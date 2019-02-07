@@ -1,0 +1,28 @@
+[
+    {
+        "description": "uniqueItems validation",
+        "schema": {"uniqueItems": true},
+        "tests": [
+            {
+                "description": "non-unique array of objects with different property order is invalid",
+                "data": [{"foo": "bar", "bar": "baz"}, {"bar": "baz", "foo": "bar"}],
+                "valid": false
+            },
+            {
+                "description": "different levels of wrapping make items unique",
+                "data": ["bar", ["bar"], [["bar"]]],
+                "valid": true
+            },
+            {
+                "description": "unique booleans",
+                "data": [true, false],
+                "valid": true
+            },
+            {
+                "description": "non-unique booleans",
+                "data": [true, false, true],
+                "valid": false
+            }
+        ]
+    }
+]
