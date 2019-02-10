@@ -6,6 +6,7 @@ import com.fasterxml.jackson.core.JsonFactory
 import com.fasterxml.jackson.core.JsonParseException
 import com.fasterxml.jackson.databind.JsonMappingException
 import com.google.gson.Gson
+import com.worldturner.medeia.api.JsonSchemaValidationOptions
 import com.worldturner.medeia.gson.toJsonElement
 import com.worldturner.medeia.jackson.toTreeNode
 import com.worldturner.medeia.parser.JsonParserAdapter

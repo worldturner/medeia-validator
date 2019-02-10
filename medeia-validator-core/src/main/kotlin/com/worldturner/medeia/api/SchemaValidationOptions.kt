@@ -1,6 +1,6 @@
-package com.worldturner.medeia.schema.model
+package com.worldturner.medeia.api
 
-import com.worldturner.medeia.schema.model.UniqueItemsValidationMethod.DIGEST_MD5
+import com.worldturner.medeia.api.UniqueItemsValidationMethod.DIGEST_MD5
 
 /**
  * Method to use for validating unique items in array.
@@ -36,7 +36,18 @@ enum class UniqueItemsValidationMethod(
     IN_MEMORY_TREES(false, "n/a"),
 }
 
-data class JsonSchemaValidationOptions(
+data class JsonSchemaValidationOptions @JvmOverloads constructor(
     val uniqueItemsValidationMethod: UniqueItemsValidationMethod = DIGEST_MD5,
     val optimizeExistentialValidators: Boolean = true
-)
+) {
+    fun withUniqueItemsValidationMethod(value: UniqueItemsValidationMethod) =
+        copy(uniqueItemsValidationMethod = value)
+
+    fun withOptimizeExistentialValidators(value: Boolean) =
+        copy(optimizeExistentialValidators = value)
+
+    companion object {
+        @JvmField
+        val DEFAULT = JsonSchemaValidationOptions()
+    }
+}

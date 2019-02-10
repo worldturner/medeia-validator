@@ -6,7 +6,7 @@ import com.worldturner.medeia.parser.JsonTokenType.END_ARRAY
 import com.worldturner.medeia.parser.JsonTokenType.START_ARRAY
 import com.worldturner.medeia.parser.NodeData
 import com.worldturner.medeia.parser.SimpleTreeBuilder
-import com.worldturner.medeia.schema.model.UniqueItemsValidationMethod
+import com.worldturner.medeia.api.UniqueItemsValidationMethod
 import com.worldturner.medeia.schema.validation.stream.SchemaValidatorInstance
 
 class ArrayUniqueItemsValidator : SchemaValidator {

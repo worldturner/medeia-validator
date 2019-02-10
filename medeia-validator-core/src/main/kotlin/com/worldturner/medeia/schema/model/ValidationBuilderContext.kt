@@ -1,5 +1,6 @@
 package com.worldturner.medeia.schema.model
 
+import com.worldturner.medeia.api.JsonSchemaValidationOptions
 import com.worldturner.medeia.schema.EMPTY_URI
 import com.worldturner.medeia.schema.resolveSafe
 import com.worldturner.medeia.schema.validation.SchemaValidator
@@ -11,7 +12,7 @@ class ValidationBuilderContext(
     val ids: MutableMap<URI, JsonSchema> = mutableMapOf(),
     val schemaValidatorsById: MutableMap<URI, SchemaValidator> = mutableMapOf(),
     val parents: List<JsonSchema> = emptyList(),
-    val options: JsonSchemaValidationOptions = JsonSchemaValidationOptions()
+    val options: JsonSchemaValidationOptions = JsonSchemaValidationOptions.DEFAULT
 ) {
     fun withBaseUri(baseUri: URI, root: Boolean = false) =
         ValidationBuilderContext(
@@ -33,7 +34,7 @@ class ValidationBuilderContext(
 
     fun put(id: URI, schema: JsonSchema, validator: SchemaValidator) {
         if (id in ids) {
-            throw IllegalStateException()
+            throw IllegalStateException("Duplicate schema id registration: $id")
         }
         ids[id] = schema
         schemaValidatorsById[id] = validator
