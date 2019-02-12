@@ -36,7 +36,7 @@ class PredeterminedSchemaValidatorInstance(
     override fun validate(token: JsonTokenData, location: JsonTokenLocation): ValidationResult? {
         return FailedValidationResult(
             location = location,
-            failedRule = failedRule,
+            rule = failedRule,
             message = message
         )
     }

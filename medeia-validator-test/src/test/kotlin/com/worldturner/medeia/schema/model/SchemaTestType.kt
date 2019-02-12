@@ -63,12 +63,12 @@ object ValidationResultType : AnyOfType(
         FailedValidationResult::class to ObjectType(
             FailedValidationResult::class,
             propertyTypes = listOf(
-                PropertyType("failedRule", TextType),
-                PropertyType("failedProperty", TextType),
+                PropertyType("rule", TextType),
+                PropertyType("property", TextType),
                 PropertyType("message", TextType),
                 PropertyType("location", TextType),
                 PropertyType("schemaUri", TextType),
-                PropertyType("subResults", ArrayType(ValidationResultTypeReference)),
+                PropertyType("details", ArrayType(ValidationResultTypeReference)),
                 PropertyType("valid", BooleanType)
             )
         )

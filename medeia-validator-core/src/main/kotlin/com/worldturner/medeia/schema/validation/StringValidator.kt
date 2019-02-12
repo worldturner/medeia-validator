@@ -28,7 +28,7 @@ class StringValidator private constructor(
             if (codePoints > it) {
                 return FailedValidationResult(
                     location = location,
-                    failedRule = "maxLength",
+                    rule = "maxLength",
                     message = "String length $codePoints is greater than maxLength $it"
                 )
             }
@@ -37,7 +37,7 @@ class StringValidator private constructor(
             if (codePoints < it) {
                 return FailedValidationResult(
                     location = location,
-                    failedRule = "minLength",
+                    rule = "minLength",
                     message = "String length $codePoints is smaller than maxLength $it"
                 )
             }
@@ -46,7 +46,7 @@ class StringValidator private constructor(
             if (!it.containsMatchIn(string)) {
                 return FailedValidationResult(
                     location = location,
-                    failedRule = "pattern",
+                    rule = "pattern",
                     message = "Pattern $it is not contained in text"
                 )
             }

@@ -77,7 +77,7 @@ class NumberValidator(
             if (!multipleOf.isMultiple(token)) {
                 return FailedValidationResult(
                     location = location,
-                    failedRule = "multipleOf",
+                    rule = "multipleOf",
                     message = "Value $token is not a multiple of $multipleOf"
                 )
             }
@@ -86,7 +86,7 @@ class NumberValidator(
             if (maximum < token) {
                 return FailedValidationResult(
                     location = location,
-                    failedRule = "maximum",
+                    rule = "maximum",
                     message = "Value $token is greater than maximum $maximum"
                 )
             }
@@ -95,7 +95,7 @@ class NumberValidator(
             if (exclusiveMaximum <= token) {
                 return FailedValidationResult(
                     location = location,
-                    failedRule = "exclusiveMaximum",
+                    rule = "exclusiveMaximum",
                     message = "Value $token is greater than or equal to exclusive maximum $exclusiveMaximum"
                 )
             }
@@ -104,7 +104,7 @@ class NumberValidator(
             if (minimum > token) {
                 return FailedValidationResult(
                     location = location,
-                    failedRule = "minimum",
+                    rule = "minimum",
                     message = "Value $token is smaller than minimum $minimum"
                 )
             }
@@ -113,7 +113,7 @@ class NumberValidator(
             if (exclusiveMinimum >= token) {
                 return FailedValidationResult(
                     location = location,
-                    failedRule = "exclusiveMinimum",
+                    rule = "exclusiveMinimum",
                     message = "Value $token is smaller than or equal to exclusive minimum $exclusiveMinimum"
                 )
             }

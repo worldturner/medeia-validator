@@ -47,7 +47,7 @@ class ArrayUniqueItemsValidatorInstance(val startLevel: Int) :
                 if (tree in uniqueItems) {
                     return FailedValidationResult(
                         location = location,
-                        failedRule = "uniqueItems",
+                        rule = "uniqueItems",
                         message = "Duplicate item"
                     )
                 } else {

@@ -84,9 +84,9 @@ class ExistentialValidatorInstance(
                 else
                     FailedValidationResult(
                         location = location,
-                        failedRule = "allOf",
+                        rule = "allOf",
                         message = "Some of the allOf validations failed",
-                        subResults = results.filter { !it.valid }.toSet()
+                        details = results.filterIsInstance(FailedValidationResult::class.java)
                     )
             ANY_OF ->
                 if (results.any { v -> v.valid })
@@ -94,9 +94,9 @@ class ExistentialValidatorInstance(
                 else
                     FailedValidationResult(
                         location = location,
-                        failedRule = "anyOf",
+                        rule = "anyOf",
                         message = "None of the anyOf validations succeeded",
-                        subResults = results.toSet()
+                        details = results.filterIsInstance(FailedValidationResult::class.java)
                     )
             ONE_OF ->
                 if (results.count { v -> v.valid } == 1)
@@ -104,9 +104,9 @@ class ExistentialValidatorInstance(
                 else
                     FailedValidationResult(
                         location = location,
-                        failedRule = "oneOf",
-                        message = "More or less than one of the oneOf validations succceeded",
-                        subResults = results.toSet()
+                        rule = "oneOf",
+                        message = "${results.count { v -> v.valid }} of the oneOf validations succceeded",
+                        details = results.filterIsInstance(FailedValidationResult::class.java)
                     )
         }
     }
@@ -181,7 +181,7 @@ class AnyOfValidatorInstance(
         if (location.level == startLevel && token.type.lastToken) {
             return FailedValidationResult(
                 location = location,
-                failedRule = "anyOf",
+                rule = "anyOf",
                 message = "None of the anyOf validations succeeded"
             )
         } else {

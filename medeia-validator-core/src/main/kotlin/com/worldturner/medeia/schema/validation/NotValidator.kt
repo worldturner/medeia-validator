@@ -37,7 +37,7 @@ class NotSchemaValidatorInstance(
                 if (result.valid)
                     FailedValidationResult(
                         location = location,
-                        failedRule = "not",
+                        rule = "not",
                         message = "Subschema was successful"
                     )
                 else

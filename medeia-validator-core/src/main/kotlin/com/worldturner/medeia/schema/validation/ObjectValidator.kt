@@ -96,8 +96,9 @@ open class ObjectValidatorInstance(
                 val property = token.text!!
                 if (property in location.propertyNames) {
                     return FailedValidationResult(
+                        rule = "duplicate",
                         location = location,
-                        failedProperty = property,
+                        property = property,
                         message = "Duplicate property name in medeia object"
                     )
                 }
@@ -140,34 +141,35 @@ open class ObjectValidatorInstance(
         }
         if (location.level == startLevel + 1 && token.type.lastToken) {
             currentPropertyResult?.let {
-                if (!it.valid) {
+                if (it is FailedValidationResult) {
                     return FailedValidationResult(
                         location = location,
-                        failedRule = "properties",
-                        failedProperty = currentPropertyName!!,
+                        rule = "properties",
+                        property = currentPropertyName!!,
                         message = "Property validation failed",
-                        subResults = setOf(it)
+                        details = setOf(it)
                     )
                 }
             }
-            val invalidPatterns = currentPatternPropertyResults.values.filter { !it.valid }
+            val invalidPatterns =
+                currentPatternPropertyResults.values.filterIsInstance(FailedValidationResult::class.java)
             if (invalidPatterns.isNotEmpty()) {
                 return FailedValidationResult(
                     location = location,
-                    failedRule = "patternProperties",
-                    failedProperty = currentPropertyName!!,
+                    rule = "patternProperties",
+                    property = currentPropertyName!!,
                     message = "Pattern property validation failed",
-                    subResults = invalidPatterns.toSet()
+                    details = invalidPatterns.toSet()
                 )
             }
             currentAdditionalPropertiesResult?.let {
-                if (!it.valid) {
+                if (it is FailedValidationResult) {
                     return FailedValidationResult(
                         location = location,
-                        failedRule = "additionalProperties",
-                        failedProperty = currentPropertyName!!,
+                        rule = "additionalProperties",
+                        property = currentPropertyName!!,
                         message = "Additional properties validation failed",
-                        subResults = setOf(it)
+                        details = setOf(it)
                     )
                 }
             }
@@ -191,7 +193,7 @@ open class ObjectValidatorInstance(
             if (propertyNamesSeen.size > it) {
                 return FailedValidationResult(
                     location = location,
-                    failedRule = "maxProperties",
+                    rule = "maxProperties",
                     message = "Value ${propertyNamesSeen.size} is greater than maxProperties $it"
                 )
             }
@@ -200,7 +202,7 @@ open class ObjectValidatorInstance(
             if (propertyNamesSeen.size < it) {
                 return FailedValidationResult(
                     location = location,
-                    failedRule = "minProperties",
+                    rule = "minProperties",
                     message = "Value ${propertyNamesSeen.size} is smaller than minProperties $it"
                 )
             }
@@ -212,13 +214,13 @@ open class ObjectValidatorInstance(
                 val result = instance.validate(textTokenData, location)
                 if (result == null)
                     throw NullPointerException("Invalid state")
-                else if (!result.valid) {
+                else if (result is FailedValidationResult) {
                     return FailedValidationResult(
-                        failedRule = "propertyNames",
+                        rule = "propertyNames",
                         location = location,
-                        failedProperty = it,
+                        property = it,
                         message = "Property name validation failed",
-                        subResults = setOf(result)
+                        details = setOf(result)
                     )
                 }
             }
@@ -228,8 +230,8 @@ open class ObjectValidatorInstance(
                 if (property !in propertyNamesSeen)
                     return FailedValidationResult(
                         location = location,
-                        failedRule = "required",
-                        failedProperty = property,
+                        rule = "required",
+                        property = property,
                         message = "Required property $property is missing from object"
                     )
             }
@@ -269,13 +271,13 @@ class ObjectDependenciesValidatorInstance(
     override fun dependenciesFinalStep(location: JsonTokenLocation): ValidationResult {
         val propertyNamesSeen = location.propertyNames
         dependenciesResults.forEach { (property, result) ->
-            if (property in propertyNamesSeen && !result.valid) {
+            if (property in propertyNamesSeen && result is FailedValidationResult) {
                 return FailedValidationResult(
                     location = location,
-                    failedRule = "dependencies",
-                    failedProperty = property,
+                    rule = "dependencies",
+                    property = property,
                     message = "Dependency for $property failed",
-                    subResults = setOf(result)
+                    details = setOf(result)
                 )
             }
         }

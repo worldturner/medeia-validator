@@ -26,7 +26,7 @@ class FormatValidator(
             } catch (e: PatternSyntaxException) {
                 return FailedValidationResult(
                     location = location,
-                    failedRule = "format",
+                    rule = "format",
                     message = "Invalid regex syntax"
                 )
             }
@@ -35,7 +35,7 @@ class FormatValidator(
             } catch (e: IllegalArgumentException) {
                 return FailedValidationResult(
                     location = location,
-                    failedRule = "format",
+                    rule = "format",
                     message = "Invalid regex syntax"
                 )
             }

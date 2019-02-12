@@ -28,7 +28,7 @@ class BooleanValidatorInstance(val booleanValue: Boolean, val startLevel: Int) :
             else
                 FailedValidationResult(
                     location = location,
-                    failedRule = "false",
+                    rule = "false",
                     message = "Nothing is valid according to this schema"
                 )
         else

@@ -68,12 +68,12 @@ class ArrayValidatorInstance(val validator: ArrayValidator, val startLevel: Int)
         allItemsInstance?.let {
             val result = it.validate(token, location)
             if (result != null) {
-                if (!result.valid)
+                if (result is FailedValidationResult)
                     return FailedValidationResult(
-                        location = location,
-                        failedRule = "items",
+                        rule = "items",
                         message = "Schema for all items failed to validate",
-                        subResults = setOf(result)
+                        location = location,
+                        details = setOf(result)
                     )
                 allItemsInstance = null
             }
@@ -89,12 +89,12 @@ class ArrayValidatorInstance(val validator: ArrayValidator, val startLevel: Int)
         currentItemInstance?.let {
             val result = it.validate(token, location)
             if (result != null) {
-                if (!result.valid)
+                if (result is FailedValidationResult)
                     return FailedValidationResult(
                         location = location,
-                        failedRule = "items/additionalItems",
+                        rule = "items/additionalItems",
                         message = "Schema for items failed to validate",
-                        subResults = setOf(result)
+                        details = setOf(result)
                     )
                 currentItemInstance = null
             }
@@ -114,7 +114,7 @@ class ArrayValidatorInstance(val validator: ArrayValidator, val startLevel: Int)
             if (!containsMatched) {
                 return FailedValidationResult(
                     location = location,
-                    failedRule = "contains",
+                    rule = "contains",
                     message = "Items don't contain an item that matches the 'contains' schemaValue"
                 )
             }
@@ -123,7 +123,7 @@ class ArrayValidatorInstance(val validator: ArrayValidator, val startLevel: Int)
             if (itemCount > it) {
                 return FailedValidationResult(
                     location = location,
-                    failedRule = "maxItems",
+                    rule = "maxItems",
                     message = "Value $itemCount is greater than maxItems $it"
                 )
             }
@@ -132,7 +132,7 @@ class ArrayValidatorInstance(val validator: ArrayValidator, val startLevel: Int)
             if (itemCount < it) {
                 return FailedValidationResult(
                     location = location,
-                    failedRule = "minItems",
+                    rule = "minItems",
                     message = "Value $itemCount is smaller than minItems $it"
                 )
             }

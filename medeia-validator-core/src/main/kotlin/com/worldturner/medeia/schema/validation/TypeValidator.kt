@@ -39,7 +39,7 @@ class TypeValidator(
             } else {
                 FailedValidationResult(
                     location = location,
-                    failedRule = "type",
+                    rule = "type",
                     message = "Type mismatch ${token.type} and $type"
                 )
             }

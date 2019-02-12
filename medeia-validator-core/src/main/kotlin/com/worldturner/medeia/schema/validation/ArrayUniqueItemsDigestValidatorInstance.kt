@@ -45,7 +45,7 @@ class ArrayUniqueItemsDigestValidatorInstance(
                 if (hashResult in uniqueItemHashes) {
                     return FailedValidationResult(
                         location = location,
-                        failedRule = "uniqueItems",
+                        rule = "uniqueItems",
                         message = "Duplicate item based on hash"
                     )
                 } else {

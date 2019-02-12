@@ -138,5 +138,5 @@ data class TestResult(
     val testSucceeded get() = outcome.valid == case.valid
 }
 
-fun List<ValidationResult>.toSingleResult() =
-    FailedValidationResult(message = "Multiple", location = "", subResults = this)
+fun List<FailedValidationResult>.toSingleResult() =
+    FailedValidationResult(rule = "multiple", message = "Multiple", location = "", details = this)

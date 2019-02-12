@@ -136,6 +136,6 @@ private fun fail(
 ) =
     FailedValidationResult(
         location = location,
-        failedRule = "const",
+        rule = "const",
         message = message
     )
