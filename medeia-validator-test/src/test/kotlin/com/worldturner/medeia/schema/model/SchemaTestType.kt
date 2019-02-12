@@ -1,5 +1,7 @@
 package com.worldturner.medeia.schema.model
 
+import com.worldturner.medeia.api.FailedValidationResult
+import com.worldturner.medeia.api.OkValidationResult
 import com.worldturner.medeia.parser.type.AnyOfType
 import com.worldturner.medeia.parser.type.ArrayType
 import com.worldturner.medeia.parser.type.BooleanType
@@ -10,8 +12,6 @@ import com.worldturner.medeia.parser.type.SimpleTreeType
 import com.worldturner.medeia.parser.type.TextType
 import com.worldturner.medeia.schema.parser.JsonSchemaDraft04TypeReference
 import com.worldturner.medeia.schema.parser.JsonSchemaDraft07TypeReference
-import com.worldturner.medeia.schema.validation.FailedValidationResult
-import com.worldturner.medeia.schema.validation.OkValidationResult
 
 object SchemaTestType : ObjectType(
     SchemaTest::class,
@@ -47,7 +47,7 @@ object TestResultType : ObjectType(
     propertyTypes = listOf(
         PropertyType("test", SchemaTestType),
         PropertyType("case", SchemaTestCaseType),
-        PropertyType("validation", ValidationResultType),
+        PropertyType("outcome", ValidationResultType),
         PropertyType("testSucceeded", BooleanType)
     )
 )

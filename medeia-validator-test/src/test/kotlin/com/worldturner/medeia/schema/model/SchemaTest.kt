@@ -6,7 +6,11 @@ import com.fasterxml.jackson.core.JsonFactory
 import com.fasterxml.jackson.core.JsonParseException
 import com.fasterxml.jackson.databind.JsonMappingException
 import com.google.gson.Gson
+import com.worldturner.medeia.api.FailedValidationResult
 import com.worldturner.medeia.api.JsonSchemaValidationOptions
+import com.worldturner.medeia.api.OkValidationResult
+import com.worldturner.medeia.api.ValidationFailedException
+import com.worldturner.medeia.api.ValidationResult
 import com.worldturner.medeia.gson.toJsonElement
 import com.worldturner.medeia.jackson.toTreeNode
 import com.worldturner.medeia.parser.JsonParserAdapter
@@ -18,10 +22,7 @@ import com.worldturner.medeia.parser.jackson.JacksonTokenDataJsonGenerator
 import com.worldturner.medeia.parser.jackson.JacksonTokenDataJsonParser
 import com.worldturner.medeia.parser.jackson.jsonFactory
 import com.worldturner.medeia.parser.jackson.mapper
-import com.worldturner.medeia.schema.validation.OkValidationResult
-import com.worldturner.medeia.schema.validation.ValidationResult
 import com.worldturner.medeia.schema.validation.stream.SchemaValidatingConsumer
-import com.worldturner.medeia.schema.validation.stream.SchemaValidationFailedException
 import com.worldturner.medeia.schema.validation.stream.SchemaValidatorInstance
 import com.worldturner.medeia.testing.support.JsonParserLibrary
 import com.worldturner.util.NullWriter
@@ -78,8 +79,8 @@ data class SchemaTestCase(
                     mapper.writeTree(generator, dataAsJacksonTree)
                 } catch (e: JsonMappingException) {
                     e.cause.let {
-                        if (it is SchemaValidationFailedException) {
-                            return TestResult(schemaTest, this, it.validationResult)
+                        if (it is ValidationFailedException) {
+                            return TestResult(schemaTest, this, it.failures.toSingleResult())
                         } else {
                             throw e
                         }
@@ -94,8 +95,8 @@ data class SchemaTestCase(
                 )
                 try {
                     Gson().toJson(dataAsGsonTree, gsonWriter)
-                } catch (e: SchemaValidationFailedException) {
-                    return TestResult(schemaTest, this, e.validationResult)
+                } catch (e: ValidationFailedException) {
+                    return TestResult(schemaTest, this, e.failures.toSingleResult())
                 }
                 return TestResult(schemaTest, this, OkValidationResult)
             }
@@ -108,8 +109,8 @@ data class SchemaTestCase(
         val parser = createParser(dataAsString, consumer, library)
         try {
             parser.parseAll()
-        } catch (e: SchemaValidationFailedException) {
-            return TestResult(schemaTest, this, e.validationResult)
+        } catch (e: ValidationFailedException) {
+            return TestResult(schemaTest, this, e.failures.toSingleResult())
         } catch (e: JsonParseException) {
             System.err.println("In $dataAsString")
             throw e
@@ -132,7 +133,10 @@ data class TestResult(
     @get:JsonIgnoreProperties("tests")
     val test: SchemaTest,
     val case: SchemaTestCase,
-    val validation: ValidationResult
+    val outcome: ValidationResult
 ) {
-    val testSucceeded get() = validation.valid == case.valid
+    val testSucceeded get() = outcome.valid == case.valid
 }
+
+fun List<ValidationResult>.toSingleResult() =
+    FailedValidationResult(message = "Multiple", location = "", subResults = this)

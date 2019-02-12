@@ -3,6 +3,7 @@ package com.worldturner.medeia.schema.performance
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.github.fge.jsonschema.core.report.ProcessingReport
 import com.github.fge.jsonschema.main.JsonSchemaFactory
+import com.worldturner.medeia.api.ValidationFailedException
 import com.worldturner.medeia.parser.gson.GsonJsonReaderDecorator
 import com.worldturner.medeia.parser.jackson.JacksonTokenDataJsonParser
 import com.worldturner.medeia.parser.jackson.jsonFactory
@@ -11,7 +12,6 @@ import com.worldturner.medeia.schema.model.JsonSchema
 import com.worldturner.medeia.schema.model.ValidationBuilderContext
 import com.worldturner.medeia.schema.parser.JsonSchemaDraft04Type
 import com.worldturner.medeia.schema.validation.stream.SchemaValidatingConsumer
-import com.worldturner.medeia.schema.validation.stream.SchemaValidationFailedException
 import com.worldturner.medeia.schema.validation.stream.SchemaValidatorInstance
 import com.worldturner.medeia.testing.support.JsonParserLibrary
 import com.worldturner.medeia.testing.support.parse
@@ -66,13 +66,12 @@ class MedeiaJacksonPerformanceTest(schemaPath: Path, iterations: Int, schemaType
     override fun run(dataPath: Path): Boolean {
         val validatorInstance: SchemaValidatorInstance = validator.createInstance()
         val consumer = SchemaValidatingConsumer(validatorInstance)
-//        Files.newBufferedReader(dataPath).use { input ->
         BufferedInputStream(Files.newInputStream(dataPath)).use { input ->
             val parser = JacksonTokenDataJsonParser(consumer, jsonFactory.createParser(input))
             return try {
                 parser.parseAll()
                 true
-            } catch (e: SchemaValidationFailedException) {
+            } catch (e: ValidationFailedException) {
                 println("Exception: $e")
                 false
             }
@@ -94,7 +93,7 @@ class MedeiaGsonPerformanceTest(schemaPath: Path, iterations: Int, schemaType: M
             return try {
                 parser.parseAll()
                 true
-            } catch (e: SchemaValidationFailedException) {
+            } catch (e: ValidationFailedException) {
                 println("Exception: $e")
                 false
             }

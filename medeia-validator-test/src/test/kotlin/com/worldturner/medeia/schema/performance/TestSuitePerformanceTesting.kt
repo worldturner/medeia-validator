@@ -1,7 +1,7 @@
 package com.worldturner.medeia.schema.performance
 
-import com.worldturner.medeia.schema.suite.DRAFT07_RUNNER
 import com.worldturner.medeia.schema.TestSuiteRunner
+import com.worldturner.medeia.schema.suite.DRAFT07_RUNNER
 import com.worldturner.medeia.testing.support.JsonParserLibrary
 
 class TestSuitePerformanceTesting {

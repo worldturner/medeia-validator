@@ -1,6 +1,5 @@
 package com.worldturner.medeia.api.jackson;
 
-import com.worldturner.medeia.api.*;
 import com.worldturner.medeia.schema.validation.SchemaValidator;
 import org.junit.Test;
 

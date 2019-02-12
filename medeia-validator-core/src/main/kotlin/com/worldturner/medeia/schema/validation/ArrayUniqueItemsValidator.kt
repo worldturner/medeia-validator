@@ -1,5 +1,7 @@
 package com.worldturner.medeia.schema.validation
 
+import com.worldturner.medeia.api.FailedValidationResult
+import com.worldturner.medeia.api.OkValidationResult
 import com.worldturner.medeia.parser.JsonTokenData
 import com.worldturner.medeia.parser.JsonTokenLocation
 import com.worldturner.medeia.parser.JsonTokenType.END_ARRAY
@@ -7,6 +9,7 @@ import com.worldturner.medeia.parser.JsonTokenType.START_ARRAY
 import com.worldturner.medeia.parser.NodeData
 import com.worldturner.medeia.parser.SimpleTreeBuilder
 import com.worldturner.medeia.api.UniqueItemsValidationMethod
+import com.worldturner.medeia.api.ValidationResult
 import com.worldturner.medeia.schema.validation.stream.SchemaValidatorInstance
 
 class ArrayUniqueItemsValidator : SchemaValidator {

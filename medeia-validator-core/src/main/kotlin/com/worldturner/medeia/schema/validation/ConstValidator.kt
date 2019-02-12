@@ -1,5 +1,8 @@
 package com.worldturner.medeia.schema.validation
 
+import com.worldturner.medeia.api.FailedValidationResult
+import com.worldturner.medeia.api.OkValidationResult
+import com.worldturner.medeia.api.ValidationResult
 import com.worldturner.medeia.parser.ArrayNodeData
 import com.worldturner.medeia.parser.JsonTokenData
 import com.worldturner.medeia.parser.JsonTokenLocation

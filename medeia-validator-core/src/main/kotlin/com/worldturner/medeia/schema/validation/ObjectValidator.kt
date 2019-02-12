@@ -1,5 +1,8 @@
 package com.worldturner.medeia.schema.validation
 
+import com.worldturner.medeia.api.FailedValidationResult
+import com.worldturner.medeia.api.OkValidationResult
+import com.worldturner.medeia.api.ValidationResult
 import com.worldturner.medeia.parser.JsonTokenData
 import com.worldturner.medeia.parser.JsonTokenLocation
 import com.worldturner.medeia.parser.JsonTokenType.END_OBJECT
@@ -235,7 +238,8 @@ open class ObjectValidatorInstance(
         return dependenciesFinalStep(location)
     }
 
-    open fun dependenciesFinalStep(location: JsonTokenLocation): ValidationResult = OkValidationResult
+    open fun dependenciesFinalStep(location: JsonTokenLocation): ValidationResult =
+        OkValidationResult
 }
 
 class ObjectDependenciesValidatorInstance(

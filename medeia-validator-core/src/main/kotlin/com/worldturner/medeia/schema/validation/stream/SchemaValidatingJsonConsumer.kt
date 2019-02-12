@@ -1,16 +1,15 @@
 package com.worldturner.medeia.schema.validation.stream
 
+import com.worldturner.medeia.api.FailedValidationResult
+import com.worldturner.medeia.api.ValidationFailedException
+import com.worldturner.medeia.api.ValidationResult
 import com.worldturner.medeia.parser.JsonTokenData
 import com.worldturner.medeia.parser.JsonTokenDataAndLocationBuilder
 import com.worldturner.medeia.parser.JsonTokenLocation
-import com.worldturner.medeia.schema.validation.ValidationResult
 
 interface SchemaValidatorInstance {
     fun validate(token: JsonTokenData, location: JsonTokenLocation): ValidationResult?
 }
-
-class SchemaValidationFailedException(val validationResult: ValidationResult) :
-    RuntimeException(validationResult.toString())
 
 class SchemaValidatingConsumer(val validator: SchemaValidatorInstance) : JsonTokenDataAndLocationBuilder {
     private var result: ValidationResult? = null
@@ -19,7 +18,7 @@ class SchemaValidatingConsumer(val validator: SchemaValidatorInstance) : JsonTok
             val result = validator.validate(token, location)
             this.result = result
             if (result != null && !result.valid)
-                throw SchemaValidationFailedException(result)
+                throw ValidationFailedException(result as FailedValidationResult)
         }
     }
 
