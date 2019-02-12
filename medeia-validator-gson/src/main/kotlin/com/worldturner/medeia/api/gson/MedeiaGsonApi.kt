@@ -6,7 +6,9 @@ import com.worldturner.medeia.api.MedeiaApiBase
 import com.worldturner.medeia.api.SchemaSource
 import com.worldturner.medeia.parser.JsonParserAdapter
 import com.worldturner.medeia.parser.JsonTokenDataAndLocationConsumer
-import com.worldturner.medeia.parser.gson.GsonTokenDataReader
+import com.worldturner.medeia.parser.JsonTokenDataConsumer
+import com.worldturner.medeia.parser.gson.GsonJsonReaderDecorator
+import com.worldturner.medeia.parser.gson.GsonJsonWriterDecorator
 import com.worldturner.medeia.parser.gson.GsonTokenDataWriter
 import com.worldturner.medeia.schema.validation.SchemaValidator
 import com.worldturner.medeia.schema.validation.stream.SchemaValidatingConsumer
@@ -20,12 +22,12 @@ class MedeiaGsonApi(private val addBuffers: Boolean = true) : MedeiaApiBase() {
 
     fun createJsonReader(validator: SchemaValidator, reader: Reader): JsonReader {
         val consumer = SchemaValidatingConsumer(validator.createInstance(0))
-        return GsonTokenDataReader(consumer = consumer, input = reader)
+        return GsonJsonReaderDecorator(consumer = consumer, input = reader)
     }
 
     fun createJsonWriter(validator: SchemaValidator, writer: Writer): JsonWriter {
         val consumer = SchemaValidatingConsumer(validator.createInstance(0))
-        return GsonTokenDataWriter(consumer = consumer, output = writer)
+        return GsonJsonWriterDecorator(consumer = consumer, output = writer)
     }
 
     override fun createSchemaParser(
@@ -34,8 +36,11 @@ class MedeiaGsonApi(private val addBuffers: Boolean = true) : MedeiaApiBase() {
     ): JsonParserAdapter {
         val reader = decorateReader(source) ?: decorateInputStream(source)
         ?: throw IllegalArgumentException()
-        return GsonTokenDataReader(consumer = consumer, input = reader)
+        return GsonJsonReaderDecorator(consumer = consumer, input = reader)
     }
+
+    override fun createTokenDataConsumerWriter(destination: Writer): JsonTokenDataConsumer =
+        GsonTokenDataWriter(JsonWriter(destination))
 
     private fun decorateInputStream(source: SchemaSource): Reader? =
         source.stream

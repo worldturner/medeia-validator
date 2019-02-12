@@ -3,7 +3,7 @@ package com.worldturner.medeia.schema.performance
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.github.fge.jsonschema.core.report.ProcessingReport
 import com.github.fge.jsonschema.main.JsonSchemaFactory
-import com.worldturner.medeia.parser.gson.GsonTokenDataReader
+import com.worldturner.medeia.parser.gson.GsonJsonReaderDecorator
 import com.worldturner.medeia.parser.jackson.JacksonTokenDataJsonParser
 import com.worldturner.medeia.parser.jackson.jsonFactory
 import com.worldturner.medeia.parser.type.MapperType
@@ -90,7 +90,7 @@ class MedeiaGsonPerformanceTest(schemaPath: Path, iterations: Int, schemaType: M
         val validatorInstance: SchemaValidatorInstance = validator.createInstance()
         val consumer = SchemaValidatingConsumer(validatorInstance)
         Files.newBufferedReader(dataPath).use { input ->
-            val parser = GsonTokenDataReader(input, consumer)
+            val parser = GsonJsonReaderDecorator(input, consumer)
             return try {
                 parser.parseAll()
                 true

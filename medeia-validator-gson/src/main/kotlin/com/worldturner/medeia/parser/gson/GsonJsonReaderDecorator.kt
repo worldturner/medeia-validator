@@ -24,7 +24,7 @@ import java.math.BigDecimal
 import java.math.BigInteger
 import java.util.ArrayDeque
 
-class GsonTokenDataReader(
+class GsonJsonReaderDecorator(
     input: Reader,
     val consumer: JsonTokenDataAndLocationConsumer
 ) : JsonReader(input), JsonParserAdapter {
@@ -143,7 +143,7 @@ class GsonTokenDataReader(
             get() = jsonPointerBuilder.toJsonPointer()
 
         override val level: Int
-            get() = this@GsonTokenDataReader.level
+            get() = this@GsonJsonReaderDecorator.level
         override val propertyNames: Set<String>
             get() = propertyNamesStack.peek() ?: emptySet()
 

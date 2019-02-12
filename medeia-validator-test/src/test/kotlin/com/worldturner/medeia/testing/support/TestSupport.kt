@@ -2,7 +2,7 @@ package com.worldturner.medeia.testing.support
 
 import com.worldturner.medeia.parser.JsonParserAdapter
 import com.worldturner.medeia.parser.SimpleObjectMapper
-import com.worldturner.medeia.parser.gson.GsonTokenDataReader
+import com.worldturner.medeia.parser.gson.GsonJsonReaderDecorator
 import com.worldturner.medeia.parser.jackson.JacksonTokenDataJsonParser
 import com.worldturner.medeia.parser.jackson.jsonFactory
 import com.worldturner.medeia.parser.type.MapperType
@@ -24,7 +24,7 @@ fun parse(type: MapperType, input: Reader, library: JsonParserLibrary): Any? {
         JsonParserLibrary.JACKSON -> JacksonTokenDataJsonParser(
             consumer = consumer, jsonParser = jsonFactory.createParser(input)
         )
-        JsonParserLibrary.GSON -> GsonTokenDataReader(
+        JsonParserLibrary.GSON -> GsonJsonReaderDecorator(
             consumer = consumer, input = input
         )
     }

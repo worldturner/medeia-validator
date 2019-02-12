@@ -12,8 +12,8 @@ import com.worldturner.medeia.jackson.toTreeNode
 import com.worldturner.medeia.parser.JsonParserAdapter
 import com.worldturner.medeia.parser.JsonTokenDataAndLocationConsumer
 import com.worldturner.medeia.parser.NodeData
-import com.worldturner.medeia.parser.gson.GsonTokenDataReader
-import com.worldturner.medeia.parser.gson.GsonTokenDataWriter
+import com.worldturner.medeia.parser.gson.GsonJsonReaderDecorator
+import com.worldturner.medeia.parser.gson.GsonJsonWriterDecorator
 import com.worldturner.medeia.parser.jackson.JacksonTokenDataJsonGenerator
 import com.worldturner.medeia.parser.jackson.JacksonTokenDataJsonParser
 import com.worldturner.medeia.parser.jackson.jsonFactory
@@ -88,7 +88,7 @@ data class SchemaTestCase(
                 return TestResult(schemaTest, this, OkValidationResult)
             }
             JsonParserLibrary.GSON -> {
-                val gsonWriter = GsonTokenDataWriter(
+                val gsonWriter = GsonJsonWriterDecorator(
                     writer,
                     SchemaValidatingConsumer(validatorInstance)
                 )
@@ -124,7 +124,7 @@ data class SchemaTestCase(
     ): JsonParserAdapter =
         when (library) {
             JsonParserLibrary.JACKSON -> JacksonTokenDataJsonParser(consumer, jsonFactory.createParser(input))
-            JsonParserLibrary.GSON -> GsonTokenDataReader(StringReader(input), consumer)
+            JsonParserLibrary.GSON -> GsonJsonReaderDecorator(StringReader(input), consumer)
         }
 }
 

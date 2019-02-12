@@ -4,6 +4,7 @@ import com.worldturner.medeia.api.JsonSchemaVersion.DRAFT04
 import com.worldturner.medeia.api.JsonSchemaVersion.DRAFT07
 import com.worldturner.medeia.parser.JsonParserAdapter
 import com.worldturner.medeia.parser.JsonTokenDataAndLocationConsumer
+import com.worldturner.medeia.parser.JsonTokenDataConsumer
 import com.worldturner.medeia.parser.SimpleObjectMapper
 import com.worldturner.medeia.parser.type.MapperType
 import com.worldturner.medeia.schema.model.JsonSchema
@@ -13,6 +14,7 @@ import com.worldturner.medeia.schema.model.ValidationBuilderContext
 import com.worldturner.medeia.schema.parser.JsonSchemaDraft04Type
 import com.worldturner.medeia.schema.parser.JsonSchemaDraft07Type
 import com.worldturner.medeia.schema.validation.SchemaValidator
+import java.io.Writer
 import java.net.URI
 
 private val JsonSchemaVersion.mapperType: MapperType
@@ -44,10 +46,18 @@ abstract class MedeiaApiBase {
         return validators.first()
     }
 
+    fun convertSchemaToDraft07(source: SchemaSource, destination: Writer) {
+        val schema = loadSchema(source)
+        val consumer = createTokenDataConsumerWriter(destination)
+        JsonSchemaDraft04Type.write(schema, consumer)
+    }
+
     protected abstract fun createSchemaParser(
         source: SchemaSource,
         consumer: JsonTokenDataAndLocationConsumer
     ): JsonParserAdapter
+
+    protected abstract fun createTokenDataConsumerWriter(destination: Writer): JsonTokenDataConsumer
 
     private fun loadSchema(source: SchemaSource): Schema {
         val consumer = SimpleObjectMapper(source.version.mapperType, 0)
