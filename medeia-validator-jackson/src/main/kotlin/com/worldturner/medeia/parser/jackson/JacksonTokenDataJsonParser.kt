@@ -85,7 +85,7 @@ class JacksonTokenDataJsonParser(
 
     inner class DynamicJsonTokenLocation : JsonTokenLocation {
         override val pointer: JsonPointer
-            get() = JsonPointer(parsingContext.pathAsPointer().toString())
+            get() = JsonPointer(parsingContext.pathAsPointer().toString(), bypassValidation = true)
         override val level: Int
             get() = this@JacksonTokenDataJsonParser.level
 

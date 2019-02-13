@@ -39,7 +39,7 @@ class JsonPointerBuilder : JsonTokenDataConsumer {
         for (i in 0 until size) {
             stack[i].toString(b)
         }
-        return JsonPointer(b.toString())
+        return JsonPointer(b.toString(), bypassValidation = true)
     }
 }
 
