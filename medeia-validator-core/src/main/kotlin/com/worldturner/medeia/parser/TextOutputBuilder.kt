@@ -10,6 +10,7 @@ import com.worldturner.medeia.parser.JsonTokenType.VALUE_BOOLEAN_TRUE
 import com.worldturner.medeia.parser.JsonTokenType.VALUE_NULL
 import com.worldturner.medeia.parser.JsonTokenType.VALUE_NUMBER
 import com.worldturner.medeia.parser.JsonTokenType.VALUE_TEXT
+import com.worldturner.util.appendJsonString
 import java.util.ArrayDeque
 import java.util.Deque
 
@@ -25,10 +26,10 @@ class TextOutputBuilder : JsonTokenDataBuilder {
             result.append(',')
         when (token.type) {
             FIELD_NAME -> {
-                outputString(token.text!!)
+                result.appendJsonString(token.text!!)
                 result.append(':')
             }
-            VALUE_TEXT -> outputString(token.text!!)
+            VALUE_TEXT -> result.appendJsonString(token.text!!)
             VALUE_NULL -> outputNull()
             VALUE_BOOLEAN_FALSE, VALUE_BOOLEAN_TRUE ->
                 outputBoolean(token.toBoolean())
@@ -56,26 +57,6 @@ class TextOutputBuilder : JsonTokenDataBuilder {
             }
         }
         outputComma = !token.type.firstStructureToken && token.type != FIELD_NAME
-    }
-
-    fun outputString(s: String) {
-        result.append('"')
-        s.forEach {
-            when (it) {
-                '\n' -> result.append("\\n")
-                '\r' -> result.append("\\r")
-                '"' -> result.append("\\\"")
-                '\\' -> result.append("\\\\")
-                '\b' -> result.append("\\b")
-                '\u000c' -> result.append("\\f")
-                '\t' -> result.append("\\t")
-                else -> if (it < ' ')
-                    result.append("\\u00${String.format("%02X", it)}")
-                else
-                    result.append(it)
-            }
-        }
-        result.append('"')
     }
 
     fun outputNumber(n: Long) {

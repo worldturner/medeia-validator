@@ -3,6 +3,7 @@ package com.worldturner.medeia.parser
 import com.worldturner.medeia.schema.validation.HashResult
 import com.worldturner.medeia.schema.validation.NodeHasher
 import com.worldturner.medeia.schema.validation.NodeHasher.Companion.TYPE_TOKEN
+import com.worldturner.util.appendJsonString
 import com.worldturner.util.updateValue
 import java.math.BigDecimal
 import java.math.BigInteger
@@ -97,7 +98,13 @@ class JsonTokenData(
             JsonTokenType.START_ARRAY -> "["
             JsonTokenType.END_ARRAY -> "]"
             JsonTokenType.VALUE_NUMBER -> if (hasLongValue()) longValue.toString() else
-                integer?.toString() ?: decimal?.toString() ?: "#?"
+                integer?.toString() ?: decimal?.toString()!!
+            JsonTokenType.START_OBJECT -> "{"
+            JsonTokenType.END_OBJECT -> "}"
+            JsonTokenType.VALUE_TEXT -> StringBuilder(text!!.length + 2).appendJsonString(text!!).toString()
+            JsonTokenType.VALUE_NULL -> "null"
+            JsonTokenType.VALUE_BOOLEAN_TRUE -> "true"
+            JsonTokenType.VALUE_BOOLEAN_FALSE -> "false"
             else -> "?"
         }
     }
