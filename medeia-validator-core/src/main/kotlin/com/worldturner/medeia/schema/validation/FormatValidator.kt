@@ -9,11 +9,13 @@ import com.worldturner.medeia.parser.JsonTokenType.VALUE_TEXT
 import com.worldturner.medeia.pointer.JsonPointer
 import com.worldturner.medeia.schema.validation.stream.SchemaValidatorInstance
 import java.net.URI
+import java.time.LocalDate
+import java.time.OffsetDateTime
+import java.time.OffsetTime
+import java.time.format.DateTimeParseException
 import java.util.regex.PatternSyntaxException
 
-val formatRegexes = mapOf(
-    "date" to Regex("""\d{4}-\d{2}-\d{2}""")
-)
+val formatRegexes = emptyMap<String, Regex>()
 
 class FormatValidator(
     val format: String
@@ -44,7 +46,7 @@ class FormatValidator(
                     message = "Invalid regex syntax"
                 )
             }
-            "uri-reference" -> try {
+            "uri-reference", "uri", "iri-reference", "iri" -> try {
                 URI.create(string).let { OkValidationResult }
             } catch (e: IllegalArgumentException) {
                 FailedValidationResult(
@@ -60,7 +62,37 @@ class FormatValidator(
                     FailedValidationResult(
                         location = location,
                         rule = "format",
-                        message = "Invalid json-pointer syntax"
+                        message = "Invalid json-pointer syntax: ${e.message}"
+                    )
+                }
+            "date" ->
+                try {
+                    LocalDate.parse(string).let { OkValidationResult }
+                } catch (e: DateTimeParseException) {
+                    FailedValidationResult(
+                        location = location,
+                        rule = "format",
+                        message = "Invalid time: ${e.message}"
+                    )
+                }
+            "time" ->
+                try {
+                    OffsetTime.parse(string).let { OkValidationResult }
+                } catch (e: DateTimeParseException) {
+                    FailedValidationResult(
+                        location = location,
+                        rule = "format",
+                        message = "Invalid time: ${e.message}"
+                    )
+                }
+            "date-time" ->
+                try {
+                    OffsetDateTime.parse(string).let { OkValidationResult }
+                } catch (e: DateTimeParseException) {
+                    FailedValidationResult(
+                        location = location,
+                        rule = "format",
+                        message = "Invalid date-time: ${e.message}"
                     )
                 }
 
