@@ -1,7 +1,16 @@
 package com.worldturner.medeia.pointer
 
-data class JsonPointer(val text: String) {
+class JsonPointer constructor(val text: String, bypassValidation: Boolean = false) {
+    init {
+        if (!bypassValidation)
+            validate()
+    }
+
     override fun toString(): String = text
+
+    private fun validate() {
+        // TODO implement
+    }
 
     fun first() = text.substringBefore('/', text, 1)
     fun tail() =
@@ -16,6 +25,15 @@ data class JsonPointer(val text: String) {
             return childPointer
         }
     }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+        other as JsonPointer
+        return text == other.text
+    }
+
+    override fun hashCode(): Int = text.hashCode()
 }
 
 fun String.substringBefore(
