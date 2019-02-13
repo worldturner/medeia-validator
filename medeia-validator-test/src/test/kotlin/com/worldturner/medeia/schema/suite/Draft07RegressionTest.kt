@@ -1,6 +1,5 @@
 package com.worldturner.medeia.schema.suite
 
-import com.worldturner.medeia.schema.TestSuiteRunner
 import java.net.URI
 import java.nio.file.Paths
 
@@ -19,4 +18,5 @@ val DRAFT07_RUNNER = TestSuiteRunner(
 class Draft07RegressionTest : RegressionTests() {
     override val runner = DRAFT07_RUNNER
     override val minimumTestCount = 425
+    override val minimumOptionalTestCount = 1
 }

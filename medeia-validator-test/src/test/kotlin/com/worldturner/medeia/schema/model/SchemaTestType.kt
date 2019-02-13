@@ -67,7 +67,6 @@ object ValidationResultType : AnyOfType(
                 PropertyType("property", TextType),
                 PropertyType("message", TextType),
                 PropertyType("location", TextType),
-                PropertyType("schemaUri", TextType),
                 PropertyType("details", ArrayType(ValidationResultTypeReference)),
                 PropertyType("valid", BooleanType)
             )

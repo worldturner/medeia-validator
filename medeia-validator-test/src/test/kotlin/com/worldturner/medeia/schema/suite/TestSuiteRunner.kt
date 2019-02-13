@@ -1,4 +1,4 @@
-package com.worldturner.medeia.schema
+package com.worldturner.medeia.schema.suite
 
 import com.worldturner.medeia.parser.type.ArrayType
 import com.worldturner.medeia.parser.type.MapperType
@@ -18,7 +18,7 @@ import java.nio.file.Paths
 import java.util.stream.Collectors
 import java.util.stream.Stream
 
-class TestSuiteRunner(
+data class TestSuiteRunner(
     val testsPaths: List<Path>,
     val remoteSchemasPath: Path,
     val metaSchemaUrl: URL,
@@ -34,7 +34,7 @@ class TestSuiteRunner(
     val tests = run {
         val remoteSchemas = loadRemoteSchemas(remoteSchemasPath) + loadMetaSchema()
         loadTests {
-            filter(it) && (optional || !it.contains(Paths.get("optional")))
+            filter(it) && (optional xor !it.contains(Paths.get("optional")))
         }.map { it.withRemotes(remoteSchemas) }
     }
 

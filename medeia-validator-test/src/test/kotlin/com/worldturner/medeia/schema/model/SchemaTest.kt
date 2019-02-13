@@ -46,11 +46,11 @@ data class SchemaTest(
 
     fun withRemotes(remotes: Set<Schema>) = copy(remotes = remotes)
 
-    fun testStreamingGenerator(library: JsonParserLibrary) = tests
-        .map { it.testStreamingGenerator(this, library) }
+    fun testStreamingGenerator(library: JsonParserLibrary) =
+        tests.map { it.testStreamingGenerator(this, library) }
 
-    fun testStreamingParser(library: JsonParserLibrary) = tests
-        .map { it.testStreamingParser(this, library) }
+    fun testStreamingParser(library: JsonParserLibrary) =
+        tests.map { it.testStreamingParser(this, library) }
 }
 
 data class SchemaTestCase(

@@ -1,6 +1,5 @@
 package com.worldturner.medeia.schema.suite
 
-import com.worldturner.medeia.schema.TestSuiteRunner
 import java.net.URI
 import java.nio.file.Paths
 

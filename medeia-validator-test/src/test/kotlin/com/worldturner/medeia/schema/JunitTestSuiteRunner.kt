@@ -16,7 +16,7 @@ import java.nio.file.Paths
 class JunitTestSuiteRunner {
     @Test
     fun `Run suite()`() {
-        val runner = DRAFT07_RUNNER
+        val runner = DRAFT07_RUNNER.copy(optional = true)
 
         val result =
             try {

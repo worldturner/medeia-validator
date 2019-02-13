@@ -1,6 +1,5 @@
 package com.worldturner.medeia.schema.suite
 
-import com.worldturner.medeia.schema.TestSuiteRunner
 import com.worldturner.medeia.schema.model.SchemaTestDraft04Type
 import com.worldturner.medeia.schema.parser.JsonSchemaDraft04Type
 import java.net.URI
