@@ -5,6 +5,11 @@ import com.worldturner.medeia.api.OkValidationResult
 import com.worldturner.medeia.api.ValidationResult
 import com.worldturner.medeia.parser.JsonTokenData
 import com.worldturner.medeia.parser.JsonTokenLocation
+import com.worldturner.medeia.parser.JsonTokenType.END_ARRAY
+import com.worldturner.medeia.parser.JsonTokenType.END_OBJECT
+import com.worldturner.medeia.parser.JsonTokenType.END_OF_STREAM
+import com.worldturner.medeia.parser.JsonTokenType.FIELD_NAME
+import com.worldturner.medeia.parser.JsonTokenType.NONE
 import com.worldturner.medeia.parser.JsonTokenType.START_ARRAY
 import com.worldturner.medeia.parser.JsonTokenType.START_OBJECT
 import com.worldturner.medeia.parser.JsonTokenType.VALUE_BOOLEAN_FALSE
@@ -13,6 +18,13 @@ import com.worldturner.medeia.parser.JsonTokenType.VALUE_NULL
 import com.worldturner.medeia.parser.JsonTokenType.VALUE_NUMBER
 import com.worldturner.medeia.parser.JsonTokenType.VALUE_TEXT
 import com.worldturner.medeia.schema.model.SimpleType
+import com.worldturner.medeia.schema.model.SimpleType.ARRAY
+import com.worldturner.medeia.schema.model.SimpleType.BOOLEAN
+import com.worldturner.medeia.schema.model.SimpleType.INTEGER
+import com.worldturner.medeia.schema.model.SimpleType.NULL
+import com.worldturner.medeia.schema.model.SimpleType.NUMBER
+import com.worldturner.medeia.schema.model.SimpleType.OBJECT
+import com.worldturner.medeia.schema.model.SimpleType.STRING
 import com.worldturner.medeia.schema.validation.stream.SchemaValidatorInstance
 import java.util.EnumSet
 
@@ -40,7 +52,8 @@ class TypeValidator(
                 FailedValidationResult(
                     location = location,
                     rule = "type",
-                    message = "Type mismatch ${token.type} and $type"
+                    message = "Type mismatch, data has ${token.schemaType} and schema has " +
+                        "${if (type.size == 1) type.first() else type}"
                 )
             }
         }
@@ -51,3 +64,14 @@ class TypeValidator(
             type?.let { TypeValidator(type) }
     }
 }
+
+val JsonTokenData.schemaType: SimpleType?
+    get() = when (this.type) {
+        START_ARRAY, END_ARRAY -> ARRAY
+        START_OBJECT, END_OBJECT -> OBJECT
+        VALUE_BOOLEAN_FALSE, VALUE_BOOLEAN_TRUE -> BOOLEAN
+        VALUE_NULL -> NULL
+        VALUE_NUMBER -> if (isInteger()) INTEGER else NUMBER
+        VALUE_TEXT -> STRING
+        FIELD_NAME, END_OF_STREAM, NONE -> null
+    }

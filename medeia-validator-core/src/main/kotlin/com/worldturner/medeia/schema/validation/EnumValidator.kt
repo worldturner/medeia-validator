@@ -40,12 +40,12 @@ internal class TokenOnlyEnumValidator(
 
     override fun validate(token: JsonTokenData, location: JsonTokenLocation): ValidationResult? {
         if (!token.type.nonStructureToken) {
-            return fail(location, "None of the single-value enum values matched")
+            return fail(location, "None of the non-structured enum values matched")
         }
         return if (enum.any { it.token == token })
             OkValidationResult
         else
-            fail(location, "None of the enum values matched")
+            fail(location, "None of the non-structured enum values matched")
     }
 }
 
@@ -136,6 +136,6 @@ private fun fail(
 ) =
     FailedValidationResult(
         location = location,
-        rule = "const",
+        rule = "enum",
         message = message
     )
