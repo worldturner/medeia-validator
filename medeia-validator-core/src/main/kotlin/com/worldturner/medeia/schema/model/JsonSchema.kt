@@ -183,7 +183,7 @@ data class JsonSchema constructor(
             when (validatorList.size) {
                 0 -> BooleanValueValidator(true)
                 1 -> validatorList.first()
-                else -> ExistentialValidator(ALL_OF, validatorList)
+                else -> ExistentialValidator.create(ALL_OF, validatorList, true)!!
             }
         recordIds(validator, context)
         return validator

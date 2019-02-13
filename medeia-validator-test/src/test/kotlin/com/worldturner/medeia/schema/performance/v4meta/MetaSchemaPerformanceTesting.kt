@@ -6,7 +6,8 @@ import com.worldturner.medeia.schema.performance.MedeiaGsonPerformanceTest
 import com.worldturner.medeia.schema.performance.MedeiaJacksonPerformanceTest
 import java.nio.file.Paths
 
-val metaSchemaPath = Paths.get("src/main/resources/meta-schemas/schema-draft04.json")
+val metaSchemaPath =
+    Paths.get("medeia-validator-core/src/main/resources/meta-schemas/schema-draft04.json").toAbsolutePath()
 
 fun main() {
     val warmups = 10
