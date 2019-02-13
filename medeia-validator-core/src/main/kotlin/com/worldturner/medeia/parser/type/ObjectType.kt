@@ -3,7 +3,9 @@ package com.worldturner.medeia.parser.type
 import com.worldturner.medeia.parser.JsonTokenData
 import com.worldturner.medeia.parser.JsonTokenDataConsumer
 import com.worldturner.medeia.parser.JsonTokenLocation
-import com.worldturner.medeia.parser.JsonTokenType
+import com.worldturner.medeia.parser.JsonTokenType.END_OBJECT
+import com.worldturner.medeia.parser.JsonTokenType.FIELD_NAME
+import com.worldturner.medeia.parser.JsonTokenType.START_OBJECT
 import com.worldturner.medeia.parser.TOKEN_END_OBJECT
 import com.worldturner.medeia.parser.TOKEN_NULL
 import com.worldturner.medeia.parser.TOKEN_START_OBJECT
@@ -20,7 +22,8 @@ import kotlin.reflect.full.memberProperties
 data class PropertyType(
     val propertyName: String,
     val type: MapperType,
-    val kotlinPropertyName: String = propertyName
+    val kotlinPropertyName: String = propertyName,
+    val readOnly: Boolean = false
 )
 
 open class ObjectType(
@@ -44,7 +47,7 @@ open class ObjectType(
             throw IllegalArgumentException("Unknown property $propertyName")
 
     override fun accepts(token: JsonTokenData) =
-        if (token.type == JsonTokenType.START_OBJECT) STRUCTURE else NOT_ACCEPTED
+        if (token.type == START_OBJECT) STRUCTURE else NOT_ACCEPTED
 
     override fun createBuilder(token: JsonTokenData, location: JsonTokenLocation) =
         ObjectValueBuilder(location.level, kotlinJsonPointerProperty?.let { location.pointer }, this)
@@ -70,7 +73,7 @@ open class ObjectType(
         } ?: constructKotlinInstance(kotlinClass, kotlinArguments, lastToken)
     }
 
-    override fun isComplete(token: JsonTokenData): Boolean = token.type == JsonTokenType.END_OBJECT
+    override fun isComplete(token: JsonTokenData): Boolean = token.type == END_OBJECT
 
     override fun write(value: Any?, consumer: JsonTokenDataConsumer) {
         if (value == null) {
@@ -86,18 +89,16 @@ open class ObjectType(
         kotlinProperties: Map<String, KProperty1<Any, *>>,
         consumer: JsonTokenDataConsumer
     ) {
-
         consumer.consume(TOKEN_START_OBJECT)
         propertyTypeMap.values.forEach { propertyType ->
-            val propertyValue = reflectProperty(value, kotlinProperties, propertyType.kotlinPropertyName)
-            if (propertyValue != null) {
-                consumer.consume(
-                    JsonTokenData(
-                        type = JsonTokenType.FIELD_NAME,
-                        text = propertyType.propertyName
+            if (!propertyType.readOnly) {
+                val propertyValue = reflectProperty(value, kotlinProperties, propertyType.kotlinPropertyName)
+                if (propertyValue != null) {
+                    consumer.consume(
+                        JsonTokenData(type = FIELD_NAME, text = propertyType.propertyName)
                     )
-                )
-                propertyType.type.write(propertyValue, consumer)
+                    propertyType.type.write(propertyValue, consumer)
+                }
             }
         }
         consumer.consume(TOKEN_END_OBJECT)

@@ -18,7 +18,7 @@ object SchemaTestType : ObjectType(
     propertyTypes = listOf(
         PropertyType("description", TextType),
         PropertyType("schema", JsonSchemaDraft07TypeReference),
-        PropertyType("tests", ArrayType(SchemaTestCaseType)),
+        PropertyType("tests", ArrayType(SchemaTestCaseType), readOnly = true),
         PropertyType("path", TextType)
     )
 )
