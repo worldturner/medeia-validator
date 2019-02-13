@@ -21,12 +21,12 @@ import java.io.Writer
 class MedeiaGsonApi(private val addBuffers: Boolean = true) : MedeiaApiBase() {
 
     fun createJsonReader(validator: SchemaValidator, reader: Reader): JsonReader {
-        val consumer = SchemaValidatingConsumer(validator.createInstance(0))
+        val consumer = SchemaValidatingConsumer(validator)
         return GsonJsonReaderDecorator(consumer = consumer, input = reader)
     }
 
     fun createJsonWriter(validator: SchemaValidator, writer: Writer): JsonWriter {
-        val consumer = SchemaValidatingConsumer(validator.createInstance(0))
+        val consumer = SchemaValidatingConsumer(validator)
         return GsonJsonWriterDecorator(consumer = consumer, output = writer)
     }
 

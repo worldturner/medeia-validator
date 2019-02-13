@@ -11,30 +11,30 @@ val metaSchemaPath =
 
 fun main() {
     val warmups = 10
-    val iterations = 15000
+    val iterations = 10000
     val allTests = listOf(
         {
-            EveritPerformanceTest(metaSchemaPath, iterations).let { test ->
-                (1..warmups).forEach { test.runWithTiming(metaSchemaPath) }
-                println("Everit:   " + test.runWithTiming(metaSchemaPath).let { "%5.4f".format(it) })
+            EveritPerformanceTest(metaSchemaPath, metaSchemaPath, iterations).let { test ->
+                (1..warmups).forEach { test.runWithTiming() }
+                println("Everit:   " + test.runWithTiming().let { "%5.4f".format(it) })
             }
         },
         {
-            MedeiaGsonPerformanceTest(metaSchemaPath, iterations).let { test ->
-                (1..warmups).forEach { test.runWithTiming(metaSchemaPath) }
-                println("Medeia-G: " + test.runWithTiming(metaSchemaPath).let { "%5.4f".format(it) })
+            MedeiaGsonPerformanceTest(metaSchemaPath, metaSchemaPath, iterations).let { test ->
+                (1..warmups).forEach { test.runWithTiming() }
+                println("Medeia-G: " + test.runWithTiming().let { "%5.4f".format(it) })
             }
         },
         {
-            MedeiaJacksonPerformanceTest(metaSchemaPath, iterations).let { test ->
-                (1..warmups).forEach { test.runWithTiming(metaSchemaPath) }
-                println("Medeia-J: " + test.runWithTiming(metaSchemaPath).let { "%5.4f".format(it) })
+            MedeiaJacksonPerformanceTest(metaSchemaPath, metaSchemaPath, iterations).let { test ->
+                (1..warmups).forEach { test.runWithTiming() }
+                println("Medeia-J: " + test.runWithTiming().let { "%5.4f".format(it) })
             }
         },
         {
-            JsonNodeValidatorPerformanceTest(metaSchemaPath, iterations).let { test ->
-                (1..warmups).forEach { test.runWithTiming(metaSchemaPath) }
-                println("JsonNode: " + test.runWithTiming(metaSchemaPath).let { "%5.4f".format(it) })
+            JsonNodeValidatorPerformanceTest(metaSchemaPath, metaSchemaPath, iterations).let { test ->
+                (1..warmups).forEach { test.runWithTiming() }
+                println("JsonNode: " + test.runWithTiming().let { "%5.4f".format(it) })
             }
         }
     )

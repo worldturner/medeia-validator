@@ -23,12 +23,12 @@ class MedeiaJacksonApi @JvmOverloads constructor(
 ) : MedeiaApiBase() {
 
     fun decorateJsonParser(validator: SchemaValidator, jsonParser: JsonParser): JsonParser {
-        val consumer = SchemaValidatingConsumer(validator.createInstance(0))
+        val consumer = SchemaValidatingConsumer(validator)
         return JacksonTokenDataJsonParser(consumer = consumer, jsonParser = jsonParser)
     }
 
     fun decorateJsonGenerator(validator: SchemaValidator, jsonGenerator: JsonGenerator): JsonGenerator {
-        val consumer = SchemaValidatingConsumer(validator.createInstance(0))
+        val consumer = SchemaValidatingConsumer(validator)
         return JacksonTokenDataJsonGenerator(consumer = consumer, delegate = jsonGenerator)
     }
 

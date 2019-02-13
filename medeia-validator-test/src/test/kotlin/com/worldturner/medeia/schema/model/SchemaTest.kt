@@ -23,7 +23,6 @@ import com.worldturner.medeia.parser.jackson.JacksonTokenDataJsonParser
 import com.worldturner.medeia.parser.jackson.jsonFactory
 import com.worldturner.medeia.parser.jackson.mapper
 import com.worldturner.medeia.schema.validation.stream.SchemaValidatingConsumer
-import com.worldturner.medeia.schema.validation.stream.SchemaValidatorInstance
 import com.worldturner.medeia.testing.support.JsonParserLibrary
 import com.worldturner.util.NullWriter
 import java.io.StringReader
@@ -67,12 +66,10 @@ data class SchemaTestCase(
 
     fun testStreamingGenerator(schemaTest: SchemaTest, library: JsonParserLibrary): TestResult {
         val writer = NullWriter()
-        val validatorInstance: SchemaValidatorInstance = schemaTest.validator.createInstance(0)
-
         when (library) {
             JsonParserLibrary.JACKSON -> {
                 val generator = JacksonTokenDataJsonGenerator(
-                    SchemaValidatingConsumer(validatorInstance),
+                    SchemaValidatingConsumer(schemaTest.validator),
                     jacksonFactory.createGenerator(writer)
                 )
                 try {
@@ -91,7 +88,7 @@ data class SchemaTestCase(
             JsonParserLibrary.GSON -> {
                 val gsonWriter = GsonJsonWriterDecorator(
                     writer,
-                    SchemaValidatingConsumer(validatorInstance)
+                    SchemaValidatingConsumer(schemaTest.validator)
                 )
                 try {
                     Gson().toJson(dataAsGsonTree, gsonWriter)
@@ -104,8 +101,7 @@ data class SchemaTestCase(
     }
 
     fun testStreamingParser(schemaTest: SchemaTest, library: JsonParserLibrary): TestResult {
-        val validatorInstance: SchemaValidatorInstance = schemaTest.validator.createInstance(0)
-        val consumer = SchemaValidatingConsumer(validatorInstance)
+        val consumer = SchemaValidatingConsumer(schemaTest.validator)
         val parser = createParser(dataAsString, consumer, library)
         try {
             parser.parseAll()

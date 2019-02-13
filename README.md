@@ -63,3 +63,20 @@ and also spend extra time garbage collecting that model afterwards.
 
 Kotlin, Java and JVM languages support
 --------------------------------------
+
+Supports calling from Kotlin and Java, and other languages that support the JVM that can call Java APIs.
+
+All accessible types are in the `com.worldturner.medeia.api.*` packages; classes in other packages are not guaranteed
+to remain stable across versions, they can change at any time witout notice.
+
+Versioning
+----------
+
+The versioning scheme of this library is [Semantic Versioning](https://semver.org/) but only for types in the API.
+These types have a package name that starts with `com.worldturner.medeia.api`.
+The APIs of types in other packages can change at any time even between minor versions.
+
+Data format support
+-------------------
+* Ordinary JSON
+* [Multi-line JSON](http://jsonlines.org/) 
