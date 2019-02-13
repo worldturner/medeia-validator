@@ -51,17 +51,20 @@ class SchemaSource private constructor(
 }
 
 class SchemaSources(val sources: List<SchemaSource>) : List<SchemaSource> by sources {
-    @JvmOverloads
-    constructor(
-        version: JsonSchemaVersion = DRAFT07,
-        vararg streams: InputStream
-    ) : this(streams.map { SchemaSource(stream = it, version = version) })
-
-    @JvmOverloads
-    constructor(
-        version: JsonSchemaVersion = DRAFT07,
-        vararg readers: Reader
-    ) : this(readers.map { SchemaSource(reader = it, version = version) })
 
     constructor(vararg sources: SchemaSource) : this(sources.toList())
+
+    companion object {
+        @JvmStatic
+        fun create(
+            version: JsonSchemaVersion,
+            vararg streams: InputStream
+        ) = SchemaSources(streams.map { SchemaSource(stream = it, version = version) })
+
+        @JvmStatic
+        fun create(
+            version: JsonSchemaVersion,
+            vararg readers: Reader
+        ) = SchemaSources(readers.map { SchemaSource(reader = it, version = version) })
+    }
 }
