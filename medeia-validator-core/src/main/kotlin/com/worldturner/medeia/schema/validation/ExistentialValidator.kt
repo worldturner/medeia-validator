@@ -9,6 +9,7 @@ import com.worldturner.medeia.schema.validation.ExistentialOperation.ALL_OF
 import com.worldturner.medeia.schema.validation.ExistentialOperation.ANY_OF
 import com.worldturner.medeia.schema.validation.ExistentialOperation.ONE_OF
 import com.worldturner.medeia.schema.validation.stream.SchemaValidatorInstance
+import java.net.URI
 
 enum class ExistentialOperation {
     ALL_OF,
@@ -22,6 +23,10 @@ class ExistentialValidator(
 ) : SchemaValidator {
     override fun createInstance(startLevel: Int): SchemaValidatorInstance =
         ExistentialValidatorInstance(operation, startLevel, validations)
+
+    override fun recordUnknownRefs(unknownRefs: MutableCollection<URI>) {
+        validations.forEach { it.recordUnknownRefs(unknownRefs) }
+    }
 
     companion object {
         fun create(operation: ExistentialOperation, validations: List<SchemaValidator>?, optimize: Boolean) =
@@ -46,6 +51,11 @@ class AllOfValidator(
 ) : SchemaValidator {
     override fun createInstance(startLevel: Int): SchemaValidatorInstance =
         AllOfValidatorInstance(startLevel, validations)
+
+    override fun recordUnknownRefs(unknownRefs: MutableCollection<URI>) {
+        validations.forEach { it.recordUnknownRefs(unknownRefs) }
+    }
+
 }
 
 /** Optimized ExistentialValidator */
@@ -54,6 +64,11 @@ class AnyOfValidator(
 ) : SchemaValidator {
     override fun createInstance(startLevel: Int): SchemaValidatorInstance =
         AnyOfValidatorInstance(startLevel, validations)
+
+    override fun recordUnknownRefs(unknownRefs: MutableCollection<URI>) {
+        validations.forEach { it.recordUnknownRefs(unknownRefs) }
+    }
+
 }
 
 class ExistentialValidatorInstance(

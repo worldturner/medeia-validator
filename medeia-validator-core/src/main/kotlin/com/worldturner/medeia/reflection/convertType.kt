@@ -45,12 +45,13 @@ fun convertType(input: Any?, target: KType): Any? {
     }
 }
 
-fun isEnum(target: KType?): Boolean {
+@Suppress("UNCHECKED_CAST")
+fun <T : Enum<T>> isEnum(target: KType?): Class<T>? {
     val classifier = target?.classifier
-    return if (classifier is KClass<*>) {
-        classifier.java.isEnum
+    return if (classifier is KClass<*> && classifier.java.isEnum) {
+        classifier.java as Class<T>
     } else {
-        false
+        null
     }
 }
 
@@ -64,31 +65,24 @@ fun convertMap(input: Map<*, *>, target: KType): Map<*, *> {
 }
 
 @Suppress("UNCHECKED_CAST")
-fun <T : Enum<T>> buildEnumSet(input: Collection<*>): EnumSet<*> {
-    val i = input.iterator()
-    val first = i.next() as T
-    val result = EnumSet.noneOf<T>(first::class.java as Class<T>)
-    result.add(first)
-    while (i.hasNext())
-        result.add(i.next() as T)
+fun <T : Enum<T>> buildEnumSet(input: Collection<*>, enumClass: Class<T>): EnumSet<*> {
+    val result = EnumSet.noneOf<T>(enumClass)
+    input.forEach { result.add(it as T) }
     return result
 }
-
-// This type is only needed as a placeholder to allow a valid call to buildEnumSet for an unknown enum type
-enum class DummyEnum
 
 fun convertList(input: List<*>, target: KType): Collection<*> = run {
     val converted = input.map { convertType(it, target.arguments[0].type ?: anyType) }
     when (target.classifier) {
         List::class -> converted
-        Set::class -> {
-            if (isEnum(target.arguments[0].type) && !converted.isEmpty()) {
-                buildEnumSet<DummyEnum>(converted)
-            } else {
-                converted.toSet()
-            }
-        }
-        EnumSet::class -> buildEnumSet<DummyEnum>(converted)
+        Set::class ->
+            isEnum<Nothing>(target.arguments[0].type)?.let {
+                buildEnumSet(converted, it)
+            } ?: converted.toSet()
+        EnumSet::class ->
+            isEnum<Nothing>(target.arguments[0].type)?.let {
+                buildEnumSet(converted, it)
+            }!!
         else -> converted
     }
 }

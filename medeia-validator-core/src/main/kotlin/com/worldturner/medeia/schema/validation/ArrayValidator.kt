@@ -8,6 +8,7 @@ import com.worldturner.medeia.parser.JsonTokenLocation
 import com.worldturner.medeia.parser.JsonTokenType.END_ARRAY
 import com.worldturner.medeia.parser.JsonTokenType.START_ARRAY
 import com.worldturner.medeia.schema.validation.stream.SchemaValidatorInstance
+import java.net.URI
 
 class ArrayValidator(
     val additionalItems: SchemaValidator?,
@@ -19,6 +20,13 @@ class ArrayValidator(
 ) : SchemaValidator {
     override fun createInstance(startLevel: Int): SchemaValidatorInstance =
         ArrayValidatorInstance(this, startLevel)
+
+    override fun recordUnknownRefs(unknownRefs: MutableCollection<URI>) {
+        additionalItems?.let { it.recordUnknownRefs(unknownRefs) }
+        allItems?.let { it.recordUnknownRefs(unknownRefs) }
+        items?.forEach { it.recordUnknownRefs(unknownRefs) }
+        contains?.let { it.recordUnknownRefs(unknownRefs) }
+    }
 
     companion object {
         fun create(

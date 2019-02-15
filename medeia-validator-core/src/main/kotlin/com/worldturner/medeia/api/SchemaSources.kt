@@ -5,66 +5,90 @@ import com.worldturner.medeia.parser.type.MapperType
 import com.worldturner.medeia.schema.parser.JsonSchemaDraft04Type
 import com.worldturner.medeia.schema.parser.JsonSchemaDraft07Type
 import java.io.InputStream
+import java.io.InputStreamReader
 import java.io.Reader
+import java.io.StringReader
 import java.net.URI
+import java.net.URL
+import java.nio.file.Files
+import java.nio.file.Path
 
 enum class JsonSchemaVersion(internal val mapperType: MapperType) {
     DRAFT04(JsonSchemaDraft04Type), DRAFT07(JsonSchemaDraft07Type)
 }
 
-class SchemaSource private constructor(
-    val stream: InputStream? = null,
-    val reader: Reader? = null,
-    val baseUri: URI? = null,
-    val version: JsonSchemaVersion = DRAFT07
-) {
-    @JvmOverloads
-    constructor(
-        stream: InputStream,
-        version: JsonSchemaVersion = DRAFT07
-    ) : this(stream, null, null, version)
+enum class InputPreference { STREAM, READER }
 
-    @JvmOverloads
-    constructor(
-        reader: Reader,
-        version: JsonSchemaVersion = DRAFT07
-    ) : this(null, reader, null, version)
-
-    @JvmOverloads
-    constructor(
-        stream: InputStream,
-        baseUri: URI,
-        version: JsonSchemaVersion = DRAFT07
-    ) : this(stream, null, baseUri, version)
-
-    @JvmOverloads
-    constructor(
-        reader: Reader,
-        baseUri: URI,
-        version: JsonSchemaVersion = DRAFT07
-    ) : this(null, reader, baseUri, version)
-
-    init {
-        if (stream == null && reader == null)
-            throw IllegalArgumentException("Either stream or reader needs a value, both cannot be null")
-    }
+interface SchemaSource {
+    val inputPreference: InputPreference
+    val stream: InputStream get() = throw UnsupportedOperationException()
+    val reader: Reader get() = InputStreamReader(stream, Charsets.UTF_8)
+    val baseUri: URI?
+    val version: JsonSchemaVersion
 }
 
-class SchemaSources(val sources: List<SchemaSource>) : List<SchemaSource> by sources {
+class StreamSchemaSource(
+    override val stream: InputStream,
+    override val baseUri: URI? = null,
+    override val version: JsonSchemaVersion = DRAFT07
+) : SchemaSource {
+    override val inputPreference: InputPreference
+        get() = InputPreference.STREAM
+}
 
-    constructor(vararg sources: SchemaSource) : this(sources.toList())
+class ReaderSchemaSource(
+    override val reader: Reader,
+    override val baseUri: URI? = null,
+    override val version: JsonSchemaVersion = DRAFT07
+) : SchemaSource {
+    override val inputPreference: InputPreference
+        get() = InputPreference.READER
+}
 
-    companion object {
-        @JvmStatic
-        fun create(
-            version: JsonSchemaVersion,
-            vararg streams: InputStream
-        ) = SchemaSources(streams.map { SchemaSource(stream = it, version = version) })
+class PathSchemaSource(
+    val path: Path,
+    override val baseUri: URI? = null,
+    override val version: JsonSchemaVersion = DRAFT07
+) : SchemaSource {
+    override val inputPreference: InputPreference
+        get() = InputPreference.STREAM
+    override val stream: InputStream
+        get() = Files.newInputStream(path)
+}
 
-        @JvmStatic
-        fun create(
-            version: JsonSchemaVersion,
-            vararg readers: Reader
-        ) = SchemaSources(readers.map { SchemaSource(reader = it, version = version) })
-    }
+class UrlSchemaSource(
+    val url: URL,
+    override val baseUri: URI? = null,
+    override val version: JsonSchemaVersion = DRAFT07
+) : SchemaSource {
+    override val inputPreference: InputPreference
+        get() = InputPreference.STREAM
+    override val stream: InputStream
+        get() = url.openStream()
+}
+
+class StringSchemaSource(
+    val string: String,
+    override val baseUri: URI? = null,
+    override val version: JsonSchemaVersion = DRAFT07
+) : SchemaSource {
+    override val inputPreference: InputPreference
+        get() = InputPreference.READER
+
+    override val reader: Reader
+        get() = StringReader(string)
+}
+
+object SchemaSources {
+    @JvmStatic
+    fun create(
+        version: JsonSchemaVersion,
+        vararg streams: InputStream
+    ) = streams.map { StreamSchemaSource(stream = it, version = version) }
+
+    @JvmStatic
+    fun create(
+        version: JsonSchemaVersion,
+        vararg readers: Reader
+    ) = readers.map { ReaderSchemaSource(reader = it, version = version) }
 }

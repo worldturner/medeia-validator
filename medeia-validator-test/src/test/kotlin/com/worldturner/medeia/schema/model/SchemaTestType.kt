@@ -5,30 +5,19 @@ import com.worldturner.medeia.api.OkValidationResult
 import com.worldturner.medeia.parser.type.AnyOfType
 import com.worldturner.medeia.parser.type.ArrayType
 import com.worldturner.medeia.parser.type.BooleanType
+import com.worldturner.medeia.parser.type.JsonAsStringType
 import com.worldturner.medeia.parser.type.ObjectType
 import com.worldturner.medeia.parser.type.PropertyType
 import com.worldturner.medeia.parser.type.ReferenceType
 import com.worldturner.medeia.parser.type.SimpleTreeType
 import com.worldturner.medeia.parser.type.TextType
-import com.worldturner.medeia.schema.parser.JsonSchemaDraft04TypeReference
-import com.worldturner.medeia.schema.parser.JsonSchemaDraft07TypeReference
 
 object SchemaTestType : ObjectType(
     SchemaTest::class,
     propertyTypes = listOf(
         PropertyType("description", TextType),
-        PropertyType("schema", JsonSchemaDraft07TypeReference),
+        PropertyType("schema", JsonAsStringType),
         PropertyType("tests", ArrayType(SchemaTestCaseType), readOnly = true),
-        PropertyType("path", TextType)
-    )
-)
-
-object SchemaTestDraft04Type : ObjectType(
-    SchemaTest::class,
-    propertyTypes = listOf(
-        PropertyType("description", TextType),
-        PropertyType("schema", JsonSchemaDraft04TypeReference),
-        PropertyType("tests", ArrayType(SchemaTestCaseType)),
         PropertyType("path", TextType)
     )
 )

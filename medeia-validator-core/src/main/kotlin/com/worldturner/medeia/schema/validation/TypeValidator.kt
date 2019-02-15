@@ -26,12 +26,15 @@ import com.worldturner.medeia.schema.model.SimpleType.NUMBER
 import com.worldturner.medeia.schema.model.SimpleType.OBJECT
 import com.worldturner.medeia.schema.model.SimpleType.STRING
 import com.worldturner.medeia.schema.validation.stream.SchemaValidatorInstance
+import java.net.URI
 import java.util.EnumSet
 
 class TypeValidator(
     val type: EnumSet<SimpleType>
 ) : SchemaValidator, SchemaValidatorInstance {
     override fun createInstance(startLevel: Int): SchemaValidatorInstance = this
+
+    override fun recordUnknownRefs(unknownRefs: MutableCollection<URI>) = Unit
 
     override fun validate(token: JsonTokenData, location: JsonTokenLocation): ValidationResult? {
         return type.let {

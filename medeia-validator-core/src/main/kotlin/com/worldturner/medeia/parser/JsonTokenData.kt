@@ -101,7 +101,7 @@ class JsonTokenData(
                 integer?.toString() ?: decimal?.toString()!!
             JsonTokenType.START_OBJECT -> "{"
             JsonTokenType.END_OBJECT -> "}"
-            JsonTokenType.VALUE_TEXT -> StringBuilder(text!!.length + 2).appendJsonString(text!!).toString()
+            JsonTokenType.VALUE_TEXT -> StringBuilder(text!!.length + 2).appendJsonString(text).toString()
             JsonTokenType.VALUE_NULL -> "null"
             JsonTokenType.VALUE_BOOLEAN_TRUE -> "true"
             JsonTokenType.VALUE_BOOLEAN_FALSE -> "false"

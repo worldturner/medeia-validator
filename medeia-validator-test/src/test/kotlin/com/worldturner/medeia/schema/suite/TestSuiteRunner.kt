@@ -1,13 +1,14 @@
 package com.worldturner.medeia.schema.suite
 
+import com.worldturner.medeia.api.JsonSchemaVersion
+import com.worldturner.medeia.api.PathSchemaSource
+import com.worldturner.medeia.api.SchemaSource
+import com.worldturner.medeia.api.UrlSchemaSource
+import com.worldturner.medeia.api.gson.MedeiaGsonApi
+import com.worldturner.medeia.api.jackson.MedeiaJacksonApi
 import com.worldturner.medeia.parser.type.ArrayType
-import com.worldturner.medeia.parser.type.MapperType
-import com.worldturner.medeia.schema.model.JsonSchema
-import com.worldturner.medeia.schema.model.Schema
 import com.worldturner.medeia.schema.model.SchemaTest
 import com.worldturner.medeia.schema.model.SchemaTestType
-import com.worldturner.medeia.schema.model.SchemaWithBaseUri
-import com.worldturner.medeia.schema.parser.JsonSchemaDraft07Type
 import com.worldturner.medeia.testing.support.JsonParserLibrary
 import com.worldturner.medeia.testing.support.parse
 import java.net.URI
@@ -25,18 +26,18 @@ data class TestSuiteRunner(
     val remoteSchemasBaseUri: URI,
     val optional: Boolean = false,
     val filter: (Path) -> Boolean = { true },
-    val jsonSchemaType: MapperType = JsonSchemaDraft07Type,
-    val schemaTestType: MapperType = SchemaTestType
+    val version: JsonSchemaVersion
 ) {
 
     val parserLibrary = JsonParserLibrary.JACKSON
 
-    val tests = run {
-        val remoteSchemas = loadRemoteSchemas(remoteSchemasPath) + loadMetaSchema()
-        loadTests {
-            filter(it) && (optional xor !it.contains(Paths.get("optional")))
-        }.map { it.withRemotes(remoteSchemas) }
-    }
+    val tests
+        get() = run {
+            val remoteSchemas = loadRemoteSchemas(remoteSchemasPath) + loadMetaSchema()
+            loadTests {
+                filter(it) && (optional xor !it.contains(Paths.get("optional")))
+            }.map { it.withRemotes(remoteSchemas) }
+        }
 
     fun loadTests(filter: (Path) -> Boolean = { true }) =
         testsPaths.flatMap { loadTests(it, filter) }
@@ -50,7 +51,7 @@ data class TestSuiteRunner(
                         @Suppress("UNCHECKED_CAST")
                         val tests =
                             parse(
-                                ArrayType(schemaTestType),
+                                ArrayType(SchemaTestType),
                                 Files.newInputStream(it),
                                 parserLibrary
                             ) as List<SchemaTest>
@@ -58,9 +59,6 @@ data class TestSuiteRunner(
                     } catch (e: Exception) {
                         throw Exception("Error in file $it", e)
                     }
-//                        mapper.readValue<List<SchemaTest>>(it.toUri().toURL(),
-//                                object : TypeReference<List<SchemaTest>>() {})
-//                                .map { test -> test.copy(path = it) }.stream()
                 } else {
                     Stream.empty()
                 }
@@ -68,19 +66,16 @@ data class TestSuiteRunner(
                 loadTests(it, filter).stream()
         }.collect(Collectors.toList())
 
-    fun loadMetaSchema() =
-        parse(jsonSchemaType, metaSchemaUrl.openStream(), parserLibrary) as JsonSchema
+    fun loadMetaSchema(): SchemaSource = UrlSchemaSource(metaSchemaUrl, version = version)
 
-    fun loadRemoteSchemas(path: Path): Set<Schema> =
+    fun loadRemoteSchemas(path: Path): Set<SchemaSource> =
         Files.list(path).flatMap { child ->
             if (Files.isRegularFile(child))
                 if (child.fileName.toString().endsWith(".json")) {
                     println("Remote Schema: $child")
                     val relativePath = remoteSchemasPath.relativize(child)
                     val baseUri = remoteSchemasBaseUri.resolve(relativePath.toString())
-                    val schema =
-                        parse(jsonSchemaType, Files.newInputStream(child), parserLibrary) as JsonSchema
-                    Stream.of(schema.let { SchemaWithBaseUri(baseUri, it) })
+                    Stream.of(PathSchemaSource(child, baseUri, version))
                 } else {
                     Stream.empty()
                 }
@@ -88,6 +83,18 @@ data class TestSuiteRunner(
                 loadRemoteSchemas(child).stream()
         }.collect(Collectors.toSet())
 
-    fun testStreamingGenerator(library: JsonParserLibrary) = tests.flatMap { it.testStreamingGenerator(library) }
-    fun testStreamingParser(library: JsonParserLibrary) = tests.flatMap { it.testStreamingParser(library) }
+    val medeiaJacksonApi = MedeiaJacksonApi()
+    val medeiaGsonApi = MedeiaGsonApi()
+
+    fun medeiaApiBase(library: JsonParserLibrary) =
+        when (library) {
+            JsonParserLibrary.JACKSON -> medeiaJacksonApi
+            JsonParserLibrary.GSON -> medeiaGsonApi
+        }
+
+    fun testStreamingGenerator(library: JsonParserLibrary) =
+        tests.flatMap { it.testStreamingGenerator(medeiaApiBase(library), version, library) }
+
+    fun testStreamingParser(library: JsonParserLibrary) =
+        tests.flatMap { it.testStreamingParser(medeiaApiBase(library), version, library) }
 }

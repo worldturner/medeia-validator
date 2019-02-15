@@ -1,7 +1,9 @@
 package com.worldturner.medeia.testing.support
 
 import com.worldturner.medeia.parser.JsonParserAdapter
+import com.worldturner.medeia.parser.NodeData
 import com.worldturner.medeia.parser.SimpleObjectMapper
+import com.worldturner.medeia.parser.SimpleTreeBuilder
 import com.worldturner.medeia.parser.gson.GsonJsonReaderDecorator
 import com.worldturner.medeia.parser.jackson.JacksonTokenDataJsonParser
 import com.worldturner.medeia.parser.jackson.jsonFactory
@@ -30,6 +32,20 @@ fun parse(type: MapperType, input: Reader, library: JsonParserLibrary): Any? {
     }
     parser.parseAll()
     return consumer.takeResult()
+}
+
+fun parseTree(input: Reader, library: JsonParserLibrary): NodeData {
+    val consumer = SimpleTreeBuilder(0)
+    val parser: JsonParserAdapter = when (library) {
+        JsonParserLibrary.JACKSON -> JacksonTokenDataJsonParser(
+            consumer = consumer, jsonParser = jsonFactory.createParser(input)
+        )
+        JsonParserLibrary.GSON -> GsonJsonReaderDecorator(
+            consumer = consumer, input = input
+        )
+    }
+    parser.parseAll()
+    return consumer.takeResult() as NodeData
 }
 
 enum class JsonParserLibrary {

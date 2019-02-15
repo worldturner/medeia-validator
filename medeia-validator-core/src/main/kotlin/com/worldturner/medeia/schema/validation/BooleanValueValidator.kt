@@ -6,12 +6,15 @@ import com.worldturner.medeia.api.ValidationResult
 import com.worldturner.medeia.parser.JsonTokenData
 import com.worldturner.medeia.parser.JsonTokenLocation
 import com.worldturner.medeia.schema.validation.stream.SchemaValidatorInstance
+import java.net.URI
 
 class BooleanValueValidator(
     val booleanValue: Boolean
 ) : SchemaValidator {
     override fun createInstance(startLevel: Int): SchemaValidatorInstance =
         BooleanValidatorInstance(booleanValue, startLevel)
+
+    override fun recordUnknownRefs(unknownRefs: MutableCollection<URI>) = Unit
 
     companion object {
         fun create(booleanValue: Boolean?): BooleanValueValidator? =

@@ -6,7 +6,12 @@ import java.net.URLEncoder
 fun String.urlEncode() = URLEncoder.encode(this, Charsets.UTF_8.name())!!
 
 fun URI.hasFragment() = this.fragment != null
-fun URI.withEmptyFragment() = URI.create("$this#")!!
+fun URI.withoutFragment(): URI = URI(this.toString().replaceFromLast('#', ""))
+
+fun URI.withEmptyFragment(): URI = this.toString().let {
+    URI(it.replaceAfterLast('#', "", "$it#"))
+}
+
 fun URI.replaceFragment(fragment: String, encoded: Boolean = false) = try {
     URI.create(
         if (hasFragment())
@@ -37,3 +42,12 @@ fun URI.resolveSafe(relative: URI) = run {
 }
 
 val EMPTY_URI = URI.create("")!!
+
+/**
+ * Replace part of string from the last occurrence of given delimiter with the [replacement] string.
+ * If the string does not contain the delimiter, returns [missingDelimiterValue] which defaults to the original string.
+ */
+fun String.replaceFromLast(delimiter: Char, replacement: String, missingDelimiterValue: String = this): String {
+    val index = lastIndexOf(delimiter)
+    return if (index == -1) missingDelimiterValue else replaceRange(index, length, replacement)
+}

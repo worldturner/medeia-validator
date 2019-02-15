@@ -11,10 +11,13 @@ import com.worldturner.medeia.parser.SimpleTreeBuilder
 import com.worldturner.medeia.api.UniqueItemsValidationMethod
 import com.worldturner.medeia.api.ValidationResult
 import com.worldturner.medeia.schema.validation.stream.SchemaValidatorInstance
+import java.net.URI
 
 class ArrayUniqueItemsValidator : SchemaValidator {
     override fun createInstance(startLevel: Int): SchemaValidatorInstance =
         ArrayUniqueItemsValidatorInstance(startLevel)
+
+    override fun recordUnknownRefs(unknownRefs: MutableCollection<URI>) = Unit
 
     companion object {
         fun create(
@@ -32,8 +35,7 @@ class ArrayUniqueItemsValidator : SchemaValidator {
     }
 }
 
-class ArrayUniqueItemsValidatorInstance(val startLevel: Int) :
-    SchemaValidatorInstance {
+class ArrayUniqueItemsValidatorInstance(val startLevel: Int) : SchemaValidatorInstance {
     private val uniqueItems: MutableSet<NodeData> = mutableSetOf()
     private val treeBuilder: SimpleTreeBuilder = SimpleTreeBuilder(startLevel + 1)
 

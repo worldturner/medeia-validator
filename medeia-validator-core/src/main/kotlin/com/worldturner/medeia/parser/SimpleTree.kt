@@ -44,11 +44,14 @@ class SimpleTreeBuilder(val startLevel: Int) : JsonTokenDataAndLocationBuilder {
     override fun takeResult(): NodeData? {
         val r = result
         result = null
+        if (r == null) {
+            System.currentTimeMillis()
+        }
         return r
     }
 }
 
-abstract class NodeData {
+sealed class NodeData {
     abstract fun isEqualTo(other: NodeData): Boolean
 
     override fun equals(other: Any?): Boolean {

@@ -11,6 +11,7 @@ import com.worldturner.medeia.parser.JsonTokenType.START_OBJECT
 import com.worldturner.medeia.schema.validation.stream.SchemaValidatorInstance
 import com.worldturner.util.mapToMapTo
 import com.worldturner.util.unmodifiableEmptyMutableMap
+import java.net.URI
 import java.util.IdentityHashMap
 
 class ObjectValidator(
@@ -24,6 +25,13 @@ class ObjectValidator(
 ) : SchemaValidator {
     override fun createInstance(startLevel: Int): SchemaValidatorInstance =
         ObjectValidatorInstance(this, startLevel)
+
+    override fun recordUnknownRefs(unknownRefs: MutableCollection<URI>) {
+        additionalProperties?.let { it.recordUnknownRefs(unknownRefs) }
+        properties?.values?.forEach { it.recordUnknownRefs(unknownRefs) }
+        patternProperties?.values?.forEach { it.recordUnknownRefs(unknownRefs) }
+        propertyNames?.let { it.recordUnknownRefs(unknownRefs) }
+    }
 
     companion object {
         fun create(
@@ -56,6 +64,8 @@ class ObjectValidator(
                 else -> null
             }
     }
+
+
 }
 
 class ObjectDependenciesValidator(
@@ -64,6 +74,11 @@ class ObjectDependenciesValidator(
 ) : SchemaValidator {
     override fun createInstance(startLevel: Int): SchemaValidatorInstance =
         ObjectDependenciesValidatorInstance(validator, dependencies, startLevel)
+
+    override fun recordUnknownRefs(unknownRefs: MutableCollection<URI>) {
+        validator.recordUnknownRefs(unknownRefs)
+        dependencies.values.forEach { it.recordUnknownRefs(unknownRefs) }
+    }
 }
 
 open class ObjectValidatorInstance(

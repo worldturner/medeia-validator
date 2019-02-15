@@ -12,6 +12,7 @@ import com.worldturner.medeia.parser.ObjectNodeData
 import com.worldturner.medeia.parser.TokenNodeData
 import com.worldturner.medeia.schema.validation.stream.SchemaValidatorInstance
 import com.worldturner.util.iterate
+import java.net.URI
 import java.util.ArrayDeque
 import java.util.Deque
 
@@ -20,6 +21,8 @@ class EnumValidator(
 ) : SchemaValidator {
     override fun createInstance(startLevel: Int): SchemaValidatorInstance =
         EnumValidatorInstance(startLevel, enum)
+
+    override fun recordUnknownRefs(unknownRefs: MutableCollection<URI>) = Unit
 
     companion object {
         fun create(enum: Set<NodeData>? = null): SchemaValidator? =
@@ -37,6 +40,8 @@ internal class TokenOnlyEnumValidator(
     val enum: Set<TokenNodeData>
 ) : SchemaValidator, SchemaValidatorInstance {
     override fun createInstance(startLevel: Int): SchemaValidatorInstance = this
+
+    override fun recordUnknownRefs(unknownRefs: MutableCollection<URI>) = Unit
 
     override fun validate(token: JsonTokenData, location: JsonTokenLocation): ValidationResult? {
         if (!token.type.nonStructureToken) {

@@ -5,6 +5,7 @@ import com.worldturner.medeia.api.ValidationResult
 import com.worldturner.medeia.parser.JsonTokenData
 import com.worldturner.medeia.parser.JsonTokenLocation
 import com.worldturner.medeia.schema.validation.stream.SchemaValidatorInstance
+import java.net.URI
 
 class IfThenElseValidator(
     val ifValidator: SchemaValidator,
@@ -18,6 +19,12 @@ class IfThenElseValidator(
             thenValidator?.createInstance(startLevel),
             elseValidator?.createInstance(startLevel)
         )
+
+    override fun recordUnknownRefs(unknownRefs: MutableCollection<URI>) {
+        ifValidator.recordUnknownRefs(unknownRefs)
+        thenValidator?.recordUnknownRefs(unknownRefs)
+        elseValidator?.recordUnknownRefs(unknownRefs)
+    }
 
     companion object {
         fun create(

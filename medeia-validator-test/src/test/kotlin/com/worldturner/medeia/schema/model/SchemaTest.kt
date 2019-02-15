@@ -1,14 +1,16 @@
 package com.worldturner.medeia.schema.model
 
-import com.fasterxml.jackson.annotation.JsonIgnore
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.core.JsonFactory
 import com.fasterxml.jackson.core.JsonParseException
 import com.fasterxml.jackson.databind.JsonMappingException
 import com.google.gson.Gson
 import com.worldturner.medeia.api.FailedValidationResult
 import com.worldturner.medeia.api.JsonSchemaValidationOptions
+import com.worldturner.medeia.api.JsonSchemaVersion
+import com.worldturner.medeia.api.MedeiaApiBase
 import com.worldturner.medeia.api.OkValidationResult
+import com.worldturner.medeia.api.SchemaSource
+import com.worldturner.medeia.api.StringSchemaSource
 import com.worldturner.medeia.api.ValidationFailedException
 import com.worldturner.medeia.api.ValidationResult
 import com.worldturner.medeia.gson.toJsonElement
@@ -32,25 +34,31 @@ val options = JsonSchemaValidationOptions()
 
 data class SchemaTest(
     val description: String,
-    @JsonIgnore
-    val schema: JsonSchema,
+    val schema: String,
     val tests: List<SchemaTestCase>,
     val path: Path? = null,
-    @JsonIgnore
-    val remotes: Set<Schema> = emptySet()
+    val remotePaths: Set<SchemaSource> = emptySet()
 ) {
-    @JsonIgnore
-    val schemaSet = JsonSchemaSet(main = schema, additional = remotes)
-    @JsonIgnore
-    val validator = schemaSet.buildValidator(ValidationBuilderContext(options = options))
+    fun validator(medeiaApiBase: MedeiaApiBase, version: JsonSchemaVersion) =
+        medeiaApiBase.loadSchemas(
+            listOf(StringSchemaSource(schema, version = version)) + remotePaths
+        )
 
-    fun withRemotes(remotes: Set<Schema>) = copy(remotes = remotes)
+    fun withRemotes(remotes: Set<SchemaSource>) = copy(remotePaths = remotes)
 
-    fun testStreamingGenerator(library: JsonParserLibrary) =
-        tests.map { it.testStreamingGenerator(this, library) }
+    fun testStreamingGenerator(
+        medeiaApiBase: MedeiaApiBase,
+        version: JsonSchemaVersion,
+        library: JsonParserLibrary
+    ) =
+        tests.map { it.testStreamingGenerator(this, medeiaApiBase, version, library) }
 
-    fun testStreamingParser(library: JsonParserLibrary) =
-        tests.map { it.testStreamingParser(this, library) }
+    fun testStreamingParser(
+        medeiaApiBase: MedeiaApiBase,
+        version: JsonSchemaVersion,
+        library: JsonParserLibrary
+    ) =
+        tests.map { it.testStreamingParser(this, medeiaApiBase, version, library) }
 }
 
 data class SchemaTestCase(
@@ -64,12 +72,18 @@ data class SchemaTestCase(
 
     val jacksonFactory = JsonFactory()
 
-    fun testStreamingGenerator(schemaTest: SchemaTest, library: JsonParserLibrary): TestResult {
+    fun testStreamingGenerator(
+        schemaTest: SchemaTest,
+        medeiaApiBase: MedeiaApiBase,
+        version: JsonSchemaVersion,
+        library: JsonParserLibrary
+    ): TestResult {
         val writer = NullWriter()
+        val validator = schemaTest.validator(medeiaApiBase, version)
         when (library) {
             JsonParserLibrary.JACKSON -> {
                 val generator = JacksonTokenDataJsonGenerator(
-                    SchemaValidatingConsumer(schemaTest.validator),
+                    SchemaValidatingConsumer(validator),
                     jacksonFactory.createGenerator(writer)
                 )
                 try {
@@ -88,7 +102,7 @@ data class SchemaTestCase(
             JsonParserLibrary.GSON -> {
                 val gsonWriter = GsonJsonWriterDecorator(
                     writer,
-                    SchemaValidatingConsumer(schemaTest.validator)
+                    SchemaValidatingConsumer(validator)
                 )
                 try {
                     Gson().toJson(dataAsGsonTree, gsonWriter)
@@ -100,8 +114,13 @@ data class SchemaTestCase(
         }
     }
 
-    fun testStreamingParser(schemaTest: SchemaTest, library: JsonParserLibrary): TestResult {
-        val consumer = SchemaValidatingConsumer(schemaTest.validator)
+    fun testStreamingParser(
+        schemaTest: SchemaTest,
+        medeiaApiBase: MedeiaApiBase,
+        version: JsonSchemaVersion,
+        library: JsonParserLibrary
+    ): TestResult {
+        val consumer = SchemaValidatingConsumer(schemaTest.validator(medeiaApiBase, version))
         val parser = createParser(dataAsString, consumer, library)
         try {
             parser.parseAll()
@@ -126,7 +145,6 @@ data class SchemaTestCase(
 }
 
 data class TestResult(
-    @get:JsonIgnoreProperties("tests")
     val test: SchemaTest,
     val case: SchemaTestCase,
     val outcome: ValidationResult

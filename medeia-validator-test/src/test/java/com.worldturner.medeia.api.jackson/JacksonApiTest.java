@@ -43,4 +43,8 @@ public class JacksonApiTest {
         SchemaValidator validator = medeia.loadSchemas(sources);
         assertNotNull(validator);
     }
+
+
+
+
 }

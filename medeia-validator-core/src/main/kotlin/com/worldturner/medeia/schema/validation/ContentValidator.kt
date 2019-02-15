@@ -2,6 +2,7 @@ package com.worldturner.medeia.schema.validation
 
 import com.worldturner.medeia.api.FailedValidationResult
 import com.worldturner.medeia.api.OkValidationResult
+import com.worldturner.medeia.api.ValidationFailedException
 import com.worldturner.medeia.api.ValidationResult
 import com.worldturner.medeia.parser.JsonTokenData
 import com.worldturner.medeia.parser.JsonTokenLocation
@@ -9,7 +10,9 @@ import com.worldturner.medeia.parser.JsonTokenType.VALUE_TEXT
 import com.worldturner.medeia.schema.validation.stream.SchemaValidatorInstance
 import com.worldturner.util.JsonParseException
 import com.worldturner.util.JsonValidator
+import java.net.URI
 import java.util.Base64
+import java.util.Locale
 
 class DecodingResult(
     val array: ByteArray? = null,
@@ -24,10 +27,16 @@ class DecodingResult(
 }
 
 class ContentValidator(
-    val contentMediaType: String?,
-    val contentEncoding: String?
+    contentMediaType: String?,
+    contentEncoding: String?
 ) : SchemaValidator, SchemaValidatorInstance {
+
+    val contentMediaType: String? = contentMediaType?.let { it.toLowerCase(Locale.US) }
+    val contentEncoding: String? = contentEncoding?.let { it.toLowerCase(Locale.US) }
+
     override fun createInstance(startLevel: Int): SchemaValidatorInstance = this
+
+    override fun recordUnknownRefs(unknownRefs: MutableCollection<URI>) = Unit
 
     override fun validate(token: JsonTokenData, location: JsonTokenLocation): ValidationResult? {
         if (token.type != VALUE_TEXT) {
@@ -35,8 +44,7 @@ class ContentValidator(
         }
         val text = token.text!!
         val decoding = validateContentEncoding(text, location).also { it.failure?.let { return it } }
-        validateContentMediaType(decoding, location).let { return it }
-        return null
+        return validateContentMediaType(decoding, location)
     }
 
     private fun validateContentEncoding(
@@ -72,6 +80,8 @@ class ContentValidator(
                         location = location,
                         message = "Invalid JSON: ${e.message}"
                     )
+                } catch (e: ValidationFailedException) {
+                    e.failures.first()
                 }
             }
             else -> OkValidationResult

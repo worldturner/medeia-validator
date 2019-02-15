@@ -115,7 +115,7 @@ data class JsonSchema constructor(
         resolvedId =
             id?.let {
                 context.baseUri.resolveSafe(id)
-            } ?: if (context.root) context.baseUri else null // ?: null // context.baseUri
+            } ?: if (context.root) context.baseUri else null
 
         ref?.let {
             val validator = RefSchemaValidator(context.baseUri.resolveSafe(ref), context.schemaValidatorsById)

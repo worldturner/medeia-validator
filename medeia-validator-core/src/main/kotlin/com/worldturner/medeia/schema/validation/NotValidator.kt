@@ -6,12 +6,17 @@ import com.worldturner.medeia.api.ValidationResult
 import com.worldturner.medeia.parser.JsonTokenData
 import com.worldturner.medeia.parser.JsonTokenLocation
 import com.worldturner.medeia.schema.validation.stream.SchemaValidatorInstance
+import java.net.URI
 
 class NotValidator(
     val validator: SchemaValidator
 ) : SchemaValidator {
     override fun createInstance(startLevel: Int): SchemaValidatorInstance {
         return NotSchemaValidatorInstance(startLevel, validator)
+    }
+
+    override fun recordUnknownRefs(unknownRefs: MutableCollection<URI>) {
+        validator.recordUnknownRefs(unknownRefs)
     }
 
     companion object {

@@ -2,6 +2,7 @@ package com.worldturner.medeia.api.gson
 
 import com.google.gson.stream.JsonReader
 import com.google.gson.stream.JsonWriter
+import com.worldturner.medeia.api.InputPreference
 import com.worldturner.medeia.api.MedeiaApiBase
 import com.worldturner.medeia.api.SchemaSource
 import com.worldturner.medeia.parser.JsonParserAdapter
@@ -18,7 +19,7 @@ import java.io.InputStreamReader
 import java.io.Reader
 import java.io.Writer
 
-class MedeiaGsonApi(private val addBuffers: Boolean = true) : MedeiaApiBase() {
+class MedeiaGsonApi(private val addBuffer: Boolean = true) : MedeiaApiBase() {
 
     fun createJsonReader(validator: SchemaValidator, reader: Reader): JsonReader {
         val consumer = SchemaValidatingConsumer(validator)
@@ -34,19 +35,22 @@ class MedeiaGsonApi(private val addBuffers: Boolean = true) : MedeiaApiBase() {
         source: SchemaSource,
         consumer: JsonTokenDataAndLocationConsumer
     ): JsonParserAdapter {
-        val reader = decorateReader(source) ?: decorateInputStream(source)
-        ?: throw IllegalArgumentException()
+
+        val reader = when (source.inputPreference) {
+            InputPreference.STREAM -> decorateInputStream(source)
+            InputPreference.READER -> decorateReader(source)
+        }
         return GsonJsonReaderDecorator(consumer = consumer, input = reader)
     }
 
     override fun createTokenDataConsumerWriter(destination: Writer): JsonTokenDataConsumer =
         GsonTokenDataWriter(JsonWriter(destination))
 
-    private fun decorateInputStream(source: SchemaSource): Reader? =
+    private fun decorateInputStream(source: SchemaSource): Reader =
         source.stream
-            ?.let { if (addBuffers) BufferedInputStream(it) else it }
+            .let { if (addBuffer) BufferedInputStream(it) else it }
             .let { InputStreamReader(it, Charsets.UTF_8) }
 
-    private fun decorateReader(source: SchemaSource): Reader? =
-        source.reader?.let { if (addBuffers) BufferedReader(it) else it }
+    private fun decorateReader(source: SchemaSource): Reader =
+        source.reader.let { if (addBuffer) BufferedReader(it) else it }
 }

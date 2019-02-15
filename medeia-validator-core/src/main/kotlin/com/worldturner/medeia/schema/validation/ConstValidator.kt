@@ -13,12 +13,15 @@ import com.worldturner.medeia.parser.NodeData
 import com.worldturner.medeia.parser.ObjectNodeData
 import com.worldturner.medeia.parser.TokenNodeData
 import com.worldturner.medeia.schema.validation.stream.SchemaValidatorInstance
+import java.net.URI
 import java.util.ArrayDeque
 import java.util.Deque
 
 class ConstValidator(val const: NodeData) : SchemaValidator {
     override fun createInstance(startLevel: Int): SchemaValidatorInstance =
         ConstValidatorInstance(startLevel, const)
+
+    override fun recordUnknownRefs(unknownRefs: MutableCollection<URI>) = Unit
 
     companion object {
         fun create(const: NodeData?): SchemaValidator? =
@@ -33,6 +36,8 @@ class ConstValidator(val const: NodeData) : SchemaValidator {
 
 class TokenOnlyConstValidator(val const: TokenNodeData) : SchemaValidator, SchemaValidatorInstance {
     override fun createInstance(startLevel: Int): SchemaValidatorInstance = this
+
+    override fun recordUnknownRefs(unknownRefs: MutableCollection<URI>) = Unit
 
     override fun validate(token: JsonTokenData, location: JsonTokenLocation): ValidationResult? {
         if (!token.type.nonStructureToken) {

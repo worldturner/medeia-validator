@@ -9,6 +9,7 @@ import com.worldturner.medeia.parser.JsonTokenType
 import com.worldturner.medeia.schema.validation.stream.SchemaValidatorInstance
 import java.math.BigDecimal
 import java.math.BigInteger
+import java.net.URI
 
 class MultiNumber(val bigDecimalValue: BigDecimal) {
     val longValue = try {
@@ -60,6 +61,8 @@ class NumberValidator(
     val exclusiveMinimum = exclusiveMinimum?.let { MultiNumber(it) }
 
     override fun createInstance(startLevel: Int): SchemaValidatorInstance = this
+
+    override fun recordUnknownRefs(unknownRefs: MutableCollection<URI>) = Unit
 
     override fun validate(token: JsonTokenData, location: JsonTokenLocation): ValidationResult? {
         if (token.type != JsonTokenType.VALUE_NUMBER) {

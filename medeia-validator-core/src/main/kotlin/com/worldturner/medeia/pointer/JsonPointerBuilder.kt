@@ -67,12 +67,10 @@ class JsonPointerObject : JsonPointerEntry {
         if (propertyName != null) {
             b.append('/')
             for (ch in propertyName) {
-                if (ch == '~') {
-                    b.append("~0")
-                } else if (ch == '/') {
-                    b.append("~1")
-                } else {
-                    b.append(ch)
+                when (ch) {
+                    '~' -> b.append("~0")
+                    '/' -> b.append("~1")
+                    else -> b.append(ch)
                 }
             }
         }

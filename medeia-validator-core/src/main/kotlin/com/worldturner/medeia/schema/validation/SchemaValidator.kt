@@ -13,6 +13,7 @@ fun isAnyNotNull(vararg args: Any?) = args.any { it != null }
 
 interface SchemaValidator {
     fun createInstance(startLevel: Int = 0): SchemaValidatorInstance
+    fun recordUnknownRefs(unknownRefs: MutableCollection<URI>)
 }
 
 class RefSchemaValidator(val ref: URI, val ids: Map<URI, SchemaValidator>) : SchemaValidator {
@@ -26,6 +27,12 @@ class RefSchemaValidator(val ref: URI, val ids: Map<URI, SchemaValidator>) : Sch
             failedRule = "\$ref",
             message = "Cannot find \$ref $ref"
         )
+    }
+
+    override fun recordUnknownRefs(unknownRefs: MutableCollection<URI>) {
+        if (ref !in ids) {
+            unknownRefs += ref
+        }
     }
 }
 

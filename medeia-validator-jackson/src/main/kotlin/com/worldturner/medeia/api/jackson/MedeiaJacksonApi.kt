@@ -3,6 +3,7 @@ package com.worldturner.medeia.api.jackson
 import com.fasterxml.jackson.core.JsonFactory
 import com.fasterxml.jackson.core.JsonGenerator
 import com.fasterxml.jackson.core.JsonParser
+import com.worldturner.medeia.api.InputPreference
 import com.worldturner.medeia.api.MedeiaApiBase
 import com.worldturner.medeia.api.SchemaSource
 import com.worldturner.medeia.parser.JsonParserAdapter
@@ -19,7 +20,7 @@ import java.io.Writer
 
 class MedeiaJacksonApi @JvmOverloads constructor(
     private val jsonFactory: JsonFactory = JsonFactory(),
-    private val addBuffers: Boolean = true
+    private val addBuffer: Boolean = true
 ) : MedeiaApiBase() {
 
     fun decorateJsonParser(validator: SchemaValidator, jsonParser: JsonParser): JsonParser {
@@ -37,18 +38,19 @@ class MedeiaJacksonApi @JvmOverloads constructor(
         consumer: JsonTokenDataAndLocationConsumer
     ): JsonParserAdapter {
         val jsonParser =
-            streamParser(source)
-                ?: readerParser(source)
-                ?: throw IllegalArgumentException()
+            when (source.inputPreference) {
+                InputPreference.STREAM -> streamParser(source)
+                InputPreference.READER -> readerParser(source)
+            }
         return JacksonTokenDataJsonParser(consumer = consumer, jsonParser = jsonParser)
     }
 
     override fun createTokenDataConsumerWriter(destination: Writer): JsonTokenDataConsumer =
         JacksonTokenDataWriter(jsonFactory.createGenerator(destination))
 
-    private fun readerParser(source: SchemaSource): JsonParser? =
-        source.reader?.let { if (addBuffers) BufferedReader(it) else it }.let { jsonFactory.createParser(it) }
+    private fun readerParser(source: SchemaSource): JsonParser =
+        source.reader.let { if (addBuffer) BufferedReader(it) else it }.let { jsonFactory.createParser(it) }
 
-    private fun streamParser(source: SchemaSource): JsonParser? =
-        source.stream?.let { if (addBuffers) BufferedInputStream(it) else it }.let { jsonFactory.createParser(it) }
+    private fun streamParser(source: SchemaSource): JsonParser =
+        source.stream.let { if (addBuffer) BufferedInputStream(it) else it }.let { jsonFactory.createParser(it) }
 }

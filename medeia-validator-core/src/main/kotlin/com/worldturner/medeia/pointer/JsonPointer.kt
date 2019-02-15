@@ -33,6 +33,10 @@ class JsonPointer constructor(val text: String, bypassValidation: Boolean = fals
     }
 
     fun first() = text.substringBefore('/', text, 1)
+    fun firstName(): String =
+        if (text.startsWith('/')) decodeJsonPointerElement(text, 1)
+        else decodeJsonPointerElement(text, 0)
+
     fun tail() =
         text.substringFrom('/', "", 1)
             .let { if (it == "") null else JsonPointer(it, bypassValidation = true) }
@@ -56,7 +60,7 @@ class JsonPointer constructor(val text: String, bypassValidation: Boolean = fals
     override fun hashCode(): Int = text.hashCode()
 }
 
-fun String.substringBefore(
+internal fun String.substringBefore(
     delimiter: Char,
     missingDelimiterValue: String = this,
     startIndex: Int = 0
@@ -65,11 +69,36 @@ fun String.substringBefore(
     return if (index == -1) missingDelimiterValue else substring(0, index)
 }
 
-fun String.substringFrom(
+internal fun String.substringFrom(
     delimiter: Char,
     missingDelimiterValue: String = this,
     startIndex: Int = 0
 ): String {
     val index = indexOf(delimiter, startIndex)
     return if (index == -1) missingDelimiterValue else substring(index, length)
+}
+
+/*
+ * Silently ignores invalid escapes - use JsonPointer.validate method to validate.
+ */
+private fun decodeJsonPointerElement(s: String, offset: Int): String {
+    if (s.indexOf('~', offset) == -1) return s.substring(offset)
+    val b = StringBuilder(s.length - offset)
+    var index = offset
+    while (index < s.length) {
+        val ch = s[index]
+        if (ch == '~') {
+            index++
+            if (index + 1 < s.length) {
+                when (s[index + 1]) {
+                    '0' -> b.append('~')
+                    '1' -> b.append('/')
+                }
+            }
+        } else {
+            b.append(ch)
+        }
+        index++
+    }
+    return b.toString()
 }

@@ -15,6 +15,7 @@ import com.worldturner.medeia.schema.validation.NodeHasher.Companion.TYPE_OBJECT
 import com.worldturner.medeia.schema.validation.NodeHasher.Companion.TYPE_OBJECT_START
 import com.worldturner.medeia.schema.validation.stream.SchemaValidatorInstance
 import com.worldturner.util.updateValue
+import java.net.URI
 import java.security.MessageDigest
 import java.util.ArrayDeque
 import java.util.Deque
@@ -25,6 +26,8 @@ class ArrayUniqueItemsDigestValidator(val digestAlgorithm: String) : SchemaValid
         ArrayUniqueItemsDigestValidatorInstance(startLevel) {
             MessageDigest.getInstance(digestAlgorithm)!!
         }
+
+    override fun recordUnknownRefs(unknownRefs: MutableCollection<URI>) = Unit
 }
 
 class ArrayUniqueItemsDigestValidatorInstance(

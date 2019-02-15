@@ -34,10 +34,12 @@ class ValidationBuilderContext(
 
     fun put(id: URI, schema: JsonSchema, validator: SchemaValidator) {
         if (id in ids) {
-            throw IllegalStateException("Duplicate schema id registration: $id")
+            if (id.toString().isNotEmpty())
+                throw IllegalStateException("Duplicate schema id registration: '$id'")
+        } else {
+            ids[id] = schema
+            schemaValidatorsById[id] = validator
         }
-        ids[id] = schema
-        schemaValidatorsById[id] = validator
     }
 
     fun baseUri(id: URI?) = id?.let { baseUri.resolveSafe(id) } ?: baseUri

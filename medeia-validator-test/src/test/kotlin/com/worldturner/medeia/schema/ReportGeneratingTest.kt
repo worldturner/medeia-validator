@@ -13,10 +13,12 @@ import java.io.Writer
 import java.nio.file.Files
 import java.nio.file.Paths
 
-class JunitTestSuiteRunner {
+class ReportGeneratingTest {
     @Test
     fun `Run suite()`() {
-        val runner = DRAFT07_RUNNER.copy(optional = true)
+        val runner = DRAFT07_RUNNER.copy(optional = false, filter = {
+            true // it.endsWith("ref-into-non-schema.json")
+        })
 
         val result =
             try {
@@ -31,12 +33,12 @@ class JunitTestSuiteRunner {
         println("Successful tests: ${result.count { it.testSucceeded }}")
         println("Failed tests:     ${result.count { !it.testSucceeded }}")
         val testResultListType = ArrayType(TestResultType)
-        Files.newBufferedWriter(Paths.get("target/test-report.json")).use { writer ->
-            val consumer = JacksonTokenDataWriter(createGenerator(writer))
+        createGenerator(Files.newBufferedWriter(Paths.get("target/test-report.json"))).use { generator ->
+            val consumer = JacksonTokenDataWriter(generator)
             testResultListType.write(result, consumer)
         }
-        Files.newBufferedWriter(Paths.get("target/failed-test-report.json")).use { writer ->
-            val consumer = JacksonTokenDataWriter(createGenerator(writer))
+        createGenerator(Files.newBufferedWriter(Paths.get("target/failed-test-report.json"))).use { generator ->
+            val consumer = JacksonTokenDataWriter(generator)
             val failed = result.filter { !it.testSucceeded }
             testResultListType.write(failed, consumer)
         }
