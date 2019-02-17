@@ -89,8 +89,8 @@ private fun decodeJsonPointerElement(s: String, offset: Int): String {
         val ch = s[index]
         if (ch == '~') {
             index++
-            if (index + 1 < s.length) {
-                when (s[index + 1]) {
+            if (index < s.length) {
+                when (s[index]) {
                     '0' -> b.append('~')
                     '1' -> b.append('/')
                 }

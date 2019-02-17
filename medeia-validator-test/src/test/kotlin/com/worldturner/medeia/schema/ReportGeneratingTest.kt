@@ -17,7 +17,7 @@ class ReportGeneratingTest {
     @Test
     fun `Run suite()`() {
         val runner = DRAFT07_RUNNER.copy(optional = false, filter = {
-            true // it.endsWith("ref-into-non-schema.json")
+            true // it.endsWith("refRemote.json")
         })
 
         val result =

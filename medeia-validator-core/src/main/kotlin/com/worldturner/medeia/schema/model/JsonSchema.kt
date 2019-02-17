@@ -80,7 +80,6 @@ data class JsonSchema constructor(
     val not: JsonSchema? = null,
     // When a schema is parsed as a boolean (meaning nothing or "everything")
     val acceptAllOrNothing: Boolean? = null,
-    val unknownProperties: Map<String, JsonSchema> = mutableMapOf(),
     val jsonPointer: JsonPointer
 ) : Schema {
 
@@ -176,9 +175,6 @@ data class JsonSchema constructor(
                     else_?.let { it.buildValidator(subContext) })
 
             )
-        // Ensures that unknown properties are still interpreted as schemas and have their ids registered
-        // There is aType testsuite test for this, although it seems to contradict the spec
-        if (unknownProperties.isNotEmpty()) unknownProperties.buildValidators(subContext)
         val validator =
             when (validatorList.size) {
                 0 -> BooleanValueValidator(true)

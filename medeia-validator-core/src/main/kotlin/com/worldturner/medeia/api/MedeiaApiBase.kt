@@ -68,7 +68,7 @@ abstract class MedeiaApiBase {
     ): List<SchemaValidator> {
         val context = ValidationBuilderContext(options = options)
         val validators = parsedSchemas.map { it.buildValidator(context) }
-
+        val extraValidators = mutableListOf<SchemaValidator>()
         // Keep resolving unknown ref until none can be found anymore
         // (but limit to avoid turning a small bug into a hang of Medeia)
         for (iteration in 1..MAX_REF_RESOLVE_ITERATIONS) {
@@ -77,6 +77,7 @@ abstract class MedeiaApiBase {
             // TODO: the context.schemaValidatorsById map
             val unknownRefs = mutableSetOf<URI>()
             validators.forEach { it.recordUnknownRefs(unknownRefs) }
+            extraValidators.forEach { it.recordUnknownRefs(unknownRefs) }
             var refFound = false
             unknownRefs.forEach { absoluteRef ->
                 val node = findNode(schemaIds, absoluteRef)
@@ -84,7 +85,12 @@ abstract class MedeiaApiBase {
                     println("Unknown \$ref $absoluteRef not found")
                 }
                 node?.let {
-                    parseSchemaFromNode(node, context.withBaseUri(absoluteRef, root = true))?.let { refFound = true }
+                    val validator = parseSchemaFromNode(
+                        node,
+                        context.withBaseUri(absoluteRef, root = true)
+                    )
+                    extraValidators += validator
+                    refFound = true
                 }
 
             }
@@ -134,14 +140,13 @@ abstract class MedeiaApiBase {
     }
 }
 
-private fun parseSchemaFromNode(node: NodeData, context: ValidationBuilderContext): Schema? {
+private fun parseSchemaFromNode(node: NodeData, context: ValidationBuilderContext): SchemaValidator {
     val mapperType = JsonSchemaVersion.DRAFT07.mapperType // TODO: get mappertype for NodeData from file
     val consumer = SimpleObjectMapper(mapperType, 0)
     val parser: JsonParserAdapter = JsonParserFromSimpleTree(node, consumer)
     parser.parseAll()
     val schema = consumer.takeResult() as JsonSchema
-    schema.buildValidator(context)
-    return schema
+    return schema.buildValidator(context)
 }
 
 private fun findNode(nodeMap: MutableMap<URI, NodeData>, ref: URI): NodeData? {
