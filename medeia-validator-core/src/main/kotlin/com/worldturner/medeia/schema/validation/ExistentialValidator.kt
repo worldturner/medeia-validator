@@ -55,7 +55,6 @@ class AllOfValidator(
     override fun recordUnknownRefs(unknownRefs: MutableCollection<URI>) {
         validations.forEach { it.recordUnknownRefs(unknownRefs) }
     }
-
 }
 
 /** Optimized ExistentialValidator */
@@ -68,7 +67,6 @@ class AnyOfValidator(
     override fun recordUnknownRefs(unknownRefs: MutableCollection<URI>) {
         validations.forEach { it.recordUnknownRefs(unknownRefs) }
     }
-
 }
 
 class ExistentialValidatorInstance(

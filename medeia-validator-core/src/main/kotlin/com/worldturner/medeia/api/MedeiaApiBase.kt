@@ -6,7 +6,6 @@ import com.worldturner.medeia.parser.ArrayNodeData
 import com.worldturner.medeia.parser.JsonParserAdapter
 import com.worldturner.medeia.parser.JsonTokenDataAndLocationConsumer
 import com.worldturner.medeia.parser.JsonTokenDataConsumer
-import com.worldturner.medeia.parser.JsonTokenType
 import com.worldturner.medeia.parser.NodeData
 import com.worldturner.medeia.parser.ObjectNodeData
 import com.worldturner.medeia.parser.SimpleObjectMapper
@@ -38,6 +37,19 @@ private val JsonSchemaVersion.mapperType: MapperType
             DRAFT07 -> JsonSchemaDraft07Type
         }
 
+private val JsonSchemaVersion.idProperty: String
+    get() =
+        when (this) {
+            DRAFT04 -> "id"
+            DRAFT07 -> "\$id"
+        }
+
+private val schemaUriToVersionMapping = mapOf(
+    "http://json-schema.org/draft-04/schema#" to DRAFT04,
+    "http://json-schema.org/draft-06/schema#" to DRAFT07,
+    "http://json-schema.org/draft-07/schema#" to DRAFT07
+)
+
 /* To avoid infinite loops in case there is a subtle bug in Medeia $ref resolution. */
 private const val MAX_REF_RESOLVE_ITERATIONS = 100
 
@@ -45,6 +57,8 @@ abstract class MedeiaApiBase {
 
     fun loadSchemas(sources: List<SchemaSource>, options: JsonSchemaValidationOptions) =
         loadSchemas(sources, validatorMap = null, options = options)
+
+    fun loadSchema(source: SchemaSource) = loadSchemas(listOf(source))
 
     @JvmOverloads
     fun loadSchemas(
@@ -54,7 +68,7 @@ abstract class MedeiaApiBase {
     ): SchemaValidator {
         if (sources.isEmpty())
             throw IllegalArgumentException("Need at least one schema source")
-        val schemaIds = mutableMapOf<URI, NodeData>()
+        val schemaIds = mutableMapOf<URI, VersionedNodeData>()
         val parsedSchemas = sources.map { loadSchema(it, schemaIds) }
         val validators = buildValidators(parsedSchemas, options, schemaIds, validatorMap)
         return validators.first()
@@ -63,7 +77,7 @@ abstract class MedeiaApiBase {
     private fun buildValidators(
         parsedSchemas: List<Schema>,
         options: JsonSchemaValidationOptions,
-        schemaIds: MutableMap<URI, NodeData>,
+        schemaIds: MutableMap<URI, VersionedNodeData>,
         validatorMap: MutableMap<URI, SchemaValidator>?
     ): List<SchemaValidator> {
         val context = ValidationBuilderContext(options = options)
@@ -92,7 +106,6 @@ abstract class MedeiaApiBase {
                     extraValidators += validator
                     refFound = true
                 }
-
             }
             // As long as refs are found, they themselves could contain unknown refs
             if (!refFound) break
@@ -116,89 +129,101 @@ abstract class MedeiaApiBase {
 
     protected abstract fun createTokenDataConsumerWriter(destination: Writer): JsonTokenDataConsumer
 
-    private fun loadSchema(source: SchemaSource, ids: MutableMap<URI, NodeData> = mutableMapOf()): Schema {
+    private fun loadSchema(source: SchemaSource, ids: MutableMap<URI, VersionedNodeData> = mutableMapOf()): Schema {
         val tree = parseTree(source)
         tree.collectIds(source.baseUri, ids)
         source.baseUri?.let { ids[it] = tree }
-        val consumer = SimpleObjectMapper(source.version.mapperType, 0)
-        val parser: JsonParserAdapter = JsonParserFromSimpleTree(tree, consumer)
+        val consumer = SimpleObjectMapper(tree.version.mapperType, 0)
+        val parser: JsonParserAdapter = JsonParserFromSimpleTree(tree.nodeData, consumer)
         parser.parseAll()
         val schema = consumer.takeResult() as JsonSchema
         val augmentedSchema = source.baseUri?.let { SchemaWithBaseUri(it, schema) } ?: schema
         return augmentedSchema
     }
 
-    private fun parseTree(source: SchemaSource): NodeData {
+    private fun parseTree(source: SchemaSource): VersionedNodeData {
         try {
             val consumer = SimpleTreeBuilder(0)
             val parser: JsonParserAdapter = createSchemaParser(source, consumer)
             parser.parseAll()
-            return consumer.takeResult() as NodeData
+            val tree = consumer.takeResult() as NodeData
+            val schemaUri = tree.textChild("\$schema")
+            val version =
+                schemaUriToVersionMapping[schemaUri] ?: source.version
+                ?: throw IllegalArgumentException(
+                    "Version not specified in schema $source, modify schema or pass version in SchemaSource.version"
+                )
+            return VersionedNodeData(tree, version)
         } catch (e: IOException) {
             throw Exception("In file with baseUri ${source.baseUri}", e)
         }
     }
 }
 
-private fun parseSchemaFromNode(node: NodeData, context: ValidationBuilderContext): SchemaValidator {
-    val mapperType = JsonSchemaVersion.DRAFT07.mapperType // TODO: get mappertype for NodeData from file
+private fun parseSchemaFromNode(node: VersionedNodeData, context: ValidationBuilderContext): SchemaValidator {
+    val mapperType = node.version.mapperType
     val consumer = SimpleObjectMapper(mapperType, 0)
-    val parser: JsonParserAdapter = JsonParserFromSimpleTree(node, consumer)
+    val parser: JsonParserAdapter = JsonParserFromSimpleTree(node.nodeData, consumer)
     parser.parseAll()
     val schema = consumer.takeResult() as JsonSchema
     return schema.buildValidator(context)
 }
 
-private fun findNode(nodeMap: MutableMap<URI, NodeData>, ref: URI): NodeData? {
+private fun findNode(nodeMap: MutableMap<URI, VersionedNodeData>, ref: URI): VersionedNodeData? {
     // First step: look up ids
     nodeMap[ref]?.let { return it }
     return if (ref.hasFragment()) {
         // Next step - look up json pointer relative to id
         val pointer = JsonPointer(ref.fragment)
         val baseNode = nodeMap[ref.withEmptyFragment()] ?: nodeMap[ref.withoutFragment()]
-        val targetNode = baseNode?.let { baseNode.resolve(pointer) }
+        val targetNode = baseNode?.let {
+            it.nodeData.resolve(pointer)?.let { VersionedNodeData(it, baseNode.version) }
+        }
         targetNode
     } else {
         null
     }
 }
 
-private fun NodeData.collectIds(baseUri: URI?, ids: MutableMap<URI, NodeData>) {
-    val baseUri = (registerAndGetJsonSchemaId(baseUri, ids) ?: EMPTY_URI).also {
+private fun VersionedNodeData.collectIds(baseUri: URI?, ids: MutableMap<URI, VersionedNodeData>) {
+    val newBaseUri = (nodeData.registerAndGetJsonSchemaId(baseUri, ids, version) ?: EMPTY_URI).also {
         // Force register the root even if it isn't an object node with an $id
         ids[it] = this
     }
-    collectIdsNonRoot(baseUri, ids)
+    nodeData.collectIdsNonRoot(newBaseUri, ids, version)
 }
 
-private fun NodeData.collectIdsNonRoot(baseUri: URI?, ids: MutableMap<URI, NodeData>) {
+private fun NodeData.collectIdsNonRoot(
+    baseUri: URI?,
+    ids: MutableMap<URI, VersionedNodeData>,
+    version: JsonSchemaVersion
+) {
     when (this) {
         is ObjectNodeData -> {
-            val newBaseUri = registerAndGetJsonSchemaId(baseUri, ids) ?: baseUri
-            nodes.values.forEach { it.collectIdsNonRoot(newBaseUri, ids) }
+            val newBaseUri = registerAndGetJsonSchemaId(baseUri, ids, version) ?: baseUri
+            nodes.values.forEach { it.collectIdsNonRoot(newBaseUri, ids, version) }
         }
-        is ArrayNodeData -> nodes.forEach { it.collectIdsNonRoot(baseUri, ids) }
+        is ArrayNodeData -> nodes.forEach { it.collectIdsNonRoot(baseUri, ids, version) }
+        else -> {
+        }
     }
 }
 
-fun NodeData.registerAndGetJsonSchemaId(baseUri: URI?, ids: MutableMap<URI, NodeData>): URI? =
-    if (this is ObjectNodeData) {
-        val idNode = nodes["\$id"]
-        if (idNode is TokenNodeData && idNode.token.type == JsonTokenType.VALUE_TEXT) {
-            try {
-                val relativeUri = URI(idNode.token.text!!)
-                val absoluteUri = baseUri?.let { baseUri.resolve(relativeUri) } ?: relativeUri
-                absoluteUri.also { ids[absoluteUri] = this }
-            } catch (e: URISyntaxException) {
-                // TODO: maybe worth a debug log
-                baseUri
-            }
-        } else {
+private fun NodeData.registerAndGetJsonSchemaId(
+    baseUri: URI?,
+    ids: MutableMap<URI, VersionedNodeData>,
+    version: JsonSchemaVersion
+): URI? =
+    textChild(version.idProperty)?.let {
+        try {
+            val relativeUri = URI(it)
+            val absoluteUri = baseUri?.let { baseUri.resolve(relativeUri) } ?: relativeUri
+            absoluteUri.also { ids[absoluteUri] = VersionedNodeData(this, version) }
+        } catch (e: URISyntaxException) {
+            // TODO: maybe worth a debug log
             baseUri
         }
-    } else {
-        null
-    }
+    } ?: baseUri
 
 fun NodeData.resolve(pointer: JsonPointer): NodeData? {
     val firstName = pointer.firstName()
@@ -215,3 +240,5 @@ fun NodeData.resolve(pointer: JsonPointer): NodeData? {
     val tail = pointer.tail()
     return if (tail != null) selected?.resolve(tail) else selected
 }
+
+internal data class VersionedNodeData(val nodeData: NodeData, val version: JsonSchemaVersion)

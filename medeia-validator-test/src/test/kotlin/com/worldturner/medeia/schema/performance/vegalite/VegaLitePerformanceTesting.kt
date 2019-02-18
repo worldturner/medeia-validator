@@ -1,6 +1,5 @@
 package com.worldturner.medeia.schema.performance.vegalite
 
-import com.worldturner.medeia.schema.parser.JsonSchemaDraft04Type
 import com.worldturner.medeia.schema.performance.EveritPerformanceTest
 import com.worldturner.medeia.schema.performance.JsonNodeValidatorPerformanceTest
 import com.worldturner.medeia.schema.performance.MedeiaGsonPerformanceTest
@@ -15,12 +14,12 @@ val vegaLiteDataPath = Paths.get("Performance-Suite/vega-lite/interactive_splom.
 fun main() {
     val warmups = 10
     val iterations = 10
-    MedeiaJacksonPerformanceTest(vegaLiteSchemaPath, vegaLiteDataPath, iterations, JsonSchemaDraft04Type).let { test ->
+    MedeiaJacksonPerformanceTest(vegaLiteSchemaPath, vegaLiteDataPath, iterations).let { test ->
         (1..warmups).forEach { test.runWithTiming() }
         println("Medeia-J: " + test.runWithTiming().let { "%5.4f".format(it) })
     }
     System.gc()
-    MedeiaGsonPerformanceTest(vegaLiteSchemaPath, vegaLiteDataPath, iterations, JsonSchemaDraft04Type).let { test ->
+    MedeiaGsonPerformanceTest(vegaLiteSchemaPath, vegaLiteDataPath, iterations).let { test ->
         (1..warmups).forEach { test.runWithTiming() }
         println("Medeia-G: " + test.runWithTiming().let { "%5.4f".format(it) })
     }

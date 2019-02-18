@@ -24,13 +24,13 @@ interface SchemaSource {
     val stream: InputStream get() = throw UnsupportedOperationException()
     val reader: Reader get() = InputStreamReader(stream, Charsets.UTF_8)
     val baseUri: URI?
-    val version: JsonSchemaVersion
+    val version: JsonSchemaVersion?
 }
 
 class StreamSchemaSource(
     override val stream: InputStream,
     override val baseUri: URI? = null,
-    override val version: JsonSchemaVersion = DRAFT07
+    override val version: JsonSchemaVersion? = null
 ) : SchemaSource {
     override val inputPreference: InputPreference
         get() = InputPreference.STREAM
@@ -39,7 +39,7 @@ class StreamSchemaSource(
 class ReaderSchemaSource(
     override val reader: Reader,
     override val baseUri: URI? = null,
-    override val version: JsonSchemaVersion = DRAFT07
+    override val version: JsonSchemaVersion? = null
 ) : SchemaSource {
     override val inputPreference: InputPreference
         get() = InputPreference.READER
@@ -48,7 +48,7 @@ class ReaderSchemaSource(
 class PathSchemaSource(
     val path: Path,
     override val baseUri: URI? = null,
-    override val version: JsonSchemaVersion = DRAFT07
+    override val version: JsonSchemaVersion? = null
 ) : SchemaSource {
     override val inputPreference: InputPreference
         get() = InputPreference.STREAM
@@ -59,7 +59,7 @@ class PathSchemaSource(
 class UrlSchemaSource(
     val url: URL,
     override val baseUri: URI? = null,
-    override val version: JsonSchemaVersion = DRAFT07
+    override val version: JsonSchemaVersion? = null
 ) : SchemaSource {
     override val inputPreference: InputPreference
         get() = InputPreference.STREAM
@@ -70,7 +70,7 @@ class UrlSchemaSource(
 class StringSchemaSource(
     val string: String,
     override val baseUri: URI? = null,
-    override val version: JsonSchemaVersion = DRAFT07
+    override val version: JsonSchemaVersion? = null
 ) : SchemaSource {
     override val inputPreference: InputPreference
         get() = InputPreference.READER

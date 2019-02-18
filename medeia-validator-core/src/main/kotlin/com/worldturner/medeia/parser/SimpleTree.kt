@@ -29,6 +29,8 @@ class SimpleTreeBuilder(val startLevel: Int) : JsonTokenDataAndLocationBuilder {
                     is ArrayNodeData -> {
                         top.nodes += nodeData
                     }
+                    else -> {
+                    }
                 }
                 stack.push(nodeData)
             }
@@ -44,15 +46,14 @@ class SimpleTreeBuilder(val startLevel: Int) : JsonTokenDataAndLocationBuilder {
     override fun takeResult(): NodeData? {
         val r = result
         result = null
-        if (r == null) {
-            System.currentTimeMillis()
-        }
         return r
     }
 }
 
 sealed class NodeData {
-    abstract fun isEqualTo(other: NodeData): Boolean
+    internal abstract fun isEqualTo(other: NodeData): Boolean
+
+    open fun textChild(fieldName: String): String? = null
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -88,6 +89,15 @@ class ArrayNodeData(val nodes: MutableList<NodeData> = mutableListOf()) : NodeDa
 class ObjectNodeData(val nodes: MutableMap<String, NodeData> = mutableMapOf()) : NodeData() {
     override fun isEqualTo(other: NodeData): Boolean {
         return other is ObjectNodeData && nodes == other.nodes
+    }
+
+    override fun textChild(fieldName: String): String? {
+        val child = nodes[fieldName]
+        return if (child is TokenNodeData && child.token.type == JsonTokenType.VALUE_TEXT) {
+            child.token.text!!
+        } else {
+            null
+        }
     }
 
     override fun hashCode(): Int = nodes.hashCode()

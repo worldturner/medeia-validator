@@ -3,9 +3,10 @@ package com.worldturner.medeia.schema.performance
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.github.fge.jsonschema.core.report.ProcessingReport
 import com.github.fge.jsonschema.main.JsonSchemaFactory
+import com.worldturner.medeia.api.PathSchemaSource
 import com.worldturner.medeia.api.ValidationFailedException
+import com.worldturner.medeia.api.jackson.MedeiaJacksonApi
 import com.worldturner.medeia.parser.gson.GsonJsonReaderDecorator
-import com.worldturner.medeia.parser.jackson.JacksonTokenDataJsonParser
 import com.worldturner.medeia.parser.jackson.jsonFactory
 import com.worldturner.medeia.parser.type.MapperType
 import com.worldturner.medeia.schema.model.JsonSchema
@@ -59,20 +60,17 @@ class JsonNodeValidatorPerformanceTest(schemaPath: Path, dataPath: Path, iterati
 class MedeiaJacksonPerformanceTest(
     schemaPath: Path,
     dataPath: Path,
-    iterations: Int,
-    schemaType: MapperType = JsonSchemaDraft04Type
-) :
-    PerformanceTest(iterations) {
-    val schema =
-        parse(schemaType, Files.newInputStream(schemaPath), JsonParserLibrary.JACKSON) as JsonSchema
-    val validator = schema.buildValidator(ValidationBuilderContext())
+    iterations: Int
+) : PerformanceTest(iterations) {
+    val api = MedeiaJacksonApi()
+    val validator = api.loadSchema(PathSchemaSource(schemaPath))
     val data = String(Files.readAllBytes(dataPath), Charsets.UTF_8)
 
     override fun run(): Boolean {
-        val consumer = SchemaValidatingConsumer(validator)
-        val parser = JacksonTokenDataJsonParser(consumer, jsonFactory.createParser(data))
+        val parser = api.decorateJsonParser(validator, jsonFactory.createParser(data))
         return try {
-            parser.parseAll()
+            while (parser.nextToken() != null) {
+            }
             true
         } catch (e: ValidationFailedException) {
             println("Exception: $e")

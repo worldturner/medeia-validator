@@ -65,14 +65,10 @@ class NumberValidator(
     override fun recordUnknownRefs(unknownRefs: MutableCollection<URI>) = Unit
 
     override fun validate(token: JsonTokenData, location: JsonTokenLocation): ValidationResult? {
-        if (token.type != JsonTokenType.VALUE_NUMBER) {
-            return OkValidationResult
-        }
-        val x = validateNumber(token, location)
-        if (!x.valid) {
-            System.currentTimeMillis()
-        }
-        return x
+        return if (token.type != JsonTokenType.VALUE_NUMBER)
+            OkValidationResult
+        else
+            return validateNumber(token, location)
     }
 
     private fun validateNumber(token: JsonTokenData, location: JsonTokenLocation): ValidationResult {
