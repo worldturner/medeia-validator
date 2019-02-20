@@ -113,17 +113,28 @@ class PunycodeBootstringTest {
         )
     }
 
+    /**
+     * Testing "😂" - all non BMP (Basic Plane) characters with codepoints > 65536.
+     */
     @Test
-    fun `punycode`() {
-        assertEquals("abc-", Punycode.encode("abc"))
-        assertSameAsSunImplementation("äbc")
-        assertSameAsSunImplementation("실실실실실실실실실")
+    fun testNonBMP1() {
+        val s = "\uD83D\uDE02"
+        assertEquals("g28h", Punycode.encode(s))
     }
 
-    private fun assertSameAsSunImplementation(s: String) {
-        assertEquals(encodeWithSunJdk(s), Punycode.encode(s))
+    /**
+     * Testing "𝒯𝒜😂𝔹" - all non BMP (Basic Plane) characters with codepoints > 65536.
+     */
+    @Test
+    fun testNonBMP2() {
+        assertEquals(
+            "521hfbx2a369h",
+            Punycode.encode("\uD835\uDCAF\uD835\uDC9C\uD83D\uDE02\uD835\uDD39")
+        )
+    }
+
+    @Test
+    fun testBasicCodePoints() {
+        assertEquals("abc-", Punycode.encode("abc"))
     }
 }
-
-fun encodeWithSunJdk(s: String) =
-    sun.net.idn.Punycode.encode(StringBuffer(s), BooleanArray(s.length)).toString()

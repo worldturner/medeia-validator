@@ -1,6 +1,5 @@
 package com.worldturner.medeia.api
 
-import com.worldturner.medeia.api.JsonSchemaVersion.DRAFT07
 import com.worldturner.medeia.parser.type.MapperType
 import com.worldturner.medeia.schema.parser.JsonSchemaDraft04Type
 import com.worldturner.medeia.schema.parser.JsonSchemaDraft07Type
