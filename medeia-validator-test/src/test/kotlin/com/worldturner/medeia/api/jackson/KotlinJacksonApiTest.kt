@@ -10,7 +10,7 @@ class KotlinJacksonApiTest {
     @Test
     fun testLoadStrangeSchema() {
         val medeia = MedeiaJacksonApi()
-        val r = StringReader("{\"uniqueItems\":true}")
+        val r = StringReader("""{"uniqueItems":true}""")
         val source = ReaderSchemaSource(r, version = JsonSchemaVersion.DRAFT07)
         val validator = medeia.loadSchemas(listOf(source))
         assertNotNull(validator)
