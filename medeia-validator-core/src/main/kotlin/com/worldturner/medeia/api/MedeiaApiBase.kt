@@ -69,7 +69,7 @@ abstract class MedeiaApiBase {
         if (sources.isEmpty())
             throw IllegalArgumentException("Need at least one schema source")
         val schemaIds = mutableMapOf<URI, VersionedNodeData>()
-        val parsedSchemas = sources.map { loadSchema(it, schemaIds) }
+        val parsedSchemas = sources.map { loadSchema(it, options, schemaIds) }
         val validators = buildValidators(parsedSchemas, options, schemaIds, validatorMap)
         return validators.first()
     }
@@ -82,14 +82,46 @@ abstract class MedeiaApiBase {
     ): List<SchemaValidator> {
         val context = ValidationBuilderContext(options = options)
         val validators = parsedSchemas.map { it.buildValidator(context) }
+
+        val unknownRefs =
+            if (options.supportRefsToAnywhere) {
+                findRefsToAnywhere(validators, schemaIds, context)
+            } else {
+                mutableSetOf<URI>().also { set ->
+                    validators.forEach { it.recordUnknownRefs(set) }
+                }
+            }
+
+        if (unknownRefs.isNotEmpty()) {
+            throw IllegalArgumentException(
+                "Invalid schema combination, unresolved \$ref references: ${unknownRefs.joinToString()}"
+            )
+        }
+
+        validatorMap?.let {
+            it.putAll(context.schemaValidatorsById)
+        }
+
+        return validators
+    }
+
+    /*
+     * Returns unknown $ref refs after attempted resolution.
+     */
+    private fun findRefsToAnywhere(
+        validators: List<SchemaValidator>,
+        schemaIds: MutableMap<URI, VersionedNodeData>,
+        context: ValidationBuilderContext
+    ): Set<URI> {
         val extraValidators = mutableListOf<SchemaValidator>()
+        var unknownRefs: MutableSet<URI>? = null
         // Keep resolving unknown ref until none can be found anymore
         // (but limit to avoid turning a small bug into a hang of Medeia)
         for (iteration in 1..MAX_REF_RESOLVE_ITERATIONS) {
             // TODO: maybe we can remove the recursive recordUnknownRefs visitor methods and
             // TODO: instead only have RefIdValidator implement them, if all of them are in
             // TODO: the context.schemaValidatorsById map
-            val unknownRefs = mutableSetOf<URI>()
+            unknownRefs = mutableSetOf<URI>()
             validators.forEach { it.recordUnknownRefs(unknownRefs) }
             extraValidators.forEach { it.recordUnknownRefs(unknownRefs) }
             var refFound = false
@@ -110,10 +142,7 @@ abstract class MedeiaApiBase {
             // As long as refs are found, they themselves could contain unknown refs
             if (!refFound) break
         }
-        validatorMap?.let {
-            it.putAll(context.schemaValidatorsById)
-        }
-        return validators
+        return unknownRefs ?: emptySet()
     }
 
     fun convertSchemaToDraft07(source: SchemaSource, destination: Writer) {
@@ -129,10 +158,16 @@ abstract class MedeiaApiBase {
 
     protected abstract fun createTokenDataConsumerWriter(destination: Writer): JsonTokenDataConsumer
 
-    private fun loadSchema(source: SchemaSource, ids: MutableMap<URI, VersionedNodeData> = mutableMapOf()): Schema {
+    private fun loadSchema(
+        source: SchemaSource,
+        options: JsonSchemaValidationOptions,
+        ids: MutableMap<URI, VersionedNodeData> = mutableMapOf()
+    ): Schema {
         val tree = parseTree(source)
-        tree.collectIds(source.baseUri, ids)
-        source.baseUri?.let { ids[it] = tree }
+        if (options.supportRefsToAnywhere) {
+            tree.collectIds(source.baseUri, ids)
+            source.baseUri?.let { ids[it] = tree }
+        }
         val consumer = SimpleObjectMapper(tree.version.mapperType, 0)
         val parser: JsonParserAdapter = JsonParserFromSimpleTree(tree.nodeData, consumer)
         parser.parseAll()

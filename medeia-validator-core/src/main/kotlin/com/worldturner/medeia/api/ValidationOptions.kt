@@ -42,7 +42,13 @@ data class JsonSchemaValidationOptions @JvmOverloads constructor(
     /** Whether to validate (best effort) based on the "format" keyword. */
     val validateFormat: Boolean = true,
     /** Whether to validate (best effort) based on the "contentEncoding" and "contentMediaEncoding" keywords. */
-    val validateContent: Boolean = true
+    val validateContent: Boolean = true,
+    /**
+     * According to the specifications, $ref refs can point anywhere, even places that weren't considered
+     * schemas before the $ref appeared. This is seldom necessary (put named schemas in the "definitions" section)
+     * and schema reading is faster without this.
+     */
+    val supportRefsToAnywhere: Boolean = true
 ) {
     fun withUniqueItemsValidationMethod(value: UniqueItemsValidationMethod) =
         copy(uniqueItemsValidationMethod = value)
