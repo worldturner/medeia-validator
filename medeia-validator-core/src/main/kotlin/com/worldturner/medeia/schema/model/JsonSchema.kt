@@ -27,6 +27,7 @@ import com.worldturner.medeia.schema.validation.TypeValidator
 import com.worldturner.medeia.schema.withEmptyFragment
 import com.worldturner.medeia.types.Alternatives
 import com.worldturner.medeia.types.SingleOrList
+import com.worldturner.util.orNull
 import java.math.BigDecimal
 import java.net.URI
 import java.util.EnumSet
@@ -129,8 +130,8 @@ data class JsonSchema constructor(
                 TypeValidator.create(type),
                 NumberValidator.create(multipleOf, maximum, exclusiveMaximum, minimum, exclusiveMinimum),
                 StringValidator.create(maxLength, minLength, pattern),
-                FormatValidator.create(format),
-                ContentValidator.create(contentMediaType, contentEncoding),
+                context.options.validateFormat.orNull { FormatValidator.create(format) },
+                context.options.validateContent.orNull { ContentValidator.create(contentMediaType, contentEncoding) },
                 ArrayValidator.create(
                     additionalItems?.let { it.buildValidator(subContext) },
                     items?.list?.let { it.buildValidators(subContext) },

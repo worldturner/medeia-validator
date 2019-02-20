@@ -38,13 +38,23 @@ enum class UniqueItemsValidationMethod(
 
 data class JsonSchemaValidationOptions @JvmOverloads constructor(
     val uniqueItemsValidationMethod: UniqueItemsValidationMethod = DIGEST_MD5,
-    val optimizeExistentialValidators: Boolean = true
+    val optimizeExistentialValidators: Boolean = true,
+    /** Whether to validate (best effort) based on the "format" keyword. */
+    val validateFormat: Boolean = true,
+    /** Whether to validate (best effort) based on the "contentEncoding" and "contentMediaEncoding" keywords. */
+    val validateContent: Boolean = true
 ) {
     fun withUniqueItemsValidationMethod(value: UniqueItemsValidationMethod) =
         copy(uniqueItemsValidationMethod = value)
 
     fun withOptimizeExistentialValidators(value: Boolean) =
         copy(optimizeExistentialValidators = value)
+
+    fun withValidateFormat(value: Boolean) =
+        copy(validateFormat = value)
+
+    fun withValidateContent(value: Boolean) =
+        copy(validateContent = value)
 
     companion object {
         @JvmField
