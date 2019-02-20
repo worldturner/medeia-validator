@@ -16,7 +16,7 @@ import java.nio.file.Paths
 class ReportGeneratingTest {
     @Test
     fun `Run suite()`() {
-        val runner = DRAFT07_RUNNER.copy(optional = false, filter = {
+        val runner = DRAFT07_RUNNER.copy(optional = true, filter = {
             true // it.endsWith("refRemote.json")
         })
 
