@@ -72,9 +72,9 @@ data class JsonSchema constructor(
     val contentMediaType: String? = null,
     val contentEncoding: String? = null,
     val definitions: Map<String, JsonSchema>? = null,
-    val if_: JsonSchema? = null,
-    val then_: JsonSchema? = null,
-    val else_: JsonSchema? = null,
+    val ifSchema: JsonSchema? = null,
+    val thenSchema: JsonSchema? = null,
+    val elseSchema: JsonSchema? = null,
     val allOf: List<JsonSchema>? = null,
     val anyOf: List<JsonSchema>? = null,
     val oneOf: List<JsonSchema>? = null,
@@ -171,9 +171,9 @@ data class JsonSchema constructor(
                 ),
                 NotValidator.create(not?.let { it.buildValidator(subContext) }),
                 IfThenElseValidator.create(
-                    if_?.buildValidator(subContext),
-                    then_?.let { it.buildValidator(subContext) },
-                    else_?.let { it.buildValidator(subContext) })
+                    ifSchema?.buildValidator(subContext),
+                    thenSchema?.let { it.buildValidator(subContext) },
+                    elseSchema?.let { it.buildValidator(subContext) })
 
             )
         val validator =
