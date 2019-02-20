@@ -104,7 +104,7 @@ class BootstringParameters(
     val delimiter: Int,
     val basicCodePoints: String
 ) {
-    val basicCodePointArray = IntArray(initialN.toInt()) {
+    private val basicCodePointArray = IntArray(initialN.toInt()) {
         basicCodePoints.indexOf(it.toChar().toLowerCase())
     }
 
