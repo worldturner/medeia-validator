@@ -83,7 +83,7 @@ Source Json format support
 How to use
 ----------
 
-#####Kotlin:
+##### Kotlin:
 
 ```kotlin
 val medeia = MedeiaJacksonApi()
@@ -114,7 +114,7 @@ different versions than their own.
 Options are passed using a `JsonSchemaValidationOptions` object.
 
 
-#####Java:
+##### Java:
 
 Care has been taken that all methods in the API can be invoked from Java. The `JsonSchemaValidationOptions` has 
 `with*` methods to allow option setting from Java.
