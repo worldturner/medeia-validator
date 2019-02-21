@@ -60,7 +60,6 @@ and also spend extra time garbage collecting that model afterwards.
   tree. This is a CPU versus memory trade-off.
 
 
-
 Kotlin, Java and JVM languages support
 --------------------------------------
 
@@ -76,7 +75,65 @@ The versioning scheme of this library is [Semantic Versioning](https://semver.or
 These types have a package name that starts with `com.worldturner.medeia.api`.
 The APIs of types in other packages can change at any time even between minor versions.
 
-Data format support
--------------------
+Source Json format support
+--------------------------
 * Ordinary JSON
-* [Multi-line JSON](http://jsonlines.org/) 
+* [Multi-line JSON](http://jsonlines.org/) for Jackson (not tested for Gson)
+
+How to use
+----------
+
+#####Kotlin:
+
+```kotlin
+val medeia = MedeiaJacksonApi()
+val schemaSource = PathSchemaSource(Paths.get("schemas/myschema.json"))
+val validator = medeia.loadSchema(schemaSource)
+// Creates a validating parser
+val parser = medeia.decorateJsonParser(validator, JsonFactory().createParser(mydata))
+val deserialized = ObjectMapper().readValue(parser, MyClass::class.java)
+```
+
+To just perform validation rather than deserialising objects, one can do:
+```kotlin
+while (parser.nextToken() != null) {
+}
+```
+
+The `MedeiaJacksonApi` and `MedeiaGsonApi` classes have various methods to load schemas and to create validating
+parsers/generators (or readers/writers in Gson parlance)
+
+The interface `SchemaSource` has several implementations to load schemas from InputStreams, Readers, Paths, or memory.
+
+The version of a schema is automatically detected, but if the schema file doesn't specify it using a `$schema` field,
+the version can be provided through the SchemaSource.
+
+Mixing different versions of schemas (draft4, 6 and 7) is allowed and schemas can refer to remote schemas in 
+different versions than their own.
+
+Options are passed using a `JsonSchemaValidationOptions` object.
+
+
+#####Java:
+
+Care has been taken that all methods in the API can be invoked from Java. The `JsonSchemaValidationOptions` has 
+`with*` methods to allow option setting from Java.
+
+```java
+TBD
+```
+Test Suite Support
+------------------
+
+Medeia validator passes all 424 'required' tests of the JSON-Schema-Test-Suite testsuite.
+It passes 132 out of the 143 optional tests. The 11 failing optional tests concern "format" keyword
+validation where the following formats that are not yet (fully) supported:
+
+> uri, uri-template, iri, email, relative-json-pointer, idn-email, regex
+
+Format keyword validation is optional (and can be turned off as mandated by the specification)
+
+The following formats are supported and pass the 'optional' testsuite:
+
+> json-pointer, date, time, date-time, ipv4, ipv4, hostname, idn-hostname
+
