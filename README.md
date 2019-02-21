@@ -71,8 +71,8 @@ to remain stable across versions, they can change at any time witout notice.
 Versioning
 ----------
 
-The versioning scheme of this library is [Semantic Versioning](https://semver.org/) but only for types in the API.
-These types have a package name that starts with `com.worldturner.medeia.api`.
+The versioning scheme of this library is [Semantic Versioning](https://semver.org/) but only the public API.
+Public API classes have package names that starts with `com.worldturner.medeia.api`.
 The APIs of types in other packages can change at any time even between minor versions.
 
 Source Json format support
