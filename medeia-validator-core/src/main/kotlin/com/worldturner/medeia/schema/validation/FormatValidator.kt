@@ -43,7 +43,17 @@ class FormatValidator(
             } catch (e: PatternSyntaxException) {
                 failedValidation(string, location, e)
             }
-            "uri-reference", "uri", "iri-reference", "iri" ->
+            "uri", "iri" ->
+                try {
+                    val uri = URI.create(string)
+                    if (uri.isAbsolute)
+                        OkValidationResult
+                    else
+                        failedValidation(string, location)
+                } catch (e: IllegalArgumentException) {
+                    failedValidation(string, location, e)
+                }
+            "uri-reference", "iri-reference" ->
                 try {
                     URI.create(string).let { OkValidationResult }
                 } catch (e: IllegalArgumentException) {
