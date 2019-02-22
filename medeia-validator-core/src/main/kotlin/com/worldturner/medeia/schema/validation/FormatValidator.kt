@@ -9,6 +9,7 @@ import com.worldturner.medeia.parser.JsonTokenData
 import com.worldturner.medeia.parser.JsonTokenLocation
 import com.worldturner.medeia.parser.JsonTokenType.VALUE_TEXT
 import com.worldturner.medeia.pointer.JsonPointer
+import com.worldturner.medeia.pointer.RelativeJsonPointer
 import com.worldturner.medeia.schema.validation.stream.SchemaValidatorInstance
 import java.net.URI
 import java.time.LocalDate
@@ -51,6 +52,12 @@ class FormatValidator(
             "json-pointer" ->
                 try {
                     JsonPointer(string).let { OkValidationResult }
+                } catch (e: IllegalArgumentException) {
+                    failedValidation(string, location, e)
+                }
+            "relative-json-pointer" ->
+                try {
+                    RelativeJsonPointer(string).let { OkValidationResult }
                 } catch (e: IllegalArgumentException) {
                     failedValidation(string, location, e)
                 }

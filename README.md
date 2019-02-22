@@ -126,14 +126,14 @@ Test Suite Support
 ------------------
 
 Medeia validator passes all 424 'required' tests of the JSON-Schema-Test-Suite testsuite.
-It passes 132 out of the 143 optional tests. The 11 failing optional tests concern "format" keyword
+It passes 133 out of the 143 optional tests. The 10 failing optional tests concern "format" keyword
 validation where the following formats that are not yet (fully) supported:
 
-> uri, uri-template, iri, email, relative-json-pointer, idn-email, regex
+> uri, uri-template, iri, email, idn-email, regex
 
 Format keyword validation is optional (and can be turned off as mandated by the specification)
 
 The following formats are supported and pass the 'optional' testsuite:
 
-> json-pointer, date, time, date-time, ipv4, ipv4, hostname, idn-hostname
+> json-pointer, relative-json-pointer, date, time, date-time, ipv4, ipv4, hostname, idn-hostname
 

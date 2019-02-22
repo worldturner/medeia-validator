@@ -102,3 +102,31 @@ private fun decodeJsonPointerElement(s: String, offset: Int): String {
     }
     return b.toString()
 }
+
+private val RJP_SEPARATORS = "#/".toCharArray()
+
+class RelativeJsonPointer(text: String) {
+    val levelsUp: Int
+    val jsonPointer: JsonPointer?
+
+    init {
+        val separatorIndex = text.indexOfAny(RJP_SEPARATORS).let { if (it == -1) text.length else it }
+        val levelsUpString = text.substring(0, separatorIndex)
+        if (levelsUpString == "0") {
+            levelsUp = 0
+        } else if (levelsUpString.startsWith("0")) {
+            throw NumberFormatException("Invalid leading zero for '$levelsUpString' in '$text'")
+        } else {
+            try {
+                levelsUp = levelsUpString.toInt()
+            } catch (e: NumberFormatException) {
+                throw NumberFormatException("Invalid number for '$levelsUpString' in '$text'")
+            }
+        }
+        if (separatorIndex == text.length || text[separatorIndex] == '/') {
+            jsonPointer = JsonPointer(text.substring(separatorIndex))
+        } else {
+            jsonPointer = null
+        }
+    }
+}
