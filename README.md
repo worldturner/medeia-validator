@@ -122,6 +122,25 @@ Care has been taken that all methods in the API can be invoked from Java. The `J
 ```java
 TBD
 ```
+
+Cloning and building medeia-validator
+-------------------------------------
+
+Medeia-validator pulls in the JSON-Schema-Test-Suite as a git submodule.
+When you have already cloned medeia-validator, perform this command:
+
+```bash
+git submodule update --init --recursive
+```
+
+Or perform the initial clone with submodules:
+
+```bash
+git clone --recurse-submodules git@github.com:worldturner/medeia-validator.git
+```
+
+Building is done with maven using `mvn clean install`.
+
 Test Suite Support
 ------------------
 
@@ -135,5 +154,5 @@ Format keyword validation is optional (and can be turned off as mandated by the 
 
 The following formats are supported and pass the 'optional' testsuite:
 
-> json-pointer, relative-json-pointer, date, time, date-time, ipv4, ipv4, hostname, idn-hostname
+> json-pointer, relative-json-pointer, date, time, date-time, ipv4, ipv6, hostname, idn-hostname
 
