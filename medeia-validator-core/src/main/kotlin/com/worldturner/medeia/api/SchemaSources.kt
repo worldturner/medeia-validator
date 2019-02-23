@@ -33,6 +33,16 @@ class StreamSchemaSource(
 ) : SchemaSource {
     override val inputPreference: InputPreference
         get() = InputPreference.STREAM
+
+    override fun toString(): String {
+        val builder = StringBuilder("StreamSchemaSource(")
+        builder.append(
+            listOfNotNull(
+                baseUri?.let { "baseUri=$baseUri" },
+                version?.let { "version=$version" }).joinToString()
+        )
+        return builder.append(")").toString()
+    }
 }
 
 class ReaderSchemaSource(
@@ -42,6 +52,16 @@ class ReaderSchemaSource(
 ) : SchemaSource {
     override val inputPreference: InputPreference
         get() = InputPreference.READER
+
+    override fun toString(): String {
+        val builder = StringBuilder("ReaderSchemaSource(")
+        builder.append(
+            listOfNotNull(
+                baseUri?.let { "baseUri=$baseUri" },
+                version?.let { "version=$version" }).joinToString()
+        )
+        return builder.append(")").toString()
+    }
 }
 
 class PathSchemaSource(
@@ -53,6 +73,17 @@ class PathSchemaSource(
         get() = InputPreference.STREAM
     override val stream: InputStream
         get() = Files.newInputStream(path)
+
+    override fun toString(): String {
+        val builder = StringBuilder("PathSchemaSource(")
+        builder.append(
+            listOfNotNull(
+                "path=$path",
+                baseUri?.let { "baseUri=$baseUri" },
+                version?.let { "version=$version" }).joinToString()
+        )
+        return builder.append(")").toString()
+    }
 }
 
 class UrlSchemaSource(
@@ -64,6 +95,17 @@ class UrlSchemaSource(
         get() = InputPreference.STREAM
     override val stream: InputStream
         get() = url.openStream()
+
+    override fun toString(): String {
+        val builder = StringBuilder("UrlSchemaSource(")
+        builder.append(
+            listOfNotNull(
+                "url=$url",
+                baseUri?.let { "baseUri=$baseUri" },
+                version?.let { "version=$version" }).joinToString()
+        )
+        return builder.append(")").toString()
+    }
 }
 
 class StringSchemaSource(
@@ -76,6 +118,17 @@ class StringSchemaSource(
 
     override val reader: Reader
         get() = StringReader(string)
+
+    override fun toString(): String {
+        val builder = StringBuilder("StringSchemaSource(")
+        builder.append(
+            listOfNotNull(
+                "string=${string.substring(0, Math.min(string.length, 40))}",
+                baseUri?.let { "baseUri=$baseUri" },
+                version?.let { "version=$version" }).joinToString()
+        )
+        return builder.append(")").toString()
+    }
 }
 
 object SchemaSources {

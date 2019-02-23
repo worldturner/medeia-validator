@@ -28,7 +28,7 @@ fun URI.replaceFragment(fragment: String, encoded: Boolean = false) = try {
 
 // cannot contain a #, a raw %, ^, [, ], {, }, \, ", < and >
 fun encodeConservatively(s: String): String =
-    s.replace(Regex("[\\\\|#<>\\^%\\[\\]{}\"]")) { r ->
+    s.replace(Regex("[\\\\|#<>\\^%\\[\\]{}\" ]")) { r ->
         "%" + r.value[0].toInt().toString(16)
     }
 

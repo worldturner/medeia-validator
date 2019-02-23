@@ -44,9 +44,13 @@ private val JsonSchemaVersion.idProperty: String
             DRAFT07 -> "\$id"
         }
 
+/* Note: being lenient in allowing schema without trailing #. */
 private val schemaUriToVersionMapping = mapOf(
+    "http://json-schema.org/draft-04/schema" to DRAFT04,
     "http://json-schema.org/draft-04/schema#" to DRAFT04,
+    "http://json-schema.org/draft-06/schema" to DRAFT07,
     "http://json-schema.org/draft-06/schema#" to DRAFT07,
+    "http://json-schema.org/draft-07/schema" to DRAFT07,
     "http://json-schema.org/draft-07/schema#" to DRAFT07
 )
 
@@ -186,7 +190,9 @@ abstract class MedeiaApiBase {
             val version =
                 schemaUriToVersionMapping[schemaUri] ?: source.version
                 ?: throw IllegalArgumentException(
-                    "Version not specified in schema $source, modify schema or pass version in SchemaSource.version"
+                    (schemaUri?.let { "Version specified \"$schemaUri\" is not known in $source" }
+                        ?: "Version not specified in schema $source") +
+                        ", modify schema or pass version in SchemaSource.version"
                 )
             return VersionedNodeData(tree, version)
         } catch (e: IOException) {
