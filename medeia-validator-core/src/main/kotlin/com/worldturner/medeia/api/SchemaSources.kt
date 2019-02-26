@@ -13,7 +13,7 @@ import java.nio.file.Files
 import java.nio.file.Path
 
 enum class JsonSchemaVersion(internal val mapperType: MapperType) {
-    DRAFT04(JsonSchemaDraft04Type), DRAFT07(JsonSchemaDraft07Type)
+    DRAFT04(JsonSchemaDraft04Type), DRAFT06(JsonSchemaDraft07Type), DRAFT07(JsonSchemaDraft07Type)
 }
 
 enum class InputPreference { STREAM, READER }
@@ -105,6 +105,28 @@ class UrlSchemaSource(
                 version?.let { "version=$version" }).joinToString()
         )
         return builder.append(")").toString()
+    }
+}
+
+class MetaSchemaSource(override val version: JsonSchemaVersion) : SchemaSource {
+    override val baseUri: URI? get() = null
+    override val inputPreference: InputPreference
+        get() = InputPreference.STREAM
+    override val stream: InputStream
+        get() = this::class.java.getResourceAsStream(version.toMetaSchemaResource())
+
+    override fun toString(): String = "MetaSchemaSource(version=$version)"
+
+    companion object {
+        private const val RESOURCE_SCHEMA_DRAFT04 = "/meta-schemas/schema-draft04.json"
+        private const val RESOURCE_SCHEMA_DRAFT06 = "/meta-schemas/schema-draft06.json"
+        private const val RESOURCE_SCHEMA_DRAFT07 = "/meta-schemas/schema-draft07.json"
+        private fun JsonSchemaVersion.toMetaSchemaResource(): String =
+            when (this) {
+                JsonSchemaVersion.DRAFT04 -> RESOURCE_SCHEMA_DRAFT04
+                JsonSchemaVersion.DRAFT06 -> RESOURCE_SCHEMA_DRAFT06
+                JsonSchemaVersion.DRAFT07 -> RESOURCE_SCHEMA_DRAFT07
+            }
     }
 }
 

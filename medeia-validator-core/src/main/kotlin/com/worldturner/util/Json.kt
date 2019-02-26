@@ -1,6 +1,6 @@
 package com.worldturner.util
 
-fun StringBuilder.appendJsonString(s: String): StringBuilder {
+fun StringBuilder.appendJsonString(s: CharSequence): StringBuilder {
     this.append('"')
     s.forEach {
         when (it) {

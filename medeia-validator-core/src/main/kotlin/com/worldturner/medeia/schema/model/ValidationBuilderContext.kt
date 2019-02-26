@@ -1,9 +1,9 @@
 package com.worldturner.medeia.schema.model
 
 import com.worldturner.medeia.api.JsonSchemaValidationOptions
-import com.worldturner.medeia.schema.EMPTY_URI
-import com.worldturner.medeia.schema.resolveSafe
 import com.worldturner.medeia.schema.validation.SchemaValidator
+import com.worldturner.util.EMPTY_URI
+import com.worldturner.util.resolveSafe
 import java.net.URI
 
 class ValidationBuilderContext(

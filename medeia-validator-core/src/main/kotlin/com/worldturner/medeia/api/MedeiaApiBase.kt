@@ -1,6 +1,7 @@
 package com.worldturner.medeia.api
 
 import com.worldturner.medeia.api.JsonSchemaVersion.DRAFT04
+import com.worldturner.medeia.api.JsonSchemaVersion.DRAFT06
 import com.worldturner.medeia.api.JsonSchemaVersion.DRAFT07
 import com.worldturner.medeia.parser.ArrayNodeData
 import com.worldturner.medeia.parser.JsonParserAdapter
@@ -12,46 +13,41 @@ import com.worldturner.medeia.parser.SimpleObjectMapper
 import com.worldturner.medeia.parser.SimpleTreeBuilder
 import com.worldturner.medeia.parser.TokenNodeData
 import com.worldturner.medeia.parser.tree.JsonParserFromSimpleTree
-import com.worldturner.medeia.parser.type.MapperType
 import com.worldturner.medeia.pointer.JsonPointer
-import com.worldturner.medeia.schema.EMPTY_URI
-import com.worldturner.medeia.schema.hasFragment
+import com.worldturner.util.EMPTY_URI
+import com.worldturner.util.hasFragment
 import com.worldturner.medeia.schema.model.JsonSchema
 import com.worldturner.medeia.schema.model.Schema
 import com.worldturner.medeia.schema.model.SchemaWithBaseUri
 import com.worldturner.medeia.schema.model.ValidationBuilderContext
 import com.worldturner.medeia.schema.parser.JsonSchemaDraft04Type
-import com.worldturner.medeia.schema.parser.JsonSchemaDraft07Type
 import com.worldturner.medeia.schema.validation.SchemaValidator
-import com.worldturner.medeia.schema.withEmptyFragment
-import com.worldturner.medeia.schema.withoutFragment
+import com.worldturner.util.withEmptyFragment
+import com.worldturner.util.withoutFragment
 import java.io.IOException
 import java.io.Writer
 import java.net.URI
 import java.net.URISyntaxException
 
-private val JsonSchemaVersion.mapperType: MapperType
-    get() =
-        when (this) {
-            DRAFT04 -> JsonSchemaDraft04Type
-            DRAFT07 -> JsonSchemaDraft07Type
-        }
-
 private val JsonSchemaVersion.idProperty: String
     get() =
         when (this) {
             DRAFT04 -> "id"
-            DRAFT07 -> "\$id"
+            DRAFT06, DRAFT07 -> "\$id"
         }
+
+private val URI_DRAFT04 = "http://json-schema.org/draft-04/schema#"
+private val URI_DRAFT06 = "http://json-schema.org/draft-06/schema#"
+private val URI_DRAFT07 = "http://json-schema.org/draft-07/schema#"
 
 /* Note: being lenient in allowing schema without trailing #. */
 private val schemaUriToVersionMapping = mapOf(
-    "http://json-schema.org/draft-04/schema" to DRAFT04,
-    "http://json-schema.org/draft-04/schema#" to DRAFT04,
-    "http://json-schema.org/draft-06/schema" to DRAFT07,
-    "http://json-schema.org/draft-06/schema#" to DRAFT07,
-    "http://json-schema.org/draft-07/schema" to DRAFT07,
-    "http://json-schema.org/draft-07/schema#" to DRAFT07
+    URI_DRAFT04.removeSuffix("#") to DRAFT04,
+    URI_DRAFT04 to DRAFT04,
+    URI_DRAFT06.removeSuffix("#") to DRAFT06,
+    URI_DRAFT06 to DRAFT06,
+    URI_DRAFT07.removeSuffix("#") to DRAFT07,
+    URI_DRAFT07 to DRAFT07
 )
 
 /* To avoid infinite loops in case there is a subtle bug in Medeia $ref resolution. */
@@ -257,7 +253,7 @@ private fun NodeData.registerAndGetJsonSchemaId(
 ): URI? =
     textChild(version.idProperty)?.let {
         try {
-            val relativeUri = URI(it)
+            val relativeUri = URI(it.toString())
             val absoluteUri = baseUri?.let { baseUri.resolve(relativeUri) } ?: relativeUri
             absoluteUri.also { ids[absoluteUri] = VersionedNodeData(this, version) }
         } catch (e: URISyntaxException) {

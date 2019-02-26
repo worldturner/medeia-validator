@@ -1,5 +1,8 @@
 package com.worldturner.medeia.pointer
 
+import com.worldturner.util.hasFragment
+import java.net.URI
+
 class JsonPointer constructor(val text: String, bypassValidation: Boolean = false) {
     init {
         if (!bypassValidation)
@@ -130,3 +133,15 @@ class RelativeJsonPointer(text: String) {
         }
     }
 }
+
+fun URI.hasJsonPointerFragment(): Boolean =
+    if (this.hasFragment() && this.fragment.startsWith('/')) {
+        try {
+            JsonPointer(this.fragment)
+            true
+        } catch (e: IllegalArgumentException) {
+            false
+        }
+    } else {
+        false
+    }
