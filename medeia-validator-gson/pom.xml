@@ -12,6 +12,17 @@
     <groupId>com.worldturner.medeia</groupId>
     <artifactId>medeia-validator-gson</artifactId>
     <packaging>jar</packaging>
+    <name>Medeia Validator Jackson</name>
+    <description>
+        Medeia streaming JSON-schema validator for the JVM platform,
+        Gson module.
+    </description>
+    <url>https://github.com/worldturner/medeia-validator</url>
+    <scm>
+        <connection>scm:git:git://github.comworldturner/medeia-validator.git</connection>
+        <developerConnection>scm:git:ssh://github.com:worldturner/medeia-validator.git</developerConnection>
+        <url>https://github.com/worldturner/medeia-validator.git</url>
+    </scm>
 
     <dependencies>
         <dependency>

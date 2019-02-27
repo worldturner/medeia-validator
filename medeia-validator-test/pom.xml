@@ -12,6 +12,12 @@
     <groupId>com.worldturner.medeia</groupId>
     <artifactId>medeia-validator-test</artifactId>
     <packaging>jar</packaging>
+    <name>Medeia Validator tests</name>
+    <description>
+        Medeia streaming JSON-schema validator for the JVM platform,
+        test suite.
+    </description>
+    <url>https://github.com/worldturner/medeia-validator</url>
 
     <dependencies>
         <dependency>
