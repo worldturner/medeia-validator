@@ -3,7 +3,6 @@ package com.worldturner.medeia.schema.suite
 import com.worldturner.medeia.api.JsonSchemaVersion
 import com.worldturner.medeia.api.PathSchemaSource
 import com.worldturner.medeia.api.SchemaSource
-import com.worldturner.medeia.api.UrlSchemaSource
 import com.worldturner.medeia.api.gson.MedeiaGsonApi
 import com.worldturner.medeia.api.jackson.MedeiaJacksonApi
 import com.worldturner.medeia.parser.type.ArrayType
@@ -12,7 +11,6 @@ import com.worldturner.medeia.schema.model.SchemaTestType
 import com.worldturner.medeia.testing.support.JsonParserLibrary
 import com.worldturner.medeia.testing.support.parse
 import java.net.URI
-import java.net.URL
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
@@ -22,7 +20,7 @@ import java.util.stream.Stream
 data class TestSuiteRunner(
     val testsPaths: List<Path>,
     val remoteSchemasPath: Path,
-    val metaSchemaUrl: URL,
+    val metaSchemaSource: SchemaSource,
     val remoteSchemasBaseUri: URI,
     val optional: Boolean = false,
     val filter: (Path) -> Boolean = { true },
@@ -33,7 +31,7 @@ data class TestSuiteRunner(
 
     val tests
         get() = run {
-            val remoteSchemas = loadRemoteSchemas(remoteSchemasPath) + loadMetaSchema()
+            val remoteSchemas = buildRemoteSchemaSources(remoteSchemasPath) + metaSchemaSource
             loadTests {
                 filter(it) && (optional xor !it.contains(Paths.get("optional")))
             }.map { it.withRemotes(remoteSchemas) }
@@ -42,7 +40,7 @@ data class TestSuiteRunner(
     fun loadTests(filter: (Path) -> Boolean = { true }) =
         testsPaths.flatMap { loadTests(it, filter) }
 
-    internal fun loadTests(path: Path, filter: (Path) -> Boolean): List<SchemaTest> =
+    private fun loadTests(path: Path, filter: (Path) -> Boolean): List<SchemaTest> =
         Files.list(path).flatMap {
             if (Files.isRegularFile(it))
                 if (it.fileName.toString().endsWith(".json") && filter(it)) {
@@ -66,9 +64,7 @@ data class TestSuiteRunner(
                 loadTests(it, filter).stream()
         }.collect(Collectors.toList())
 
-    fun loadMetaSchema(): SchemaSource = UrlSchemaSource(metaSchemaUrl, version = version)
-
-    fun loadRemoteSchemas(path: Path): Set<SchemaSource> =
+    private fun buildRemoteSchemaSources(path: Path): Set<SchemaSource> =
         Files.list(path).flatMap { child ->
             if (Files.isRegularFile(child))
                 if (child.fileName.toString().endsWith(".json")) {
@@ -80,7 +76,7 @@ data class TestSuiteRunner(
                     Stream.empty()
                 }
             else
-                loadRemoteSchemas(child).stream()
+                buildRemoteSchemaSources(child).stream()
         }.collect(Collectors.toSet())
 
     val medeiaJacksonApi = MedeiaJacksonApi()
