@@ -180,7 +180,7 @@ abstract class MedeiaApiBase {
         try {
             val consumer = SimpleTreeBuilder(0)
             val parser: JsonParserAdapter = createSchemaParser(source, consumer)
-            parser.parseAll()
+            parser.use { it.parseAll() }
             val tree = consumer.takeResult() as NodeData
             val schemaUri = tree.textChild("\$schema")
             val version =

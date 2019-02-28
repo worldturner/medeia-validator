@@ -26,9 +26,6 @@ data class TestSuiteRunner(
     val filter: (Path) -> Boolean = { true },
     val version: JsonSchemaVersion
 ) {
-
-    val parserLibrary = JsonParserLibrary.JACKSON
-
     val tests
         get() = run {
             val remoteSchemas = buildRemoteSchemaSources(remoteSchemasPath) + metaSchemaSource
@@ -48,11 +45,13 @@ data class TestSuiteRunner(
                     try {
                         @Suppress("UNCHECKED_CAST")
                         val tests =
-                            parse(
-                                ArrayType(SchemaTestType),
-                                Files.newInputStream(it),
-                                parserLibrary
-                            ) as List<SchemaTest>
+                            Files.newInputStream(it).use { file ->
+                                parse(
+                                    ArrayType(SchemaTestType),
+                                    file,
+                                    JsonParserLibrary.JACKSON
+                                ) as List<SchemaTest>
+                            }
                         tests.map { test -> test.copy(path = it) }.stream()
                     } catch (e: Exception) {
                         throw Exception("Error in file $it", e)

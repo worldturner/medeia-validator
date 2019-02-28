@@ -74,4 +74,7 @@ class JsonParserFromSimpleTree(val tree: NodeData, val consumer: JsonTokenDataAn
     override fun parseAll() {
         generateEvents(tree)
     }
+
+    override fun close() {
+    }
 }

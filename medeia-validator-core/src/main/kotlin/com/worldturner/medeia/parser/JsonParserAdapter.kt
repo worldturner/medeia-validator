@@ -1,5 +1,7 @@
 package com.worldturner.medeia.parser
 
-interface JsonParserAdapter {
+import java.io.Closeable
+
+interface JsonParserAdapter : Closeable {
     fun parseAll()
 }
