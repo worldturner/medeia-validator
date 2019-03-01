@@ -3,6 +3,10 @@ package com.worldturner.util
 import replaceFromLast
 import java.net.URI
 
+fun URI.hasAnyOtherThanFragment() =
+    !rawAuthority.isNullOrEmpty() || !rawPath.isNullOrEmpty() || !rawQuery.isNullOrEmpty() ||
+        !rawSchemeSpecificPart.isNullOrEmpty() || !rawUserInfo.isNullOrEmpty()
+
 fun URI.hasFragment() = this.fragment != null
 fun URI.withoutFragment(): URI = URI(this.toString().replaceFromLast('#', ""))
 
