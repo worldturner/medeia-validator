@@ -112,7 +112,7 @@ open class ObjectValidatorInstance(
                         rule = "duplicate",
                         location = location,
                         property = property,
-                        message = "Duplicate property name in medeia object"
+                        message = "Duplicate property name in json object"
                     )
                 }
                 if (validator.properties != null && property in validator.properties) {

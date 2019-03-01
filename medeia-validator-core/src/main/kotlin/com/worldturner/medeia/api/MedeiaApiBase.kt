@@ -127,9 +127,6 @@ abstract class MedeiaApiBase {
             var refFound = false
             unknownRefs.forEach { absoluteRef ->
                 val node = findNode(schemaIds, absoluteRef)
-                if (node == null) {
-                    println("Unknown \$ref $absoluteRef not found")
-                }
                 node?.let {
                     val validator = parseSchemaFromNode(
                         node,
