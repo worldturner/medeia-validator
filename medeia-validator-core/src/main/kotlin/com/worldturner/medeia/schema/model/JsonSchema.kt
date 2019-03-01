@@ -3,9 +3,6 @@ package com.worldturner.medeia.schema.model
 import com.worldturner.medeia.parser.NodeData
 import com.worldturner.medeia.pointer.JsonPointer
 import com.worldturner.medeia.pointer.hasJsonPointerFragment
-import com.worldturner.util.hasFragment
-import com.worldturner.util.replaceFragment
-import com.worldturner.util.resolveSafe
 import com.worldturner.medeia.schema.validation.ArrayUniqueItemsValidator
 import com.worldturner.medeia.schema.validation.ArrayValidator
 import com.worldturner.medeia.schema.validation.BooleanValueValidator
@@ -25,10 +22,14 @@ import com.worldturner.medeia.schema.validation.RefSchemaValidator
 import com.worldturner.medeia.schema.validation.SchemaValidator
 import com.worldturner.medeia.schema.validation.StringValidator
 import com.worldturner.medeia.schema.validation.TypeValidator
-import com.worldturner.util.withEmptyFragment
 import com.worldturner.medeia.types.Alternatives
 import com.worldturner.medeia.types.SingleOrList
+import com.worldturner.util.hasAnyOtherThanFragment
+import com.worldturner.util.hasFragment
 import com.worldturner.util.orNull
+import com.worldturner.util.replaceFragment
+import com.worldturner.util.resolveSafe
+import com.worldturner.util.withEmptyFragment
 import java.math.BigDecimal
 import java.net.URI
 import java.util.EnumSet
@@ -113,16 +114,19 @@ data class JsonSchema constructor(
     }
 
     override fun buildValidator(context: ValidationBuilderContext): SchemaValidator {
-        id?.also {
-            if (it.hasJsonPointerFragment()) {
+        if (id != null && id.hasJsonPointerFragment()) {
+            if (id.hasAnyOtherThanFragment() || id.fragment != jsonPointer.toString()) {
+                // Note if the id is simply trying to define the current json pointer
+                // (which is invalid but strangely, commonly done) then just ignore it.
                 throw IllegalArgumentException(
                     "Invalid \$id with non-plain name fragment (see section 8.2.3 of json-schema-core): '$id'"
                 )
             }
+        } else {
+            resolvedId = id?.let {
+                context.baseUri.resolveSafe(id)
+            } ?: if (context.root) context.baseUri else null
         }
-        resolvedId = id?.let {
-            context.baseUri.resolveSafe(id)
-        } ?: if (context.root) context.baseUri else null
 
         ref?.let {
             val validator = RefSchemaValidator(context.baseUri.resolveSafe(ref), context.schemaValidatorsById)
