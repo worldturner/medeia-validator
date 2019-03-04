@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.worldturner.medeia</groupId>
     <artifactId>medeia-validator-parent</artifactId>
-    <version>0.8.0-SNAPSHOT</version>
+    <version>0.8.0</version>
     <packaging>pom</packaging>
     <name>Medeia Validator</name>
     <description>Medeia streaming JSON-schema validator for the JVM platform, parent pom</description>
@@ -28,7 +27,8 @@
         <connection>scm:git:git://git@github.com/worldturner/medeia-validator.git</connection>
         <developerConnection>scm:git:ssh://git@github.com/worldturner/medeia-validator.git</developerConnection>
         <url>https://github.com/worldturner/medeia-validator.git</url>
-    </scm>
+      <tag>medeia-validator-parent-0.8.0</tag>
+  </scm>
     <distributionManagement>
         <snapshotRepository>
             <id>ossrh</id>
@@ -37,7 +37,7 @@
     </distributionManagement>
 
     <properties>
-        <medeia-validator.version>0.8.0-SNAPSHOT</medeia-validator.version>
+        <medeia-validator.version>0.8.0</medeia-validator.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <kotlin.version>1.3.20</kotlin.version>
         <kotlin.compiler.jvmTarget>1.8</kotlin.compiler.jvmTarget>
