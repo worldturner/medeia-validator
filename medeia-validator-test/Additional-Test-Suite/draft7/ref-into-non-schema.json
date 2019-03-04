@@ -58,5 +58,70 @@
         "valid": true
       }
     ]
+  },
+  {
+    "description": "Refs pointing into non-schema objects with multiple json-pointer steps",
+    "schema": {
+      "type": "array",
+      "items": {
+        "$ref": "#/defs/truthy",
+        "type": []
+      },
+      "defs": {
+        "truthy": true
+      }
+    },
+    "tests": [
+      {
+        "description": "items allows everything if ref is followed",
+        "data": [ true, false, 42 ],
+        "valid": true
+      }
+    ]
+  },
+  {
+    "description": "Refs pointing into non-schema objects with multiple json-pointer steps",
+    "schema": {
+      "type": "array",
+      "items": {
+        "$ref": "#/defs/truthy",
+        "type": "boolean"
+      },
+      "defs": {
+        "truthy": false
+      }
+    },
+    "tests": [
+      {
+        "description": "items allows nothing if ref is followed",
+        "data": [ true, true ],
+        "valid": false
+      }
+    ]
+  },
+  {
+    "description": "Refs pointing into non-schema objects don't cause schema parsing errors because #/items isn't really defined twice",
+    "schema": {
+      "type": "array",
+      "items": {
+        "$ref": "#/defs/truthy",
+        "type": "number"
+      },
+      "defs": {
+        "truthy": {
+          "type": "boolean",
+          "items": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    "tests": [
+      {
+        "description": "items allows nothing if ref is followed",
+        "data": [ true, true ],
+        "valid": true
+      }
+    ]
   }
 ]

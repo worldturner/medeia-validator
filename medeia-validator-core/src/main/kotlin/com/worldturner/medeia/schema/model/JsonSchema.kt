@@ -100,9 +100,11 @@ data class JsonSchema constructor(
         }
         context.parents.forEach { parent ->
             parent.resolvedId?.let {
-                val relativeJsonPointer = parent.jsonPointer.relativize(this.jsonPointer)
-                val uri = it.replaceFragment(relativeJsonPointer.toString(), encoded = true)
-                context.put(uri, this, validator)
+                if (it.hasAnyOtherThanFragment()) {
+                    val relativeJsonPointer = parent.jsonPointer.relativize(this.jsonPointer)
+                    val uri = it.replaceFragment(relativeJsonPointer.toString(), encoded = true)
+                    context.put(uri, this, validator)
+                }
             }
         }
 
