@@ -37,8 +37,10 @@ class JsonPointer constructor(val text: String, bypassValidation: Boolean = fals
 
     fun first() = text.substringBefore('/', text, 1)
     fun firstName(): String =
-        if (text.startsWith('/')) decodeJsonPointerElement(text, 1)
-        else decodeJsonPointerElement(text, 0)
+        first().let { first ->
+            if (first.startsWith('/')) decodeJsonPointerElement(first, 1)
+            else decodeJsonPointerElement(first, 0)
+        }
 
     fun tail() =
         text.substringFrom('/', "", 1)
