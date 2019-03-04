@@ -39,7 +39,7 @@ fun main() {
         }
     )
 
-    val tests = allTests.subList(1, 3).shuffled()
+    val tests = allTests.subList(0, 3).shuffled()
 //    val tests = allTests.subList(2, 3).shuffled()
     tests.forEach {
         it()
