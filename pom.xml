@@ -25,7 +25,7 @@
         </developer>
     </developers>
     <scm>
-        <connection>scm:git:git://github.comworldturner/medeia-validator.git</connection>
+        <connection>scm:git:git://github.com:worldturner/medeia-validator.git</connection>
         <developerConnection>scm:git:ssh://github.com:worldturner/medeia-validator.git</developerConnection>
         <url>https://github.com/worldturner/medeia-validator.git</url>
     </scm>
@@ -275,6 +275,17 @@
                         </configuration>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-release-plugin</artifactId>
+                <version>2.5.3</version>
+                <configuration>
+                    <autoVersionSubmodules>true</autoVersionSubmodules>
+                    <useReleaseProfile>false</useReleaseProfile>
+                    <releaseProfiles>release</releaseProfiles>
+                    <goals>deploy</goals>
+                </configuration>
             </plugin>
         </plugins>
     </build>
