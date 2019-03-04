@@ -6,7 +6,7 @@ import com.worldturner.util.EMPTY_URI
 import com.worldturner.util.resolveSafe
 import java.net.URI
 
-class ValidationBuilderContext(
+data class ValidationBuilderContext(
     val root: Boolean = true,
     val baseUri: URI = EMPTY_URI,
     val ids: MutableMap<URI, JsonSchema> = mutableMapOf(),
@@ -15,22 +15,10 @@ class ValidationBuilderContext(
     val options: JsonSchemaValidationOptions = JsonSchemaValidationOptions.DEFAULT
 ) {
     fun withBaseUri(baseUri: URI, root: Boolean = false) =
-        ValidationBuilderContext(
-            root = root,
-            baseUri = baseUri,
-            ids = ids,
-            schemaValidatorsById = schemaValidatorsById,
-            parents = parents
-        )
+        copy(root = root, baseUri = baseUri)
 
     fun withParent(parent: JsonSchema) =
-        ValidationBuilderContext(
-            root = root,
-            baseUri = baseUri,
-            ids = ids,
-            schemaValidatorsById = schemaValidatorsById,
-            parents = parents + parent
-        )
+        copy(parents = parents + parent)
 
     fun put(id: URI, schema: JsonSchema, validator: SchemaValidator) {
         if (id in ids) {
