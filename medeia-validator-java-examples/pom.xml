@@ -18,6 +18,10 @@
     </description>
     <url>https://github.com/worldturner/medeia-validator</url>
 
+    <properties>
+        <maven.deploy.skip>true</maven.deploy.skip>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>com.worldturner.medeia</groupId>
