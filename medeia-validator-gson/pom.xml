@@ -12,7 +12,7 @@
     <groupId>com.worldturner.medeia</groupId>
     <artifactId>medeia-validator-gson</artifactId>
     <packaging>jar</packaging>
-    <name>Medeia Validator Jackson</name>
+    <name>Medeia Validator Gson</name>
     <description>
         Medeia streaming JSON-schema validator for the JVM platform,
         Gson module.
