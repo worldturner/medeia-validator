@@ -1,0 +1,10 @@
+{
+  "$schema": "person-address-schema.json",
+  "firstName": "Jane",
+  "address": {
+    "street2": "12345 George Street",
+    "postalCode": "20001",
+    "city": "Sydney",
+    "country": "Australia"
+  }
+}
