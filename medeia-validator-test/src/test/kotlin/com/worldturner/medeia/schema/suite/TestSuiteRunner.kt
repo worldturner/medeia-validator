@@ -70,7 +70,7 @@ data class TestSuiteRunner(
                     println("Remote Schema: $child")
                     val relativePath = remoteSchemasPath.relativize(child)
                     val baseUri = remoteSchemasBaseUri.resolve(relativePath.toString())
-                    Stream.of(PathSchemaSource(child, baseUri, version))
+                    Stream.of(PathSchemaSource(child, version, baseUri))
                 } else {
                     Stream.empty()
                 }
