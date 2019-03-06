@@ -1,11 +1,11 @@
 package com.worldturner.medeia.jackson
 
 import com.fasterxml.jackson.core.JsonFactory
-import com.worldturner.medeia.api.JsonSchemaVersion
-import com.worldturner.medeia.api.SchemaSources
+import com.worldturner.medeia.api.UrlSchemaSource
 import com.worldturner.medeia.api.ValidationFailedException
 import com.worldturner.medeia.api.jackson.MedeiaJacksonApi
 import com.worldturner.test.util.getResourceAsStream
+import com.worldturner.test.util.getResourceAsUrl
 import org.junit.Test
 
 class JsonLinesTest {
@@ -23,11 +23,8 @@ class JsonLinesTest {
 
     private fun runValidation(resource: String) {
         val api = MedeiaJacksonApi()
-        val sources = SchemaSources.create(
-            JsonSchemaVersion.DRAFT07,
-            getResourceAsStream("/multiline/multiline-schema.json")
-        )
-        val validator = api.loadSchemas(sources)
+        val source = UrlSchemaSource(getResourceAsUrl("/multiline/multiline-schema.json"))
+        val validator = api.loadSchema(source)
         val jsonFactory = JsonFactory()
 
         val parser = api.decorateJsonParser(

@@ -156,17 +156,3 @@ class StringSchemaSource @JvmOverloads constructor(
         return builder.append(")").toString()
     }
 }
-
-object SchemaSources {
-    @JvmStatic
-    fun create(
-        version: JsonSchemaVersion,
-        vararg streams: InputStream
-    ) = streams.map { StreamSchemaSource(stream = it, version = version) }
-
-    @JvmStatic
-    fun create(
-        version: JsonSchemaVersion,
-        vararg readers: Reader
-    ) = readers.map { ReaderSchemaSource(reader = it, version = version) }
-}
