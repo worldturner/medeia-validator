@@ -1,4 +1,4 @@
-package com.worldturner.medeia.examples.java.readobject;
+package com.worldturner.medeia.examples.java.jackson.objects;
 
 public class Person {
     private String firstName;

@@ -1,4 +1,4 @@
-package com.worldturner.medeia.examples.java.customformats;
+package com.worldturner.medeia.examples.java.jackson.customformats;
 
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;

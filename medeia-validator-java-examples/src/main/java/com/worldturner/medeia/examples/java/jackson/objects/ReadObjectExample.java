@@ -1,6 +1,7 @@
-package com.worldturner.medeia.examples.java.readobject;
+package com.worldturner.medeia.examples.java.jackson.objects;
 
 import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.worldturner.medeia.api.SchemaSource;
 import com.worldturner.medeia.api.UrlSchemaSource;
@@ -31,11 +32,15 @@ public class ReadObjectExample {
                 objectMapper.getFactory().createParser(getClass().getResource("/readobject/invalid-person.json"));
         JsonParser validatedParser = api.decorateJsonParser(validator, unvalidatedParser);
         try {
-            api.parseAll(validatedParser);
+            Person person = objectMapper.readValue(validatedParser, Person.class);
             throw new IllegalStateException("Invalid json data passed validation");
-        } catch (ValidationFailedException e) {
-            // Expected
-            System.out.println("Validation failed as expected: " + e);
+        } catch (JsonMappingException e) {
+            if (e.getCause() instanceof ValidationFailedException) {
+                // Expected
+                System.out.println("Validation failed as expected: " + e.getCause());
+            } else {
+                throw e;
+            }
         }
     }
 

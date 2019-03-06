@@ -1,5 +1,8 @@
-package com.worldturner.medeia.examples.java.readobject;
+package com.worldturner.medeia.examples.java.jackson.objects;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class Address {
     private String street1;
     private String street2;
