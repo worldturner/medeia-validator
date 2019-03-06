@@ -1,5 +1,4 @@
 {
-  "$schema": "person-address-schema.json",
   "firstName": "Jane",
   "lastName": "Doe",
   "address": {

@@ -1,10 +1,11 @@
-package com.worldturner.medeia.examples.java.readobject1;
+package com.worldturner.medeia.examples.java.readobject;
 
 public class Address {
     private String street1;
     private String street2;
     private String city;
     private String postalCode;
+    private String region;
     private String country;
 
     public String getStreet1() {
@@ -37,6 +38,14 @@ public class Address {
 
     public void setPostalCode(String postalCode) {
         this.postalCode = postalCode;
+    }
+
+    public String getRegion() {
+        return region;
+    }
+
+    public void setRegion(String region) {
+        this.region = region;
     }
 
     public String getCountry() {
