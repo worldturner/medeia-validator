@@ -109,6 +109,17 @@ class JsonTokenData(
         }
     }
 
+    fun toValue(): Any? {
+        return when (type) {
+            JsonTokenType.VALUE_NUMBER -> if (hasLongValue()) longValue else integer ?: decimal!!
+            JsonTokenType.VALUE_TEXT -> text!!
+            JsonTokenType.VALUE_NULL -> null
+            JsonTokenType.VALUE_BOOLEAN_TRUE -> true
+            JsonTokenType.VALUE_BOOLEAN_FALSE -> false
+            else -> throw IllegalStateException("Token of type $type can't be expressed as a value")
+        }
+    }
+
     companion object {
         val minLongValue = -127
         val maxLongValue = 127

@@ -45,6 +45,11 @@ class MedeiaJacksonApi @JvmOverloads constructor(
         return JacksonTokenDataJsonParser(consumer = consumer, jsonParser = jsonParser)
     }
 
+    fun parseAll(parser: JsonParser) {
+        while (parser.nextToken() != null) {
+        }
+    }
+
     override fun createTokenDataConsumerWriter(destination: Writer): JsonTokenDataConsumer =
         JacksonTokenDataWriter(jsonFactory.createGenerator(destination))
 

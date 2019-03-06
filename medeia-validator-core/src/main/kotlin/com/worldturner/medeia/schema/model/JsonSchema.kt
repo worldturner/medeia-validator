@@ -143,7 +143,7 @@ data class JsonSchema constructor(
                 TypeValidator.create(type),
                 NumberValidator.create(multipleOf, maximum, exclusiveMaximum, minimum, exclusiveMinimum),
                 StringValidator.create(maxLength, minLength, pattern),
-                context.options.validateFormat.orNull { FormatValidator.create(format) },
+                context.options.validateFormat.orNull { FormatValidator.create(format, context.options.customFormats) },
                 context.options.validateContent.orNull { ContentValidator.create(contentMediaType, contentEncoding) },
                 ArrayValidator.create(
                     additionalItems?.let { it.buildValidator(subContext) },

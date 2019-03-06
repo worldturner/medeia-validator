@@ -26,10 +26,10 @@ interface SchemaSource {
     val version: JsonSchemaVersion?
 }
 
-class StreamSchemaSource(
+class StreamSchemaSource @JvmOverloads constructor(
     override val stream: InputStream,
-    override val baseUri: URI? = null,
-    override val version: JsonSchemaVersion? = null
+    override val version: JsonSchemaVersion? = null,
+    override val baseUri: URI? = null
 ) : SchemaSource {
     override val inputPreference: InputPreference
         get() = InputPreference.STREAM
@@ -45,10 +45,10 @@ class StreamSchemaSource(
     }
 }
 
-class ReaderSchemaSource(
+class ReaderSchemaSource @JvmOverloads constructor(
     override val reader: Reader,
-    override val baseUri: URI? = null,
-    override val version: JsonSchemaVersion? = null
+    override val version: JsonSchemaVersion? = null,
+    override val baseUri: URI? = null
 ) : SchemaSource {
     override val inputPreference: InputPreference
         get() = InputPreference.READER
@@ -64,10 +64,10 @@ class ReaderSchemaSource(
     }
 }
 
-class PathSchemaSource(
+class PathSchemaSource @JvmOverloads constructor(
     val path: Path,
-    override val baseUri: URI? = null,
-    override val version: JsonSchemaVersion? = null
+    override val version: JsonSchemaVersion? = null,
+    override val baseUri: URI? = null
 ) : SchemaSource {
     override val inputPreference: InputPreference
         get() = InputPreference.STREAM
@@ -86,10 +86,10 @@ class PathSchemaSource(
     }
 }
 
-class UrlSchemaSource(
+class UrlSchemaSource @JvmOverloads constructor(
     val url: URL,
-    override val baseUri: URI? = null,
-    override val version: JsonSchemaVersion? = null
+    override val version: JsonSchemaVersion? = null,
+    override val baseUri: URI? = null
 ) : SchemaSource {
     override val inputPreference: InputPreference
         get() = InputPreference.STREAM
@@ -130,10 +130,10 @@ class MetaSchemaSource(override val version: JsonSchemaVersion) : SchemaSource {
     }
 }
 
-class StringSchemaSource(
+class StringSchemaSource @JvmOverloads constructor(
     val string: String,
-    override val baseUri: URI? = null,
-    override val version: JsonSchemaVersion? = null
+    override val version: JsonSchemaVersion? = null,
+    override val baseUri: URI? = null
 ) : SchemaSource {
     override val inputPreference: InputPreference
         get() = InputPreference.READER

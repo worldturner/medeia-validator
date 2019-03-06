@@ -36,6 +36,22 @@ enum class UniqueItemsValidationMethod(
     IN_MEMORY_TREES(false, "n/a"),
 }
 
+/**
+ * A custom format validation function.
+ * @param value the value to be validated, having the following types:
+ *              java.lang.String for a JSON string value
+ *              java.lang.Boolean for a JSON boolean value
+ *              null for a JSON null value
+ *              a java.lang.Number subclass for a numeric value;
+ *              java.lang.Integer/java.lang.Long/java.math.BigInteger for integral values
+ *              java.lang.Double/java.lang.BigDecimal for floating point values
+ * @param format the name of the format being validated
+ * @return null if the validation was successful, or an error message if it was not successful.
+ */
+interface FormatValidation {
+    fun validate(value: Any?, format: String): String?
+}
+
 data class JsonSchemaValidationOptions @JvmOverloads constructor(
     val uniqueItemsValidationMethod: UniqueItemsValidationMethod = DIGEST_MD5,
     val optimizeExistentialValidators: Boolean = true,
@@ -48,7 +64,8 @@ data class JsonSchemaValidationOptions @JvmOverloads constructor(
      * schemas before the $ref appeared. This is seldom necessary (put named schemas in the "definitions" section)
      * and schema reading is faster without this.
      */
-    val supportRefsToAnywhere: Boolean = true
+    val supportRefsToAnywhere: Boolean = true,
+    val customFormats: Map<String, FormatValidation> = emptyMap()
 ) {
     fun withUniqueItemsValidationMethod(value: UniqueItemsValidationMethod) =
         copy(uniqueItemsValidationMethod = value)
@@ -62,7 +79,10 @@ data class JsonSchemaValidationOptions @JvmOverloads constructor(
     fun withValidateContent(value: Boolean) =
         copy(validateContent = value)
 
-    companion object {
+    fun withCustomFormats(customFormats: Map<String, FormatValidation>) =
+        copy(customFormats = customFormats)
+
+        companion object {
         @JvmField
         val DEFAULT = JsonSchemaValidationOptions()
     }

@@ -1,6 +1,7 @@
 package com.worldturner.medeia.schema.validation
 
 import com.worldturner.medeia.api.FailedValidationResult
+import com.worldturner.medeia.api.FormatValidation
 import com.worldturner.medeia.api.OkValidationResult
 import com.worldturner.medeia.api.ValidationResult
 import com.worldturner.medeia.format.isHostname
@@ -18,26 +19,26 @@ import java.time.OffsetTime
 import java.time.format.DateTimeParseException
 import java.util.regex.PatternSyntaxException
 
-val formatRegexes = emptyMap<String, Regex>()
-
 class FormatValidator(
-    val format: String
+    val format: String,
+    val customFormats: Map<String, FormatValidation> = emptyMap()
 ) : SchemaValidator, SchemaValidatorInstance {
     override fun createInstance(startLevel: Int): SchemaValidatorInstance = this
 
     override fun recordUnknownRefs(unknownRefs: MutableCollection<URI>) = Unit
 
     override fun validate(token: JsonTokenData, location: JsonTokenLocation): ValidationResult? {
+        val customValidation = customFormats[format]
+        customValidation?.let {
+            val value = token.toValue()
+            val result = it.validate(value, format)
+            return result?.let { failedValidation(value, location, it) } ?: OkValidationResult
+        }
         if (token.type != VALUE_TEXT) {
             return OkValidationResult
         }
         val string = token.text!!
-        return if (format in formatRegexes) {
-            if (formatRegexes[format]?.matchEntire(string) != null)
-                OkValidationResult
-            else
-                failedValidation(string, location)
-        } else when (format) {
+        return when (format) {
             "regex" -> try {
                 Regex(string).let { OkValidationResult }
             } catch (e: PatternSyntaxException) {
@@ -113,25 +114,30 @@ class FormatValidator(
         }
     }
 
-    fun failedValidation(string: String, location: JsonTokenLocation) =
+    private fun failedValidation(value: Any?, location: JsonTokenLocation, msg: String) =
         FailedValidationResult(
             location = location,
             rule = "format",
-            message = "Invalid $format '$string'"
+            message = "Invalid $format '$value': $msg"
         )
 
-    fun failedValidation(string: String, location: JsonTokenLocation, e: Exception) =
+    private fun failedValidation(value: Any?, location: JsonTokenLocation) =
         FailedValidationResult(
             location = location,
             rule = "format",
-            message = "Invalid $format '$string': ${e.message}"
+            message = "Invalid $format '$value'"
         )
+
+    private fun failedValidation(value: Any?, location: JsonTokenLocation, e: Exception) =
+        e.message?.let { failedValidation(value, location, it) } ?: failedValidation(value, location)
 
     companion object {
-        fun create(format: String?): FormatValidator? =
-            format?.let { FormatValidator(format) }
+        fun create(format: String?, customFormats: Map<String, FormatValidation>): FormatValidator? =
+            format?.let { FormatValidator(format, customFormats) }
     }
 }
+
+val formats: Map<String, FormatValidation> = emptyMap()
 
 private fun String.isIpv4(): Boolean {
     val decbytes = this.split('.')
