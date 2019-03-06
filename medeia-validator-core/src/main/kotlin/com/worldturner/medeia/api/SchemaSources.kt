@@ -108,7 +108,7 @@ class UrlSchemaSource @JvmOverloads constructor(
     }
 }
 
-class MetaSchemaSource(override val version: JsonSchemaVersion) : SchemaSource {
+class MetaSchemaSource private constructor(override val version: JsonSchemaVersion) : SchemaSource {
     override val baseUri: URI? get() = null
     override val inputPreference: InputPreference
         get() = InputPreference.STREAM
@@ -127,6 +127,10 @@ class MetaSchemaSource(override val version: JsonSchemaVersion) : SchemaSource {
                 JsonSchemaVersion.DRAFT06 -> RESOURCE_SCHEMA_DRAFT06
                 JsonSchemaVersion.DRAFT07 -> RESOURCE_SCHEMA_DRAFT07
             }
+
+        val DRAFT04 = MetaSchemaSource(JsonSchemaVersion.DRAFT04)
+        val DRAFT06 = MetaSchemaSource(JsonSchemaVersion.DRAFT06)
+        val DRAFT07 = MetaSchemaSource(JsonSchemaVersion.DRAFT07)
     }
 }
 

@@ -9,7 +9,7 @@ val DRAFT06_RUNNER
     get() = TestSuiteRunner(
         listOf(Paths.get("JSON-Schema-Test-Suite/tests/draft6/")),
         Paths.get("JSON-Schema-Test-Suite/remotes/"),
-        MetaSchemaSource(version = JsonSchemaVersion.DRAFT06),
+        MetaSchemaSource.DRAFT06,
         URI.create("http://localhost:1234/"),
         version = JsonSchemaVersion.DRAFT07
     )

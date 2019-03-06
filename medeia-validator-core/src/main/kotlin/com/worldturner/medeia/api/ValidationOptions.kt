@@ -65,6 +65,7 @@ data class JsonSchemaValidationOptions @JvmOverloads constructor(
      * and schema reading is faster without this.
      */
     val supportRefsToAnywhere: Boolean = true,
+    /** Custom formats for "format" keyword". Custom formats can override built-in formats. */
     val customFormats: Map<String, FormatValidation> = emptyMap()
 ) {
     fun withUniqueItemsValidationMethod(value: UniqueItemsValidationMethod) =

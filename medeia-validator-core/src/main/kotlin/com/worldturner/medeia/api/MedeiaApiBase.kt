@@ -14,14 +14,14 @@ import com.worldturner.medeia.parser.SimpleTreeBuilder
 import com.worldturner.medeia.parser.TokenNodeData
 import com.worldturner.medeia.parser.tree.JsonParserFromSimpleTree
 import com.worldturner.medeia.pointer.JsonPointer
-import com.worldturner.util.EMPTY_URI
-import com.worldturner.util.hasFragment
 import com.worldturner.medeia.schema.model.JsonSchema
 import com.worldturner.medeia.schema.model.Schema
 import com.worldturner.medeia.schema.model.SchemaWithBaseUri
 import com.worldturner.medeia.schema.model.ValidationBuilderContext
 import com.worldturner.medeia.schema.parser.JsonSchemaDraft04Type
 import com.worldturner.medeia.schema.validation.SchemaValidator
+import com.worldturner.util.EMPTY_URI
+import com.worldturner.util.hasFragment
 import com.worldturner.util.withEmptyFragment
 import com.worldturner.util.withoutFragment
 import java.io.IOException
@@ -36,9 +36,9 @@ private val JsonSchemaVersion.idProperty: String
             DRAFT06, DRAFT07 -> "\$id"
         }
 
-private val URI_DRAFT04 = "http://json-schema.org/draft-04/schema#"
-private val URI_DRAFT06 = "http://json-schema.org/draft-06/schema#"
-private val URI_DRAFT07 = "http://json-schema.org/draft-07/schema#"
+private const val URI_DRAFT04 = "http://json-schema.org/draft-04/schema#"
+private const val URI_DRAFT06 = "http://json-schema.org/draft-06/schema#"
+private const val URI_DRAFT07 = "http://json-schema.org/draft-07/schema#"
 
 /* Note: being lenient in allowing schema without trailing #. */
 private val schemaUriToVersionMapping = mapOf(
@@ -161,6 +161,7 @@ abstract class MedeiaApiBase {
         ids: MutableMap<URI, VersionedNodeData> = mutableMapOf()
     ): Schema {
         val tree = parseTree(source)
+
         if (options.supportRefsToAnywhere) {
             tree.collectIds(source.baseUri, ids)
             source.baseUri?.let { ids[it] = tree }

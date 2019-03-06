@@ -12,7 +12,7 @@ val DRAFT07_RUNNER
             Paths.get("Additional-Test-Suite/draft7/")
         ),
         Paths.get("JSON-Schema-Test-Suite/remotes/"),
-        MetaSchemaSource(version = JsonSchemaVersion.DRAFT07),
+        MetaSchemaSource.DRAFT07,
         URI.create("http://localhost:1234/"),
         version = JsonSchemaVersion.DRAFT07
     )
