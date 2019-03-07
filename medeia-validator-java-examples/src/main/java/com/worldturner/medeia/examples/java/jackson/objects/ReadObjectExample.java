@@ -7,6 +7,7 @@ import com.worldturner.medeia.api.SchemaSource;
 import com.worldturner.medeia.api.UrlSchemaSource;
 import com.worldturner.medeia.api.ValidationFailedException;
 import com.worldturner.medeia.api.jackson.MedeiaJacksonApi;
+import com.worldturner.medeia.examples.java.domain.Person;
 import com.worldturner.medeia.schema.validation.SchemaValidator;
 import org.jetbrains.annotations.NotNull;
 

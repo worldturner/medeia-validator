@@ -1,6 +1,7 @@
 package com.worldturner.medeia.api.gson
 
 import com.google.gson.stream.JsonReader
+import com.google.gson.stream.JsonToken
 import com.google.gson.stream.JsonWriter
 import com.worldturner.medeia.api.InputPreference
 import com.worldturner.medeia.api.MedeiaApiBase
@@ -45,6 +46,24 @@ class MedeiaGsonApi(private val addBuffer: Boolean = true) : MedeiaApiBase() {
 
     override fun createTokenDataConsumerWriter(destination: Writer): JsonTokenDataConsumer =
         GsonTokenDataWriter(JsonWriter(destination))
+
+    fun parseAll(reader: JsonReader) {
+        loop@ do {
+            var token = reader.peek()!!
+            when (token) {
+                JsonToken.NUMBER -> reader.nextString()
+                JsonToken.STRING -> reader.nextString()
+                JsonToken.NAME -> reader.nextName()
+                JsonToken.BOOLEAN -> reader.nextBoolean()
+                JsonToken.NULL -> reader.nextNull()
+                JsonToken.BEGIN_ARRAY -> reader.beginArray()
+                JsonToken.END_ARRAY -> reader.endArray()
+                JsonToken.BEGIN_OBJECT -> reader.beginObject()
+                JsonToken.END_OBJECT -> reader.endObject()
+                JsonToken.END_DOCUMENT -> break@loop
+            }
+        } while (true)
+    }
 
     private fun decorateInputStream(source: SchemaSource): Reader =
         source.stream

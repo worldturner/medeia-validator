@@ -1,0 +1,10 @@
+{
+  "firstName": "Jane",
+  "address": {
+    "street1": "The Big Building",
+    "street2": "12345 George Street",
+    "postalCode": "2000",
+    "city": "Sydney",
+    "country": "Australia"
+  }
+}

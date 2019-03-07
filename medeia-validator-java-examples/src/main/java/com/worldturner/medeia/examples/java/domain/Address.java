@@ -1,4 +1,4 @@
-package com.worldturner.medeia.examples.java.jackson.objects;
+package com.worldturner.medeia.examples.java.domain;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 

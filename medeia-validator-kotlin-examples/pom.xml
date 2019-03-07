@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
     <parent>
@@ -9,12 +10,12 @@
     </parent>
 
     <groupId>com.worldturner.medeia</groupId>
-    <artifactId>medeia-validator-java-examples</artifactId>
+    <artifactId>medeia-validator-kotlin-examples</artifactId>
     <packaging>jar</packaging>
-    <name>Medeia Validator Java Examples</name>
+    <name>Medeia Validator Kotlin Examples</name>
     <description>
         Medeia streaming JSON-schema validator for the JVM platform,
-        Java Examples.
+        Kotlin Examples.
     </description>
     <url>https://github.com/worldturner/medeia-validator</url>
 
@@ -23,6 +24,10 @@
     </properties>
 
     <dependencies>
+        <dependency>
+            <groupId>org.jetbrains.kotlin</groupId>
+            <artifactId>kotlin-stdlib</artifactId>
+        </dependency>
         <dependency>
             <groupId>com.worldturner.medeia</groupId>
             <artifactId>medeia-validator-core</artifactId>
@@ -55,18 +60,25 @@
             <version>${jackson.version}</version>
         </dependency>
         <dependency>
+            <groupId>com.fasterxml.jackson.module</groupId>
+            <artifactId>jackson-module-kotlin</artifactId>
+            <version>${jackson.version}</version>
+        </dependency>
+        <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
             <version>${gson.version}</version>
         </dependency>
     </dependencies>
     <build>
-        <sourceDirectory>src/main/java</sourceDirectory>
-        <testSourceDirectory>src/test/java</testSourceDirectory>
         <plugins>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
+                <groupId>org.jetbrains.kotlin</groupId>
+                <artifactId>kotlin-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>com.github.z3d1k</groupId>
+                <artifactId>ktlint-maven-plugin</artifactId>
             </plugin>
         </plugins>
     </build>

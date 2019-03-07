@@ -1,4 +1,4 @@
-package com.worldturner.medeia.examples.java.jackson.customformats;
+package com.worldturner.medeia.examples.kotlin.jackson.customformats;
 
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
@@ -21,7 +21,7 @@ public class CustomFormatExample {
         public String validate(@Nullable Object value, @NotNull String format) {
             String text = String.valueOf(value);
             String nospaces = text.replaceAll("\\s+", "");
-            String lowercase = text.toLowerCase(Locale.US);
+            String lowercase = nospaces.toLowerCase(Locale.US);
             StringBuffer reversed = new StringBuffer(lowercase);
             reversed.reverse();
             if (!lowercase.equals(reversed.toString())) {
@@ -64,7 +64,7 @@ public class CustomFormatExample {
         customFormats.put("palindrome", new PalindromeValidator());
         return api.loadSchemas(
                 Arrays.asList(source),
-                new JsonSchemaValidationOptions().withCustomFormats(customFormats));
+                new ValidationOptions().withCustomFormats(customFormats));
     }
 
     public static void main(String[] args) throws IOException {

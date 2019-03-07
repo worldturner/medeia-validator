@@ -111,6 +111,7 @@
         <module>medeia-validator-gson</module>
         <module>medeia-validator-test</module>
         <module>medeia-validator-java-examples</module>
+        <module>medeia-validator-kotlin-examples</module>
     </modules>
 
     <build>

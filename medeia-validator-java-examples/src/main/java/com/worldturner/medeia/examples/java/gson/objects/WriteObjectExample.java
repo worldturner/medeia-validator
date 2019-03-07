@@ -1,11 +1,10 @@
-package com.worldturner.medeia.examples.java.jackson.objects;
+package com.worldturner.medeia.examples.java.gson.objects;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.worldturner.medeia.api.SchemaSource;
 import com.worldturner.medeia.api.UrlSchemaSource;
-import com.worldturner.medeia.api.ValidationFailedException;
 import com.worldturner.medeia.api.jackson.MedeiaJacksonApi;
 import com.worldturner.medeia.examples.java.domain.Fixtures;
 import com.worldturner.medeia.schema.validation.SchemaValidator;
@@ -18,6 +17,7 @@ public class WriteObjectExample {
 
     private static MedeiaJacksonApi api = new MedeiaJacksonApi();
     private static ObjectMapper objectMapper = new ObjectMapper();
+
 
     private void writeValidExample() throws IOException {
         SchemaValidator validator = loadSchema();
@@ -38,12 +38,8 @@ public class WriteObjectExample {
             objectMapper.writeValue(validatedGenerator, Fixtures.createInvalidPerson());
             throw new IllegalStateException("Objects that generate Invalid json data passed validation");
         } catch (JsonMappingException e) {
-            if (e.getCause() instanceof ValidationFailedException) {
-                // Expected
-                System.out.println("Validation failed as expected: " + e.getCause());
-            } else {
-                throw e;
-            }
+            // Expected
+            System.out.println("Validation failed as expected: " + e);
         }
     }
 
