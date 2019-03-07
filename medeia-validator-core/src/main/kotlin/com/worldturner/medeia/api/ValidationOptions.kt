@@ -52,7 +52,9 @@ interface FormatValidation {
     fun validate(value: Any?, format: String): String?
 }
 
-data class JsonSchemaValidationOptions @JvmOverloads constructor(
+data class ValidationOptions constructor(
+    /** Whether to validate schemas with their meta-schema while loading. */
+    val validateSchema: Boolean = true,
     val uniqueItemsValidationMethod: UniqueItemsValidationMethod = DIGEST_MD5,
     val optimizeExistentialValidators: Boolean = true,
     /** Whether to validate (best effort) based on the "format" keyword. */
@@ -68,6 +70,9 @@ data class JsonSchemaValidationOptions @JvmOverloads constructor(
     /** Custom formats for "format" keyword". Custom formats can override built-in formats. */
     val customFormats: Map<String, FormatValidation> = emptyMap()
 ) {
+    /** Constructor for Java. */
+    constructor() : this(validateSchema = true)
+
     fun withUniqueItemsValidationMethod(value: UniqueItemsValidationMethod) =
         copy(uniqueItemsValidationMethod = value)
 
@@ -83,8 +88,8 @@ data class JsonSchemaValidationOptions @JvmOverloads constructor(
     fun withCustomFormats(customFormats: Map<String, FormatValidation>) =
         copy(customFormats = customFormats)
 
-        companion object {
+    companion object {
         @JvmField
-        val DEFAULT = JsonSchemaValidationOptions()
+        val DEFAULT = ValidationOptions()
     }
 }

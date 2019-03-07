@@ -5,7 +5,7 @@ import com.fasterxml.jackson.core.JsonParseException
 import com.fasterxml.jackson.databind.JsonMappingException
 import com.google.gson.Gson
 import com.worldturner.medeia.api.FailedValidationResult
-import com.worldturner.medeia.api.JsonSchemaValidationOptions
+import com.worldturner.medeia.api.ValidationOptions
 import com.worldturner.medeia.api.JsonSchemaVersion
 import com.worldturner.medeia.api.MedeiaApiBase
 import com.worldturner.medeia.api.OkValidationResult
@@ -30,7 +30,7 @@ import com.worldturner.util.NullWriter
 import java.io.StringReader
 import java.nio.file.Path
 
-val options = JsonSchemaValidationOptions()
+val options = ValidationOptions()
 
 data class SchemaTest(
     val description: String,

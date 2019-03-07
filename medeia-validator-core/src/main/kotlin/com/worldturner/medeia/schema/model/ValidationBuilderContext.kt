@@ -1,6 +1,6 @@
 package com.worldturner.medeia.schema.model
 
-import com.worldturner.medeia.api.JsonSchemaValidationOptions
+import com.worldturner.medeia.api.ValidationOptions
 import com.worldturner.medeia.schema.validation.SchemaValidator
 import com.worldturner.util.EMPTY_URI
 import com.worldturner.util.resolveSafe
@@ -12,7 +12,7 @@ data class ValidationBuilderContext(
     val ids: MutableMap<URI, JsonSchema> = mutableMapOf(),
     val schemaValidatorsById: MutableMap<URI, SchemaValidator> = mutableMapOf(),
     val parents: List<JsonSchema> = emptyList(),
-    val options: JsonSchemaValidationOptions = JsonSchemaValidationOptions.DEFAULT
+    val options: ValidationOptions = ValidationOptions.DEFAULT
 ) {
     fun withBaseUri(baseUri: URI, root: Boolean = false) =
         copy(root = root, baseUri = baseUri)

@@ -55,7 +55,7 @@ private const val MAX_REF_RESOLVE_ITERATIONS = 100
 
 abstract class MedeiaApiBase {
 
-    fun loadSchemas(sources: List<SchemaSource>, options: JsonSchemaValidationOptions) =
+    fun loadSchemas(sources: List<SchemaSource>, options: ValidationOptions) =
         loadSchemas(sources, validatorMap = null, options = options)
 
     fun loadSchema(source: SchemaSource) = loadSchemas(listOf(source))
@@ -64,7 +64,7 @@ abstract class MedeiaApiBase {
     fun loadSchemas(
         sources: List<SchemaSource>,
         validatorMap: MutableMap<URI, SchemaValidator>? = null,
-        options: JsonSchemaValidationOptions = JsonSchemaValidationOptions.DEFAULT
+        options: ValidationOptions = ValidationOptions.DEFAULT
     ): SchemaValidator {
         if (sources.isEmpty())
             throw IllegalArgumentException("Need at least one schema source")
@@ -76,7 +76,7 @@ abstract class MedeiaApiBase {
 
     private fun buildValidators(
         parsedSchemas: List<Schema>,
-        options: JsonSchemaValidationOptions,
+        options: ValidationOptions,
         schemaIds: MutableMap<URI, VersionedNodeData>,
         validatorMap: MutableMap<URI, SchemaValidator>?
     ): List<SchemaValidator> {
@@ -157,7 +157,7 @@ abstract class MedeiaApiBase {
 
     private fun loadSchema(
         source: SchemaSource,
-        options: JsonSchemaValidationOptions,
+        options: ValidationOptions,
         ids: MutableMap<URI, VersionedNodeData> = mutableMapOf()
     ): Schema {
         val tree = parseTree(source)
