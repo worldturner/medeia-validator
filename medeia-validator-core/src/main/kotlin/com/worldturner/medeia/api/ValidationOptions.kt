@@ -73,6 +73,9 @@ data class ValidationOptions constructor(
     /** Constructor for Java. */
     constructor() : this(validateSchema = true)
 
+    fun withValidateSchema(value: Boolean) =
+        copy(validateSchema = value)
+
     fun withUniqueItemsValidationMethod(value: UniqueItemsValidationMethod) =
         copy(uniqueItemsValidationMethod = value)
 
@@ -84,6 +87,9 @@ data class ValidationOptions constructor(
 
     fun withValidateContent(value: Boolean) =
         copy(validateContent = value)
+
+    fun withSupportRefsToAnywhere(value: Boolean) =
+        copy(supportRefsToAnywhere = value)
 
     fun withCustomFormats(customFormats: Map<String, FormatValidation>) =
         copy(customFormats = customFormats)
