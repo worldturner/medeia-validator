@@ -15,19 +15,26 @@ import com.worldturner.medeia.parser.TOKEN_START_OBJECT
 import com.worldturner.medeia.parser.TokenNodeData
 import com.worldturner.medeia.pointer.JsonPointer
 import com.worldturner.medeia.pointer.JsonPointerBuilder
+import java.util.ArrayDeque
 
 class JsonParserFromSimpleTree(val tree: NodeData, val consumer: JsonTokenDataAndLocationConsumer) : JsonParserAdapter {
+    private val propertyNamesStack = ArrayDeque<MutableSet<String>>()
+
     inner class DynamicTokenLocation : JsonTokenLocation {
         override val level: Int
             get() = this@JsonParserFromSimpleTree.level
         override val pointer: JsonPointer
             get() = jsonPointerBuilder.toJsonPointer()
         override val propertyNames: Set<String>
-            get() = currentObjectNode?.nodes?.keys ?: emptySet()
+            get() = propertyNamesStack.peek() ?: emptySet()
         override val column: Int
             get() = super.column
         override val line: Int
             get() = super.line
+
+        override fun toString(): String {
+            return "at $pointer"
+        }
     }
 
     val dynamicLocation = DynamicTokenLocation()
@@ -57,12 +64,15 @@ class JsonParserFromSimpleTree(val tree: NodeData, val consumer: JsonTokenDataAn
                 jsonPointerBuilder.consume(TOKEN_START_OBJECT)
                 consumer.consume(TOKEN_START_OBJECT, dynamicLocation)
                 level++
+                propertyNamesStack.addFirst(HashSet())
                 node.nodes.forEach {
                     val fieldNameToken = JsonTokenData(JsonTokenType.FIELD_NAME, text = it.key)
                     jsonPointerBuilder.consume(fieldNameToken)
                     consumer.consume(fieldNameToken, dynamicLocation)
                     generateEvents(it.value)
+                    propertyNamesStack.peek() += it.key
                 }
+                propertyNamesStack.removeFirst()
                 level--
                 currentObjectNode = node
                 jsonPointerBuilder.consume(TOKEN_END_OBJECT)

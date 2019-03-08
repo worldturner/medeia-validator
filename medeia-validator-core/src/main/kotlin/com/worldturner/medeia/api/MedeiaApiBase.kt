@@ -7,6 +7,7 @@ import com.worldturner.medeia.parser.ArrayNodeData
 import com.worldturner.medeia.parser.JsonParserAdapter
 import com.worldturner.medeia.parser.JsonTokenDataAndLocationConsumer
 import com.worldturner.medeia.parser.JsonTokenDataConsumer
+import com.worldturner.medeia.parser.MultipleConsumer
 import com.worldturner.medeia.parser.NodeData
 import com.worldturner.medeia.parser.ObjectNodeData
 import com.worldturner.medeia.parser.SimpleObjectMapper
@@ -20,6 +21,7 @@ import com.worldturner.medeia.schema.model.SchemaWithBaseUri
 import com.worldturner.medeia.schema.model.ValidationBuilderContext
 import com.worldturner.medeia.schema.parser.JsonSchemaDraft04Type
 import com.worldturner.medeia.schema.validation.SchemaValidator
+import com.worldturner.medeia.schema.validation.stream.SchemaValidatingConsumer
 import com.worldturner.util.EMPTY_URI
 import com.worldturner.util.hasFragment
 import com.worldturner.util.withEmptyFragment
@@ -28,6 +30,7 @@ import java.io.IOException
 import java.io.Writer
 import java.net.URI
 import java.net.URISyntaxException
+import java.util.concurrent.ConcurrentHashMap
 
 private val JsonSchemaVersion.idProperty: String
     get() =
@@ -54,6 +57,7 @@ private val schemaUriToVersionMapping = mapOf(
 private const val MAX_REF_RESOLVE_ITERATIONS = 100
 
 abstract class MedeiaApiBase {
+    private val metaSchemaValidators: MutableMap<JsonSchemaVersion, SchemaValidator> = ConcurrentHashMap()
 
     fun loadSchemas(sources: List<SchemaSource>, options: ValidationOptions) =
         loadSchemas(sources, validatorMap = null, options = options)
@@ -72,6 +76,15 @@ abstract class MedeiaApiBase {
         val parsedSchemas = sources.map { loadSchema(it, options, schemaIds) }
         val validators = buildValidators(parsedSchemas, options, schemaIds, validatorMap)
         return validators.first()
+    }
+
+    /**
+     * Loads meta schema validator or cached version if already there.
+     */
+    private fun loadMetaSchemaValidator(version: JsonSchemaVersion): SchemaValidator {
+        return metaSchemaValidators.computeIfAbsent(version) {
+            loadSchemas(listOf(MetaSchemaSource.forVersion(version)), ValidationOptions(validateSchema = false))
+        }
     }
 
     private fun buildValidators(
@@ -166,10 +179,28 @@ abstract class MedeiaApiBase {
             tree.collectIds(source.baseUri, ids)
             source.baseUri?.let { ids[it] = tree }
         }
-        val consumer = SimpleObjectMapper(tree.version.mapperType, 0)
+        val schemaBuilder = SimpleObjectMapper(tree.version.mapperType, 0)
+        // If meta-schema validation option is on, then validate the schema while parsing it
+        val consumer =
+            if (options.validateSchema) {
+                MultipleConsumer(
+                    listOf(
+                        schemaBuilder,
+                        SchemaValidatingConsumer(loadMetaSchemaValidator(tree.version))
+                    )
+                )
+            } else {
+                schemaBuilder
+            }
         val parser: JsonParserAdapter = JsonParserFromSimpleTree(tree.nodeData, consumer)
-        parser.parseAll()
-        val schema = consumer.takeResult() as JsonSchema
+
+        try {
+            parser.parseAll()
+        } catch (e: ValidationFailedException) {
+            throw e
+        }
+
+        val schema = schemaBuilder.takeResult() as JsonSchema
         val augmentedSchema = source.baseUri?.let { SchemaWithBaseUri(it, schema) } ?: schema
         return augmentedSchema
     }

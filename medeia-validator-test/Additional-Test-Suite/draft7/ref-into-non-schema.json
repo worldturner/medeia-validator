@@ -5,7 +5,7 @@
       "type": "array",
       "items": {
         "$ref": "#/uniqueItems",
-        "type": []
+        "type": "null"
       },
       "uniqueItems": true
     },
@@ -41,7 +41,7 @@
       "type": "array",
       "items": {
         "$ref": "urn:myscheme:myid",
-        "type": []
+        "type": "null"
       },
       "default": [
         {
@@ -65,7 +65,7 @@
       "type": "array",
       "items": {
         "$ref": "#/defs/truthy",
-        "type": []
+        "type": "null"
       },
       "defs": {
         "truthy": true

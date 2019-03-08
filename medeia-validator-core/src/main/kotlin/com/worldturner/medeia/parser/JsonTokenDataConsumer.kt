@@ -17,3 +17,11 @@ interface JsonTokenDataBuilder : JsonTokenDataAndLocationBuilder, JsonTokenDataC
 interface JsonTokenDataAndLocationBuilder : JsonTokenDataAndLocationConsumer {
     fun takeResult(): Any?
 }
+
+class MultipleConsumer(val consumers: List<JsonTokenDataAndLocationConsumer>) : JsonTokenDataAndLocationConsumer {
+    override fun consume(token: JsonTokenData, location: JsonTokenLocation) {
+        consumers.forEach {
+            it.consume(token, location)
+        }
+    }
+}

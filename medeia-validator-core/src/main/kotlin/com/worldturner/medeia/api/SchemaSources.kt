@@ -131,6 +131,12 @@ class MetaSchemaSource private constructor(override val version: JsonSchemaVersi
         val DRAFT04 = MetaSchemaSource(JsonSchemaVersion.DRAFT04)
         val DRAFT06 = MetaSchemaSource(JsonSchemaVersion.DRAFT06)
         val DRAFT07 = MetaSchemaSource(JsonSchemaVersion.DRAFT07)
+        fun forVersion(version: JsonSchemaVersion) =
+            when (version) {
+                JsonSchemaVersion.DRAFT04 -> DRAFT04
+                JsonSchemaVersion.DRAFT06 -> DRAFT06
+                JsonSchemaVersion.DRAFT07 -> DRAFT07
+            }
     }
 }
 
