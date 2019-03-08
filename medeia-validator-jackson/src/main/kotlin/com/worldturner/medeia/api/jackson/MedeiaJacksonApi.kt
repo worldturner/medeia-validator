@@ -19,7 +19,8 @@ import java.io.BufferedReader
 import java.io.Writer
 
 class MedeiaJacksonApi @JvmOverloads constructor(
-    private val jsonFactory: JsonFactory = JsonFactory(),
+    private val jsonFactory: JsonFactory =
+        JsonFactory().apply { enable(JsonParser.Feature.STRICT_DUPLICATE_DETECTION) },
     private val addBuffer: Boolean = true
 ) : MedeiaApiBase() {
 
