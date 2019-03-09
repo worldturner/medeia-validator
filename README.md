@@ -4,6 +4,25 @@ Medeia Validator
 Medeia validator is a streaming validator for json data using schema documents specified in 
 the Json Schema format.
 
+Maven dependency
+----------------
+
+For the Jackson support
+
+    <dependency>
+        <groupId>com.worldturner.medeia</groupId>
+        <artifactId>medeia-validator-jackson</artifactId>
+        <version>0.8.3</version>
+    </dependency>
+    
+For the Gson support
+
+    <dependency>
+        <groupId>com.worldturner.medeia</groupId>
+        <artifactId>medeia-validator-gson</artifactId>
+        <version>0.8.3</version>
+    </dependency>
+    
 Json Schema version support
 ---------------------------
 
@@ -147,3 +166,29 @@ The following formats are supported and pass the 'optional' testsuite:
 
 > json-pointer, relative-json-pointer, date, time, date-time, ipv4, ipv6, hostname, idn-hostname, uri, uri-reference
 
+Performance
+-----------
+
+Parsing the JSON schema version 4 meta schema using:
+
+* Medeia Validator Jackson & Gson 0.8.3
+* Everit Json Schema 1.5.1
+* Json schema validator 2.2.10
+
+The test includes the time to parse the data from a file and to validate it.
+It does not include the time to load/build the validation schema itself.
+
+*Result summary:*
+
+Medeia validator Jackson is 1.86x faster than Everit, and 11.9x faster than Json schema validator,
+on this testcase.
+
+*Results:*
+
+```
+                     millis
+Medeia-J:            0.1036 1.86x 11.90x
+Medeia-G:            0.1288 1.49x  9.57x
+Everit:              0.1924 1.00x  6.41x
+JsonSchemaValidator: 1.2329 0.16x  1.00x
+```
