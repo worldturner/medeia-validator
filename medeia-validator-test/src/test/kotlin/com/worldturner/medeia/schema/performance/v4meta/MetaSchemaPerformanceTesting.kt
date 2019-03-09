@@ -9,40 +9,49 @@ import java.nio.file.Paths
 val metaSchemaPath =
     Paths.get("medeia-validator-core/src/main/resources/meta-schemas/schema-draft04.json").toAbsolutePath()
 
+fun gc() {
+    (1..10).forEach { System.gc(); Thread.sleep(50) }
+    Thread.sleep(2000)
+}
 fun main() {
-    val warmups = 10
+    val warmups = 20
     val iterations = 10000
     val allTests = listOf(
         {
-            EveritPerformanceTest(metaSchemaPath, metaSchemaPath, iterations).let { test ->
+            MedeiaJacksonPerformanceTest(metaSchemaPath, metaSchemaPath, iterations).let { test ->
                 (1..warmups).forEach { test.runWithTiming() }
-                println("Everit:   " + test.runWithTiming().let { "%5.4f".format(it) })
+                gc()
+                println("Medeia-J: " + test.runWithTiming().let { "%5.4f".format(it) })
             }
         },
         {
             MedeiaGsonPerformanceTest(metaSchemaPath, metaSchemaPath, iterations).let { test ->
                 (1..warmups).forEach { test.runWithTiming() }
+                gc()
                 println("Medeia-G: " + test.runWithTiming().let { "%5.4f".format(it) })
             }
         },
         {
-            MedeiaJacksonPerformanceTest(metaSchemaPath, metaSchemaPath, iterations).let { test ->
+            EveritPerformanceTest(metaSchemaPath, metaSchemaPath, iterations).let { test ->
                 (1..warmups).forEach { test.runWithTiming() }
-                println("Medeia-J: " + test.runWithTiming().let { "%5.4f".format(it) })
+                gc()
+                println("Everit:   " + test.runWithTiming().let { "%5.4f".format(it) })
             }
         },
         {
             JsonNodeValidatorPerformanceTest(metaSchemaPath, metaSchemaPath, iterations).let { test ->
                 (1..warmups).forEach { test.runWithTiming() }
+                gc()
                 println("JsonNode: " + test.runWithTiming().let { "%5.4f".format(it) })
             }
         }
     )
 
-    val tests = allTests.subList(0, 3).shuffled()
-//    val tests = allTests.subList(2, 3).shuffled()
+//    val tests = allTests
+
+    val tests = allTests.subList(2, 3)
+
     tests.forEach {
         it()
-        System.gc()
     }
 }
