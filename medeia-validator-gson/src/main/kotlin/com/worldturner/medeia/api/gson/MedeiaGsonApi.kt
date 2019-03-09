@@ -37,7 +37,7 @@ class MedeiaGsonApi(private val addBuffer: Boolean = true) : MedeiaApiBase() {
         consumer: JsonTokenDataAndLocationConsumer
     ): JsonParserAdapter {
 
-        val reader = when (source.inputPreference) {
+        val reader = when (source.input.preference) {
             InputPreference.STREAM -> decorateInputStream(source)
             InputPreference.READER -> decorateReader(source)
         }
@@ -66,10 +66,10 @@ class MedeiaGsonApi(private val addBuffer: Boolean = true) : MedeiaApiBase() {
     }
 
     private fun decorateInputStream(source: SchemaSource): Reader =
-        source.stream
+        source.input.stream
             .let { if (addBuffer) BufferedInputStream(it) else it }
             .let { InputStreamReader(it, Charsets.UTF_8) }
 
     private fun decorateReader(source: SchemaSource): Reader =
-        source.reader.let { if (addBuffer) BufferedReader(it) else it }
+        source.input.reader.let { if (addBuffer) BufferedReader(it) else it }
 }

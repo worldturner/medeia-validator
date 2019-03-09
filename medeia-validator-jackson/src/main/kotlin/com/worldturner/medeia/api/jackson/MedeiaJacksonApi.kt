@@ -39,7 +39,7 @@ class MedeiaJacksonApi @JvmOverloads constructor(
         consumer: JsonTokenDataAndLocationConsumer
     ): JsonParserAdapter {
         val jsonParser =
-            when (source.inputPreference) {
+            when (source.input.preference) {
                 InputPreference.STREAM -> streamParser(source)
                 InputPreference.READER -> readerParser(source)
             }
@@ -55,8 +55,8 @@ class MedeiaJacksonApi @JvmOverloads constructor(
         JacksonTokenDataWriter(jsonFactory.createGenerator(destination))
 
     private fun readerParser(source: SchemaSource): JsonParser =
-        source.reader.let { if (addBuffer) BufferedReader(it) else it }.let { jsonFactory.createParser(it) }
+        source.input.reader.let { if (addBuffer) BufferedReader(it) else it }.let { jsonFactory.createParser(it) }
 
     private fun streamParser(source: SchemaSource): JsonParser =
-        source.stream.let { if (addBuffer) BufferedInputStream(it) else it }.let { jsonFactory.createParser(it) }
+        source.input.stream.let { if (addBuffer) BufferedInputStream(it) else it }.let { jsonFactory.createParser(it) }
 }
