@@ -83,22 +83,19 @@ Source Json format support
 How to use
 ----------
 
-##### Kotlin:
+Examples are provided in this git repository in the projects:
 
-```kotlin
-val medeia = MedeiaJacksonApi()
-val schemaSource = PathSchemaSource(Paths.get("schemas/myschema.json"))
-val validator = medeia.loadSchema(schemaSource)
-// Creates a validating parser
-val parser = medeia.decorateJsonParser(validator, JsonFactory().createParser(mydata))
-val deserialized = ObjectMapper().readValue(parser, MyClass::class.java)
-```
+* medeia-validator-examples-java
+* medeia-validator-examples-kotlin
 
-To just perform validation rather than deserialising objects, one can do:
-```kotlin
-while (parser.nextToken() != null) {
-}
-```
+It includes examples on how to read and write using Jackson and Gson while also loading or retrieving
+from Java/Kotlin objects.
+
+The CustomFormatExample also doubles as a way to show how streaming validation can be done 
+without loading the data into memory at all.
+
+The allows medeia-validator to validate many Gigabytes of data. 
+
 
 The `MedeiaJacksonApi` and `MedeiaGsonApi` classes have various methods to load schemas and to create validating
 parsers/generators (or readers/writers in Gson parlance)
@@ -113,15 +110,8 @@ different versions than their own.
 
 Options are passed using a `JsonSchemaValidationOptions` object.
 
-
-##### Java:
-
 Care has been taken that all methods in the API can be invoked from Java. The `JsonSchemaValidationOptions` has 
 `with*` methods to allow option setting from Java.
-
-```java
-TBD
-```
 
 Cloning and building medeia-validator
 -------------------------------------
@@ -139,7 +129,8 @@ Or perform the initial clone with submodules:
 git clone --recurse-submodules git@github.com:worldturner/medeia-validator.git
 ```
 
-Building is done with maven using `mvn clean install`.
+Building is done with maven using `mvn clean install` and also executes git to retrieve the
+submodule.
 
 Test Suite Support
 ------------------
