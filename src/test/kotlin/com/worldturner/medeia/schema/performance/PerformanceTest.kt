@@ -3,40 +3,42 @@ package com.worldturner.medeia.schema.performance
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.github.fge.jsonschema.core.report.ProcessingReport
 import com.github.fge.jsonschema.main.JsonSchemaFactory
-import com.worldturner.medeia.api.PathSchemaSource
+import com.worldturner.medeia.api.InputSource
+import com.worldturner.medeia.api.SchemaSource
 import com.worldturner.medeia.api.ValidationFailedException
 import com.worldturner.medeia.api.gson.MedeiaGsonApi
 import com.worldturner.medeia.api.jackson.MedeiaJacksonApi
 import com.worldturner.medeia.parser.gson.GsonJsonReaderDecorator
-import com.worldturner.medeia.parser.type.MapperType
-import com.worldturner.medeia.schema.parser.JsonSchemaDraft04Type
 import com.worldturner.medeia.schema.validation.stream.SchemaValidatingConsumer
 import org.everit.json.schema.ValidationException
 import org.everit.json.schema.loader.SchemaLoader
 import org.json.JSONObject
 import org.json.JSONTokener
+import org.leadpony.justify.api.JsonValidationService
+import java.io.BufferedReader
 import java.io.StringReader
-import java.nio.file.Files
-import java.nio.file.Path
 
 abstract class PerformanceTest(val iterations: Int) {
 
     abstract fun run(): Boolean
 
     fun runWithTiming(): Double =
-        timing {
+        timing(iterations) {
             if (!run()) {
                 println("Validation failed for $this")
             }
         }
 }
 
-class JsonNodeValidatorPerformanceTest(schemaPath: Path, dataPath: Path, iterations: Int) :
+class JsonNodeValidatorPerformanceTest(
+    schemaSource: SchemaSource,
+    dataSource: InputSource,
+    iterations: Int) :
     PerformanceTest(iterations) {
-    val schemaTree = Files.newBufferedReader(schemaPath).use { testMapper.readTree(it) }
+    val schemaTree = BufferedReader(schemaSource.input.reader).use { testMapper.readTree(it) }
     val factory = JsonSchemaFactory.byDefault()
     val schema = factory.getJsonSchema(schemaTree)
-    val data = String(Files.readAllBytes(dataPath), Charsets.UTF_8)
+    val data = String(dataSource.stream.use { it.readAllBytes() }, Charsets.UTF_8)
 
     override fun run(): Boolean {
         val dataTree = testMapper.readTree(data)
@@ -50,13 +52,13 @@ class JsonNodeValidatorPerformanceTest(schemaPath: Path, dataPath: Path, iterati
 }
 
 class MedeiaJacksonPerformanceTest(
-    schemaPath: Path,
-    dataPath: Path,
+    schemaSource: SchemaSource,
+    dataSource: InputSource,
     iterations: Int
 ) : PerformanceTest(iterations) {
     val api = MedeiaJacksonApi()
-    val validator = api.loadSchema(PathSchemaSource(schemaPath))
-    val data = String(Files.readAllBytes(dataPath), Charsets.UTF_8)
+    val validator = api.loadSchema(schemaSource)
+    val data = String(dataSource.stream.use { it.readAllBytes() }, Charsets.UTF_8)
 
     override fun run(): Boolean {
         val parser = api.decorateJsonParser(validator, api.jsonFactory.createParser(data))
@@ -72,14 +74,13 @@ class MedeiaJacksonPerformanceTest(
 }
 
 class MedeiaGsonPerformanceTest(
-    schemaPath: Path,
-    dataPath: Path,
-    iterations: Int,
-    schemaType: MapperType = JsonSchemaDraft04Type
+    schemaSource: SchemaSource,
+    dataSource: InputSource,
+    iterations: Int
 ) : PerformanceTest(iterations) {
     val api = MedeiaGsonApi()
-    val validator = api.loadSchema(PathSchemaSource(schemaPath))
-    val data = String(Files.readAllBytes(dataPath), Charsets.UTF_8)
+    val validator = api.loadSchema(schemaSource)
+    val data = String(dataSource.stream.use { it.readAllBytes() }, Charsets.UTF_8)
 
     override fun run(): Boolean {
         val consumer = SchemaValidatingConsumer(validator)
@@ -94,12 +95,15 @@ class MedeiaGsonPerformanceTest(
     }
 }
 
-class EveritPerformanceTest(schemaPath: Path, dataPath: Path, iterations: Int) : PerformanceTest(iterations) {
-    val schemaTree = Files.newBufferedReader(schemaPath).use {
+class EveritPerformanceTest(
+    schemaSource: SchemaSource,
+    dataSource: InputSource,
+    iterations: Int) : PerformanceTest(iterations) {
+    val schemaTree = BufferedReader(schemaSource.input.reader).use {
         JSONObject(JSONTokener(it))
     }
     val schema = SchemaLoader.load(schemaTree)
-    val data = String(Files.readAllBytes(dataPath), Charsets.UTF_8)
+    val data = String(dataSource.stream.use { it.readAllBytes() }, Charsets.UTF_8)
 
     override fun run(): Boolean {
         val jsonObject = JSONObject(JSONTokener(data))
@@ -112,3 +116,28 @@ class EveritPerformanceTest(schemaPath: Path, dataPath: Path, iterations: Int) :
         }
     }
 }
+
+class JustifyPerformanceTest(
+    schemaSource: SchemaSource,
+    dataSource: InputSource,
+    iterations: Int) : PerformanceTest(iterations) {
+    val schemaTree = BufferedReader(schemaSource.input.reader).use {
+        JSONObject(JSONTokener(it))
+    }
+    val service = JsonValidationService.newInstance()
+    val schema = BufferedReader(schemaSource.input.reader).use { service.readSchema(it) }
+    val data = String(dataSource.stream.use { it.readAllBytes() }, Charsets.UTF_8)
+
+    override fun run(): Boolean {
+        val problemHandler = service.createProblemPrinter(::println)
+        // Parses the JSON instance by javax.json.stream.JsonParser
+        service.createParser(StringReader(data), schema, problemHandler).use { parser ->
+            while (parser.hasNext()) {
+                val event = parser.next()
+                // Do something useful here
+            }
+        }
+        return true
+    }
+}
+
