@@ -184,7 +184,7 @@ Performed on mid-2015 MacBookPro, median values of at least 30 runs, see [medeia
 
 Validating the JSON schema draft 4 meta schema against itself using:
 
-* Medeia Validator Jackson & Gson 0.8.3
+* Medeia Validator Jackson & Gson 1.0.0
 * Everit Json Schema 1.11.1
 * Json schema validator 2.2.10
 * Justify not used, doesn't support draft 4
@@ -201,7 +201,7 @@ Results in milliseconds per validation (fastest first):
 
 Validating the JSON schema version 4 meta schema against itself using:
 
-* Medeia Validator Jackson & Gson 0.8.3
+* Medeia Validator Jackson & Gson 1.0.0
 * Everit Json Schema 1.11.1
 * Json schema validator not used, doesn't support draft 7
 * Justify 0.13.0
