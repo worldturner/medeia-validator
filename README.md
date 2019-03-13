@@ -4,6 +4,12 @@ Medeia Validator
 Medeia validator is a streaming validator for json data using schema documents specified in 
 the Json Schema format.
 
+License
+-------
+This software is licensed under the Apache License, Version 2.0.
+
+Software is copyright &copy; 2018-2019 by the authors.
+
 Maven dependency
 ----------------
 
@@ -12,7 +18,7 @@ For the Jackson support
     <dependency>
         <groupId>com.worldturner.medeia</groupId>
         <artifactId>medeia-validator-jackson</artifactId>
-        <version>0.8.3</version>
+        <version>1.0.0</version>
     </dependency>
     
 For the Gson support
@@ -20,7 +26,7 @@ For the Gson support
     <dependency>
         <groupId>com.worldturner.medeia</groupId>
         <artifactId>medeia-validator-gson</artifactId>
-        <version>0.8.3</version>
+        <version>1.0.0</version>
     </dependency>
     
 Json Schema version support
@@ -127,7 +133,7 @@ the version can be provided through the SchemaSource.
 Mixing different versions of schemas (draft4, 6 and 7) is allowed and schemas can refer to remote schemas in 
 different versions than their own.
 
-Options are passed using a `JsonSchemaValidationOptions` object.
+Options are passed using a `ValidationOptions` object.
 
 Care has been taken that all methods in the API can be invoked from Java. The `JsonSchemaValidationOptions` has 
 `with*` methods to allow option setting from Java.
@@ -169,26 +175,48 @@ The following formats are supported and pass the 'optional' testsuite:
 Performance
 -----------
 
-Parsing the JSON schema version 4 meta schema using:
+Performance tests include the time to parse the data from a file and to validate it.
+They do not include the time to load/build the validation schema itself.
+
+Performed on mid-2015 MacBookPro, median values of at least 30 runs, see [medeia-validator-performance](https://github.com/worldturner/medeia-validator-performance).
+
+#####Draft04
+
+Validating the JSON schema draft 4 meta schema against itself using:
 
 * Medeia Validator Jackson & Gson 0.8.3
-* Everit Json Schema 1.5.1
+* Everit Json Schema 1.11.1
 * Json schema validator 2.2.10
+* Justify not used, doesn't support draft 4
 
-The test includes the time to parse the data from a file and to validate it.
-It does not include the time to load/build the validation schema itself.
+Results in milliseconds per validation (fastest first):
 
-*Result summary:*
+| MedeiaJackson | MedeiaGson | Everit | JsonValidator |
+|---------------|------------|--------|---------------|
+|    0.1062     |   0.1300   | 0.1982 |     0.8526    |
 
-Medeia validator Jackson is 1.86x faster than Everit, and 11.9x faster than Json schema validator,
-on this testcase.
+![Performance Chart draft-04](documentation/img/performance-draft04.png)
 
-*Results:*
+#####Draft07
 
-```
-                     millis
-Medeia-J:            0.1036 1.86x 11.90x
-Medeia-G:            0.1288 1.49x  9.57x
-Everit:              0.1924 1.00x  6.41x
-JsonSchemaValidator: 1.2329 0.16x  1.00x
-```
+Validating the JSON schema version 4 meta schema against itself using:
+
+* Medeia Validator Jackson & Gson 0.8.3
+* Everit Json Schema 1.11.1
+* Json schema validator not used, doesn't support draft 7
+* Justify 0.13.0
+
+Results in milliseconds per validation (fastest first):
+
+| MedeiaJackson | MedeiaGson | Justify | Everit |
+|---------------|------------|---------|--------|
+|    0.0723     |   0.0742   |  0.0850 | 0.4836 |
+			
+![Performance Chart draft-07](documentation/img/performance-draft07.png)
+
+Large file validation
+---------------------
+
+Generated lists of draft-04 and draft-07 schemas, validating against a list of the metaschema,
+have been tested up to 10Gb files. Time taken scales linearly - the time taken is the number of concatenations
+of the schema times the time taken per schema instance above (0.10-0.13 milliseconds)
