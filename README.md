@@ -180,7 +180,7 @@ They do not include the time to load/build the validation schema itself.
 
 Performed on mid-2015 MacBookPro, median values of at least 30 runs, see [medeia-validator-performance](https://github.com/worldturner/medeia-validator-performance).
 
-#####Draft04
+##### Draft04
 
 Validating the JSON schema draft 4 meta schema against itself using:
 
@@ -197,7 +197,7 @@ Results in milliseconds per validation (fastest first):
 
 ![Performance Chart draft-04](documentation/img/performance-draft04.png)
 
-#####Draft07
+##### Draft07
 
 Validating the JSON schema version 4 meta schema against itself using:
 
