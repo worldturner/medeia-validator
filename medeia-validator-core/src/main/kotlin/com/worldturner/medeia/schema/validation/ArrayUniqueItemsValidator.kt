@@ -6,7 +6,7 @@ import com.worldturner.medeia.parser.JsonTokenData
 import com.worldturner.medeia.parser.JsonTokenLocation
 import com.worldturner.medeia.parser.JsonTokenType.END_ARRAY
 import com.worldturner.medeia.parser.JsonTokenType.START_ARRAY
-import com.worldturner.medeia.parser.NodeData
+import com.worldturner.medeia.parser.TreeNode
 import com.worldturner.medeia.parser.SimpleTreeBuilder
 import com.worldturner.medeia.api.UniqueItemsValidationMethod
 import com.worldturner.medeia.api.ValidationResult
@@ -36,7 +36,7 @@ class ArrayUniqueItemsValidator : SchemaValidator {
 }
 
 class ArrayUniqueItemsValidatorInstance(val startLevel: Int) : SchemaValidatorInstance {
-    private val uniqueItems: MutableSet<NodeData> = mutableSetOf()
+    private val uniqueItems: MutableSet<TreeNode> = mutableSetOf()
     private val treeBuilder: SimpleTreeBuilder = SimpleTreeBuilder(startLevel + 1)
 
     override fun validate(token: JsonTokenData, location: JsonTokenLocation): ValidationResult? {

@@ -12,7 +12,7 @@ import kotlin.test.assertEquals
 
 data class Thing(
     val name: String,
-    val tree: NodeData
+    val tree: TreeNode
 )
 
 val treeWithSingle = """
@@ -58,7 +58,7 @@ class SimpleObjectMapperSimpleTreeTest {
         val thing = parse(ThingType, treeWithSingle, JsonParserLibrary.JACKSON) as Thing
         assertEquals("treeWithSingle", thing.name)
         assertEquals(
-            TokenNodeData(
+            SimpleNode(
                 JsonTokenData(
                     type = JsonTokenType.VALUE_NUMBER,
                     integer = BigInteger.valueOf(4L)
@@ -72,9 +72,9 @@ class SimpleObjectMapperSimpleTreeTest {
         val thing = parse(ThingType, treeWithList, JsonParserLibrary.GSON) as Thing
         assertEquals("treeWithList", thing.name)
         assertEquals(
-            ArrayNodeData(
-                mutableListOf(
-                    TokenNodeData(
+            ArrayNode(
+                nodes = mutableListOf(
+                    SimpleNode(
                         JsonTokenData(
                             type = JsonTokenType.VALUE_NUMBER,
                             integer = BigInteger.valueOf(4L)
@@ -90,10 +90,10 @@ class SimpleObjectMapperSimpleTreeTest {
         val thing = parse(ThingType, treeWithObject, JsonParserLibrary.JACKSON) as Thing
         assertEquals("treeWithObject", thing.name)
         assertEquals(
-            ObjectNodeData(
-                mutableMapOf(
+            ObjectNode(
+                nodes = mutableMapOf(
                     "foo" to
-                        TokenNodeData(JsonTokenData.createText("bar"))
+                        SimpleNode(JsonTokenData.createText("bar"))
                 )
             ),
             thing.tree

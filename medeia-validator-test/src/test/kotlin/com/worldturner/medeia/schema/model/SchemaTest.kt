@@ -17,7 +17,7 @@ import com.worldturner.medeia.gson.toJsonElement
 import com.worldturner.medeia.jackson.toTreeNode
 import com.worldturner.medeia.parser.JsonParserAdapter
 import com.worldturner.medeia.parser.JsonTokenDataAndLocationConsumer
-import com.worldturner.medeia.parser.NodeData
+import com.worldturner.medeia.parser.TreeNode
 import com.worldturner.medeia.parser.gson.GsonJsonReaderDecorator
 import com.worldturner.medeia.parser.gson.GsonJsonWriterDecorator
 import com.worldturner.medeia.parser.jackson.JacksonTokenDataJsonGenerator
@@ -63,7 +63,7 @@ data class SchemaTest(
 
 data class SchemaTestCase(
     val description: String,
-    val data: NodeData,
+    val data: TreeNode,
     val valid: Boolean
 ) {
     val dataAsString = data.toString()

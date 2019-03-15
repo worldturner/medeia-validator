@@ -5,9 +5,9 @@ import java.util.ArrayDeque
 import java.util.Deque
 
 class SimpleTreeBuilder(val startLevel: Int) : JsonTokenDataAndLocationBuilder {
-    private val stack: Deque<NodeData> = ArrayDeque()
+    private val stack: Deque<TreeNode> = ArrayDeque()
     private var currentProperty: String? = null
-    private var result: NodeData? = null
+    private var result: TreeNode? = null
 
     override fun consume(token: JsonTokenData, location: JsonTokenLocation) {
         if (token.type == JsonTokenType.FIELD_NAME) {
@@ -17,16 +17,15 @@ class SimpleTreeBuilder(val startLevel: Int) : JsonTokenDataAndLocationBuilder {
                 val top = if (stack.isEmpty()) null else stack.peek()
                 val nodeData =
                     when (token.type) {
-                        JsonTokenType.START_OBJECT -> ObjectNodeData()
-                        JsonTokenType.START_ARRAY -> ArrayNodeData()
-                        else -> TokenNodeData(token)
+                        JsonTokenType.START_OBJECT -> ObjectNode(location.line, location.column)
+                        JsonTokenType.START_ARRAY -> ArrayNode(location.line, location.column)
+                        else -> SimpleNode(token, location.line, location.column)
                     }
-
                 when (top) {
-                    is ObjectNodeData -> {
+                    is ObjectNode -> {
                         top.nodes[currentProperty!!] = nodeData
                     }
-                    is ArrayNodeData -> {
+                    is ArrayNode -> {
                         top.nodes += nodeData
                     }
                     else -> {
@@ -43,22 +42,29 @@ class SimpleTreeBuilder(val startLevel: Int) : JsonTokenDataAndLocationBuilder {
         }
     }
 
-    override fun takeResult(): NodeData? {
+    override fun takeResult(): TreeNode? {
         val r = result
         result = null
         return r
     }
 }
 
-sealed class NodeData {
-    internal abstract fun isEqualTo(other: NodeData): Boolean
+sealed class TreeNode(
+    val line: Int = -1,
+    val column: Int = -1
+) {
+    internal abstract fun isEqualTo(other: TreeNode): Boolean
 
-    open fun textChild(fieldName: String): String? = null
+    /**
+     * Quick way to get the value of a text property of an ObjectNode, or null
+     * if this is not an ObjectNode or the property doesn't exist.
+     */
+    open fun textProperty(fieldName: String): String? = null
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
-        other as NodeData
+        other as TreeNode
         return isEqualTo(other)
     }
 
@@ -69,31 +75,47 @@ sealed class NodeData {
     }
 }
 
-class TokenNodeData(val token: JsonTokenData) : NodeData() {
+/**
+ * A node with a simple value (string, number, boolean, null) represented by a JsonTokenData object.
+ */
+class SimpleNode(
+    val token: JsonTokenData,
+    line: Int = -1,
+    column: Int = -1
+) : TreeNode(line, column) {
 
-    override fun isEqualTo(other: NodeData): Boolean {
-        return other is TokenNodeData && token == other.token
+    override fun isEqualTo(other: TreeNode): Boolean {
+        return other is SimpleNode && token == other.token
     }
 
     override fun hashCode(): Int = token.hashCode()
 }
 
-class ArrayNodeData(val nodes: MutableList<NodeData> = mutableListOf()) : NodeData() {
-    override fun isEqualTo(other: NodeData): Boolean {
-        return other is ArrayNodeData && nodes == other.nodes
+class ArrayNode(
+    line: Int = -1,
+    column: Int = -1,
+    val nodes: MutableList<TreeNode> = mutableListOf()
+) : TreeNode(line, column) {
+
+    override fun isEqualTo(other: TreeNode): Boolean {
+        return other is ArrayNode && nodes == other.nodes
     }
 
     override fun hashCode(): Int = nodes.hashCode()
 }
 
-class ObjectNodeData(val nodes: MutableMap<String, NodeData> = mutableMapOf()) : NodeData() {
-    override fun isEqualTo(other: NodeData): Boolean {
-        return other is ObjectNodeData && nodes == other.nodes
+class ObjectNode(
+    line: Int = -1,
+    column: Int = -1,
+    val nodes: MutableMap<String, TreeNode> = mutableMapOf()
+) : TreeNode(line, column) {
+    override fun isEqualTo(other: TreeNode): Boolean {
+        return other is ObjectNode && nodes == other.nodes
     }
 
-    override fun textChild(fieldName: String): String? {
+    override fun textProperty(fieldName: String): String? {
         val child = nodes[fieldName]
-        return if (child is TokenNodeData && child.token.type == JsonTokenType.VALUE_TEXT) {
+        return if (child is SimpleNode && child.token.type == JsonTokenType.VALUE_TEXT) {
             child.token.text!!
         } else {
             null

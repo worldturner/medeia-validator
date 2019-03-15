@@ -5,7 +5,7 @@ import com.worldturner.medeia.parser.JsonTokenDataConsumer
 import com.worldturner.medeia.parser.JsonTokenLocation
 import com.worldturner.medeia.parser.TOKEN_NULL
 import com.worldturner.medeia.parser.TextOutputBuilder
-import com.worldturner.medeia.parser.TokenNodeData
+import com.worldturner.medeia.parser.SimpleNode
 import com.worldturner.medeia.parser.builder.ConsumerBuilderValueBuilder
 import com.worldturner.medeia.parser.type.AcceptKind.SINGLE
 import com.worldturner.medeia.parser.type.AcceptKind.STRUCTURE
@@ -15,7 +15,7 @@ object JsonAsStringType : StructuredType() {
         if (token.type.nonStructureToken) SINGLE else STRUCTURE
 
     override fun createObject(token: JsonTokenData, location: JsonTokenLocation): Any? =
-        TokenNodeData(token).toString()
+        SimpleNode(token).toString()
 
     override fun createBuilder(token: JsonTokenData, location: JsonTokenLocation) =
         ConsumerBuilderValueBuilder(location.level, TextOutputBuilder())

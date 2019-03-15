@@ -5,15 +5,15 @@ import com.google.gson.JsonElement
 import com.google.gson.JsonNull
 import com.google.gson.JsonObject
 import com.google.gson.JsonPrimitive
-import com.worldturner.medeia.parser.ArrayNodeData
+import com.worldturner.medeia.parser.ArrayNode
 import com.worldturner.medeia.parser.JsonTokenType
-import com.worldturner.medeia.parser.NodeData
-import com.worldturner.medeia.parser.ObjectNodeData
-import com.worldturner.medeia.parser.TokenNodeData
+import com.worldturner.medeia.parser.TreeNode
+import com.worldturner.medeia.parser.ObjectNode
+import com.worldturner.medeia.parser.SimpleNode
 
-fun NodeData.toJsonElement(): JsonElement =
+fun TreeNode.toJsonElement(): JsonElement =
     when (this) {
-        is TokenNodeData -> {
+        is SimpleNode -> {
             when (token.type) {
                 JsonTokenType.VALUE_NUMBER -> JsonPrimitive(token.toDecimal())
                 JsonTokenType.VALUE_TEXT -> JsonPrimitive(token.text)
@@ -23,11 +23,11 @@ fun NodeData.toJsonElement(): JsonElement =
                 else -> throw IllegalStateException()
             }
         }
-        is ArrayNodeData ->
+        is ArrayNode ->
             JsonArray().also { array ->
                 nodes.forEach { array.add(it.toJsonElement()) }
             }
-        is ObjectNodeData -> JsonObject().also { obj ->
+        is ObjectNode -> JsonObject().also { obj ->
             nodes.forEach { obj.add(it.key, it.value.toJsonElement()) }
         }
         else -> {

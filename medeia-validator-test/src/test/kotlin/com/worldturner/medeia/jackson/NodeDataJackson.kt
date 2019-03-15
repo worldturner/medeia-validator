@@ -8,15 +8,13 @@ import com.fasterxml.jackson.databind.node.JsonNodeFactory
 import com.fasterxml.jackson.databind.node.NullNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.databind.node.TextNode
-import com.worldturner.medeia.parser.ArrayNodeData
 import com.worldturner.medeia.parser.JsonTokenType
-import com.worldturner.medeia.parser.NodeData
-import com.worldturner.medeia.parser.ObjectNodeData
-import com.worldturner.medeia.parser.TokenNodeData
+import com.worldturner.medeia.parser.TreeNode
+import com.worldturner.medeia.parser.SimpleNode
 
-fun NodeData.toTreeNode(): JsonNode =
+fun TreeNode.toTreeNode(): JsonNode =
     when (this) {
-        is TokenNodeData -> {
+        is SimpleNode -> {
             when (token.type) {
                 JsonTokenType.VALUE_NUMBER -> DecimalNode(token.toDecimal())
                 JsonTokenType.VALUE_TEXT -> TextNode(token.text)
@@ -26,10 +24,10 @@ fun NodeData.toTreeNode(): JsonNode =
                 else -> throw IllegalStateException()
             }
         }
-        is ArrayNodeData -> {
+        is com.worldturner.medeia.parser.ArrayNode -> {
             ArrayNode(JsonNodeFactory.instance, nodes.map { it.toTreeNode() })
         }
-        is ObjectNodeData -> {
+        is com.worldturner.medeia.parser.ObjectNode -> {
             ObjectNode(JsonNodeFactory.instance, nodes.mapValues { it.value.toTreeNode() })
         }
         else -> {
