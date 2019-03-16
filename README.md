@@ -2,7 +2,7 @@ Medeia Validator
 ================
 
 Medeia validator is a streaming validator for json data using schema documents specified in 
-the [Json Schema format][3].
+the [Json Schema format](https://json-schema.org/specification.html).
 
 License
 -------
@@ -45,8 +45,8 @@ Parser library support
 
 Medeia works with the following Json parser libraries:
 
-* [FasterXML Jackson][1]
-* [Google Gson][2]
+* [FasterXML Jackson](https://github.com/FasterXML/jackson) (only jackson-core is needed)
+* [Google Gson](https://github.com/google/gson)
 
 Use cases
 ---------
@@ -221,6 +221,3 @@ Generated lists of draft-04 and draft-07 schemas, validating against a list of t
 have been tested up to 10Gb files. Time taken scales linearly - the time taken is the number of concatenations
 of the schema times the time taken per schema instance above (0.10-0.13 milliseconds)
 
-[1]: https://github.com/FasterXML/jackson) (only jackson-core is needed
-[2]: https://github.com/google/gson
-[3]: https://json-schema.org/specification.html
