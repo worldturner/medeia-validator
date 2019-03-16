@@ -1,6 +1,6 @@
 package com.worldturner.medeia.schema.model
 
-import com.worldturner.medeia.parser.NodeData
+import com.worldturner.medeia.parser.TreeNode
 import com.worldturner.medeia.pointer.JsonPointer
 import com.worldturner.medeia.pointer.hasJsonPointerFragment
 import com.worldturner.medeia.schema.validation.ArrayUniqueItemsValidator
@@ -42,9 +42,9 @@ data class JsonSchema constructor(
     val comment: String? = null,
     val title: String? = null,
     val description: String? = null,
-    val default: NodeData? = null,
+    val default: TreeNode? = null,
     val readOnly: Boolean? = null,
-    val examples: List<NodeData>? = null,
+    val examples: List<TreeNode>? = null,
     val multipleOf: BigDecimal? = null,
     val maximum: BigDecimal? = null,
     val exclusiveMaximum: BigDecimal? = null,
@@ -67,8 +67,8 @@ data class JsonSchema constructor(
     val patternProperties: Map<Regex, JsonSchema>? = null,
     val dependencies: Map<String, PropertyNamesOrJsonSchema>? = null,
     val propertyNames: JsonSchema? = null,
-    val const: NodeData? = null,
-    val enum: Set<NodeData>? = null,
+    val const: TreeNode? = null,
+    val enum: Set<TreeNode>? = null,
     val type: EnumSet<SimpleType>? = null,
     val format: String? = null,
     val contentMediaType: String? = null,

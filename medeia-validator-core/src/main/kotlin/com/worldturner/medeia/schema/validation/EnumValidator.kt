@@ -3,13 +3,13 @@ package com.worldturner.medeia.schema.validation
 import com.worldturner.medeia.api.FailedValidationResult
 import com.worldturner.medeia.api.OkValidationResult
 import com.worldturner.medeia.api.ValidationResult
-import com.worldturner.medeia.parser.ArrayNodeData
+import com.worldturner.medeia.parser.ArrayNode
 import com.worldturner.medeia.parser.JsonTokenData
 import com.worldturner.medeia.parser.JsonTokenLocation
 import com.worldturner.medeia.parser.JsonTokenType
-import com.worldturner.medeia.parser.NodeData
-import com.worldturner.medeia.parser.ObjectNodeData
-import com.worldturner.medeia.parser.TokenNodeData
+import com.worldturner.medeia.parser.TreeNode
+import com.worldturner.medeia.parser.ObjectNode
+import com.worldturner.medeia.parser.SimpleNode
 import com.worldturner.medeia.schema.validation.stream.SchemaValidatorInstance
 import com.worldturner.util.iterate
 import java.net.URI
@@ -17,7 +17,7 @@ import java.util.ArrayDeque
 import java.util.Deque
 
 class EnumValidator(
-    val enum: Set<NodeData>
+    val enum: Set<TreeNode>
 ) : SchemaValidator {
     override fun createInstance(startLevel: Int): SchemaValidatorInstance =
         EnumValidatorInstance(startLevel, enum)
@@ -25,11 +25,11 @@ class EnumValidator(
     override fun recordUnknownRefs(unknownRefs: MutableCollection<URI>) = Unit
 
     companion object {
-        fun create(enum: Set<NodeData>? = null): SchemaValidator? =
+        fun create(enum: Set<TreeNode>? = null): SchemaValidator? =
             enum?.let {
-                if (enum.all { it is TokenNodeData })
+                if (enum.all { it is SimpleNode })
                     @Suppress("UNCHECKED_CAST")
-                    TokenOnlyEnumValidator(enum as Set<TokenNodeData>)
+                    TokenOnlyEnumValidator(enum as Set<SimpleNode>)
                 else
                     EnumValidator(enum)
             }
@@ -37,7 +37,7 @@ class EnumValidator(
 }
 
 internal class TokenOnlyEnumValidator(
-    val enum: Set<TokenNodeData>
+    val enum: Set<SimpleNode>
 ) : SchemaValidator, SchemaValidatorInstance {
     override fun createInstance(startLevel: Int): SchemaValidatorInstance = this
 
@@ -54,14 +54,14 @@ internal class TokenOnlyEnumValidator(
     }
 }
 
-class EnumValueState(enumValue: NodeData) {
-    internal val constStack: Deque<NodeData> = ArrayDeque()
-    internal var currentConst: NodeData? = enumValue
+class EnumValueState(enumValue: TreeNode) {
+    internal val constStack: Deque<TreeNode> = ArrayDeque()
+    internal var currentConst: TreeNode? = enumValue
 }
 
 class EnumValidatorInstance(
     val startLevel: Int,
-    val enum: Set<NodeData>
+    val enum: Set<TreeNode>
 ) : SchemaValidatorInstance {
     private val verificationStack: Deque<ConstVerifier> = ArrayDeque()
     private var currentProperty: String? = null
@@ -79,7 +79,7 @@ class EnumValidatorInstance(
                     top.propertyNames.add(currentProperty!!)
                     enumValueStates.iterate { enumValueState, iterator ->
                         val currentConst = enumValueState.currentConst
-                        if (currentConst is ObjectNodeData) {
+                        if (currentConst is ObjectNode) {
                             enumValueState.constStack.push(currentConst)
                             currentConst.nodes[currentProperty!!]?.let { enumValueState.currentConst = it }
                                 ?: iterator.remove()
@@ -91,7 +91,7 @@ class EnumValidatorInstance(
                 is ArrayVerifier -> {
                     enumValueStates.iterate { enumValueState, iterator ->
                         val currentConst = enumValueState.currentConst
-                        if (currentConst is ArrayNodeData) {
+                        if (currentConst is ArrayNode) {
                             if (currentConst.nodes.size <= top.itemCount) {
                                 iterator.remove()
                             } else {

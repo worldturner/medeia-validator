@@ -1,6 +1,6 @@
 package com.worldturner.medeia.schema.parser
 
-import com.worldturner.medeia.parser.NodeData
+import com.worldturner.medeia.parser.TreeNode
 import com.worldturner.medeia.parser.type.AlternativesType
 import com.worldturner.medeia.parser.type.ArrayType
 import com.worldturner.medeia.parser.type.BooleanOrObjectType
@@ -92,7 +92,7 @@ fun createJsonSchemaDraft04(
     comment: String? = null,
     title: String? = null,
     description: String? = null,
-    default: NodeData? = null,
+    default: TreeNode? = null,
     readOnly: Boolean? = null,
     multipleOf: BigDecimal? = null,
     maximum: BigDecimal? = null,
@@ -115,7 +115,7 @@ fun createJsonSchemaDraft04(
     patternProperties: Map<Regex, JsonSchema>? = null,
     dependencies: Map<String, PropertyNamesOrJsonSchema>? = null,
     propertyNames: JsonSchema? = null,
-    enum: Set<NodeData>? = null,
+    enum: Set<TreeNode>? = null,
     type: EnumSet<SimpleType>? = null,
     format: String? = null,
     contentMediaType: String? = null,

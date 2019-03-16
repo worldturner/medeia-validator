@@ -3,30 +3,30 @@ package com.worldturner.medeia.schema.validation
 import com.worldturner.medeia.api.FailedValidationResult
 import com.worldturner.medeia.api.OkValidationResult
 import com.worldturner.medeia.api.ValidationResult
-import com.worldturner.medeia.parser.ArrayNodeData
+import com.worldturner.medeia.parser.ArrayNode
 import com.worldturner.medeia.parser.JsonTokenData
 import com.worldturner.medeia.parser.JsonTokenLocation
 import com.worldturner.medeia.parser.JsonTokenType.FIELD_NAME
 import com.worldturner.medeia.parser.JsonTokenType.START_ARRAY
 import com.worldturner.medeia.parser.JsonTokenType.START_OBJECT
-import com.worldturner.medeia.parser.NodeData
-import com.worldturner.medeia.parser.ObjectNodeData
-import com.worldturner.medeia.parser.TokenNodeData
+import com.worldturner.medeia.parser.TreeNode
+import com.worldturner.medeia.parser.ObjectNode
+import com.worldturner.medeia.parser.SimpleNode
 import com.worldturner.medeia.schema.validation.stream.SchemaValidatorInstance
 import java.net.URI
 import java.util.ArrayDeque
 import java.util.Deque
 
-class ConstValidator(val const: NodeData) : SchemaValidator {
+class ConstValidator(val const: TreeNode) : SchemaValidator {
     override fun createInstance(startLevel: Int): SchemaValidatorInstance =
         ConstValidatorInstance(startLevel, const)
 
     override fun recordUnknownRefs(unknownRefs: MutableCollection<URI>) = Unit
 
     companion object {
-        fun create(const: NodeData?): SchemaValidator? =
+        fun create(const: TreeNode?): SchemaValidator? =
             const?.let {
-                if (const is TokenNodeData)
+                if (const is SimpleNode)
                     TokenOnlyConstValidator(const)
                 else
                     ConstValidator(const)
@@ -34,7 +34,7 @@ class ConstValidator(val const: NodeData) : SchemaValidator {
     }
 }
 
-class TokenOnlyConstValidator(val const: TokenNodeData) : SchemaValidator, SchemaValidatorInstance {
+class TokenOnlyConstValidator(val const: SimpleNode) : SchemaValidator, SchemaValidatorInstance {
     override fun createInstance(startLevel: Int): SchemaValidatorInstance = this
 
     override fun recordUnknownRefs(unknownRefs: MutableCollection<URI>) = Unit
@@ -51,15 +51,15 @@ class TokenOnlyConstValidator(val const: TokenNodeData) : SchemaValidator, Schem
 }
 
 interface ConstVerifier {
-    fun verify(node: NodeData, location: JsonTokenLocation):
+    fun verify(node: TreeNode, location: JsonTokenLocation):
         ValidationResult
 }
 
 class ObjectVerifier : ConstVerifier {
     val propertyNames = mutableSetOf<String>()
 
-    override fun verify(node: NodeData, location: JsonTokenLocation): ValidationResult =
-        if (node !is ObjectNodeData) {
+    override fun verify(node: TreeNode, location: JsonTokenLocation): ValidationResult =
+        if (node !is ObjectNode) {
             fail(location, "Type mismatch")
         } else if (node.nodes.keys != propertyNames) {
             fail(
@@ -75,8 +75,8 @@ class ObjectVerifier : ConstVerifier {
 class ArrayVerifier : ConstVerifier {
     var itemCount = 0
 
-    override fun verify(node: NodeData, location: JsonTokenLocation): ValidationResult =
-        if (node !is ArrayNodeData) {
+    override fun verify(node: TreeNode, location: JsonTokenLocation): ValidationResult =
+        if (node !is ArrayNode) {
             fail(location, "Type mismatch")
         } else if (node.nodes.size != itemCount) {
             fail(
@@ -90,8 +90,8 @@ class ArrayVerifier : ConstVerifier {
 }
 
 class SingleVerifier(val token: JsonTokenData) : ConstVerifier {
-    override fun verify(node: NodeData, location: JsonTokenLocation): ValidationResult =
-        if (node !is TokenNodeData) {
+    override fun verify(node: TreeNode, location: JsonTokenLocation): ValidationResult =
+        if (node !is SimpleNode) {
             fail(location, "Type mismatch")
         } else if (node.token != token) {
             fail(
@@ -105,12 +105,12 @@ class SingleVerifier(val token: JsonTokenData) : ConstVerifier {
 
 class ConstValidatorInstance(
     val startLevel: Int,
-    val const: NodeData
+    val const: TreeNode
 ) : SchemaValidatorInstance {
     private val verificationStack: Deque<ConstVerifier> = ArrayDeque()
-    private val constStack: Deque<NodeData> = ArrayDeque()
+    private val constStack: Deque<TreeNode> = ArrayDeque()
     private var currentProperty: String? = null
-    private var currentConst: NodeData? = const
+    private var currentConst: TreeNode? = const
 
     override fun validate(token: JsonTokenData, location: JsonTokenLocation): ValidationResult? {
         if (token.type == FIELD_NAME) {
@@ -124,7 +124,7 @@ class ConstValidatorInstance(
             when (top) {
                 is ObjectVerifier -> {
                     top.propertyNames.add(currentProperty!!)
-                    if (currentConst is ObjectNodeData) {
+                    if (currentConst is ObjectNode) {
                         this.constStack.push(currentConst)
                         this.currentConst = currentConst.nodes[currentProperty!!]
                             ?: return fail(
@@ -141,7 +141,7 @@ class ConstValidatorInstance(
                     }
                 }
                 is ArrayVerifier -> {
-                    if (currentConst is ArrayNodeData) {
+                    if (currentConst is ArrayNode) {
                         if (currentConst.nodes.size <= top.itemCount)
                             return fail(
                                 location,

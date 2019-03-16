@@ -3,17 +3,17 @@ package com.worldturner.medeia.parser.jackson
 import com.fasterxml.jackson.core.JsonGenerator
 import com.fasterxml.jackson.databind.SerializerProvider
 import com.fasterxml.jackson.databind.ser.std.StdSerializer
-import com.worldturner.medeia.parser.ArrayNodeData
+import com.worldturner.medeia.parser.ArrayNode
 import com.worldturner.medeia.parser.JsonTokenType
-import com.worldturner.medeia.parser.NodeData
-import com.worldturner.medeia.parser.ObjectNodeData
-import com.worldturner.medeia.parser.TokenNodeData
+import com.worldturner.medeia.parser.TreeNode
+import com.worldturner.medeia.parser.ObjectNode
+import com.worldturner.medeia.parser.SimpleNode
 
-class SimpleTreeSerializer : StdSerializer<NodeData>(NodeData::class.java) {
-    override fun serialize(value: NodeData?, gen: JsonGenerator, provider: SerializerProvider?) {
+class SimpleTreeSerializer : StdSerializer<TreeNode>(TreeNode::class.java) {
+    override fun serialize(value: TreeNode?, gen: JsonGenerator, provider: SerializerProvider?) {
 
         when (value) {
-            is TokenNodeData -> {
+            is SimpleNode -> {
                 val token = value.token
                 when (token.type) {
                     JsonTokenType.VALUE_NULL -> gen.writeNull()
@@ -31,12 +31,12 @@ class SimpleTreeSerializer : StdSerializer<NodeData>(NodeData::class.java) {
                     }
                 }
             }
-            is ArrayNodeData -> {
+            is ArrayNode -> {
                 gen.writeStartArray()
                 value.nodes.forEach { serialize(it, gen, provider) }
                 gen.writeEndArray()
             }
-            is ObjectNodeData -> {
+            is ObjectNode -> {
                 gen.writeStartObject()
                 value.nodes.forEach {
                     gen.writeFieldName(it.key)
