@@ -3,6 +3,7 @@ package com.worldturner.medeia.parser
 import com.worldturner.medeia.parser.builder.ValueBuilder
 import com.worldturner.medeia.parser.type.AcceptKind
 import com.worldturner.medeia.parser.type.MapperType
+import com.worldturner.util.getAndClear
 import java.util.ArrayDeque
 
 class SimpleObjectMapper(val rootType: MapperType, val startLevel: Int) : JsonTokenDataAndLocationBuilder {
@@ -12,6 +13,19 @@ class SimpleObjectMapper(val rootType: MapperType, val startLevel: Int) : JsonTo
         ArrayDeque<ValueBuilder<out MapperType>>().apply { push(RootBuilder()) }
 
     override fun consume(token: JsonTokenData, location: JsonTokenLocation) {
+        try {
+            consumeProtected(token, location)
+        } catch (e: TokenLocationException) {
+            throw e
+        } catch (e: Exception) {
+            throw TokenLocationException(e.message, location.toString(), e)
+        }
+    }
+
+    private fun consumeProtected(
+        token: JsonTokenData,
+        location: JsonTokenLocation
+    ) {
         val top = valueBuilderStack.peek()
         val consumerBuilder = top.consumerBuilder
         if (consumerBuilder == null && token.type == JsonTokenType.FIELD_NAME) {
@@ -42,9 +56,7 @@ class SimpleObjectMapper(val rootType: MapperType, val startLevel: Int) : JsonTo
                     }
                 }
                 else ->
-                    throw TypeMismatchException(
-                        "Token $token not accepted by $currentType ($valueBuilderStack) at $location"
-                    )
+                    throw TypeMismatchException("$token not accepted by $currentType", location.toString())
             }
         }
     }
@@ -58,11 +70,7 @@ class SimpleObjectMapper(val rootType: MapperType, val startLevel: Int) : JsonTo
         }
     }
 
-    override fun takeResult(): Any? {
-        val r = result
-        result = null
-        return r
-    }
+    override fun takeResult(): Any? = ::result.getAndClear()
 
     // A stand-in for the result of the entire builder
     private inner class RootBuilder : ValueBuilder<MapperType>(startLevel, rootType) {
@@ -81,4 +89,11 @@ class SimpleObjectMapper(val rootType: MapperType, val startLevel: Int) : JsonTo
     }
 }
 
-class TypeMismatchException(message: String? = null) : Exception(message)
+open class TokenLocationException(
+    message: String?,
+    val location: String,
+    cause: Throwable? = null
+) :
+    RuntimeException("$message $location", cause)
+
+class TypeMismatchException(message: String, location: String) : TokenLocationException(message, location)
