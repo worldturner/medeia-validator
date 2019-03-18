@@ -18,7 +18,11 @@ import com.worldturner.medeia.pointer.JsonPointerBuilder
 import java.util.ArrayDeque
 import kotlin.reflect.KMutableProperty0
 
-class JsonParserFromSimpleTree(val tree: TreeNode, val consumer: JsonTokenDataAndLocationConsumer) : JsonParserAdapter {
+class JsonParserFromSimpleTree(
+    private val tree: TreeNode,
+    private val consumer: JsonTokenDataAndLocationConsumer,
+    private val inputSourceName: String?
+) : JsonParserAdapter {
     private val propertyNamesStack = ArrayDeque<MutableSet<String>>()
 
     inner class DynamicTokenLocation : JsonTokenLocation {
@@ -32,16 +36,21 @@ class JsonParserFromSimpleTree(val tree: TreeNode, val consumer: JsonTokenDataAn
             get() = currentNode?.column ?: -1
         override val line: Int
             get() = currentNode?.line ?: -1
+        override val inputSourceName: String?
+            get() = this@JsonParserFromSimpleTree.inputSourceName
 
         override fun toString(): String {
-            return if (line != -1) {
+            val b = StringBuilder("at ")
+            if (line != -1) {
+                b.append(line)
                 if (column != -1)
-                    "at $line:$column ($pointer)"
-                else
-                    "at $line ($pointer)"
+                    b.append(':').append(column)
+                b.append(" (").append(pointer).append(')')
             } else {
-                "at $pointer"
+                b.append(pointer)
             }
+            inputSourceName?.let { b.append(" in ").append(it) }
+            return b.toString()
         }
     }
 

@@ -39,14 +39,16 @@ open class InputSourceSchemaSource(
 class StreamSchemaSource @JvmOverloads constructor(
     val stream: InputStream,
     override val version: JsonSchemaVersion? = null,
-    override val baseUri: URI? = null
-) : InputSourceSchemaSource(StreamInputSource(stream), version, baseUri)
+    override val baseUri: URI? = null,
+    name: String? = null
+) : InputSourceSchemaSource(StreamInputSource(stream, name), version, baseUri)
 
 class ReaderSchemaSource @JvmOverloads constructor(
     val reader: Reader,
     override val version: JsonSchemaVersion? = null,
-    override val baseUri: URI? = null
-) : InputSourceSchemaSource(ReaderInputSource(reader), version, baseUri)
+    override val baseUri: URI? = null,
+    name: String? = null
+) : InputSourceSchemaSource(ReaderInputSource(reader, name), version, baseUri)
 
 class PathSchemaSource @JvmOverloads constructor(
     val path: Path,
@@ -63,8 +65,9 @@ class UrlSchemaSource @JvmOverloads constructor(
 class StringSchemaSource @JvmOverloads constructor(
     val string: String,
     override val version: JsonSchemaVersion? = null,
-    override val baseUri: URI? = null
-) : InputSourceSchemaSource(StringInputSource(string), version, baseUri)
+    override val baseUri: URI? = null,
+    name: String? = null
+) : InputSourceSchemaSource(StringInputSource(string, name), version, baseUri)
 
 class MetaSchemaSource private constructor(
     override val version: JsonSchemaVersion

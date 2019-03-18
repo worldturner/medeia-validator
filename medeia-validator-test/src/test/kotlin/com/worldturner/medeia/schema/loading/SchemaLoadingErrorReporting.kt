@@ -21,11 +21,12 @@ class SchemaLoadingErrorReporting {
 }
             """.trimIndent()
         )
-        val source = ReaderSchemaSource(r, version = JsonSchemaVersion.DRAFT07)
+        val source = ReaderSchemaSource(r, version = JsonSchemaVersion.DRAFT07, name = "string")
         try {
             medeia.loadSchemas(listOf(source))
         } catch (e: ValidationFailedException) {
             assertThat(e.failures.first().location, stringContainsInOrder("at 2:25 "))
+            println(e)
             throw e
         }
     }

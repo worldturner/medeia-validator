@@ -23,7 +23,8 @@ import java.util.concurrent.atomic.AtomicLong
 
 class GsonJsonWriterDecorator(
     output: Writer,
-    val consumer: JsonTokenDataAndLocationConsumer
+    private val consumer: JsonTokenDataAndLocationConsumer,
+    private val inputSourceName: String?
 ) : JsonWriter(output) {
 
     var level: Int = 0
@@ -39,8 +40,11 @@ class GsonJsonWriterDecorator(
             get() = jsonPointerBuilder.toJsonPointer()
         override val propertyNames: Set<String>
             get() = propertyNamesStack.peek() ?: emptySet()
+        override val inputSourceName: String?
+            get() = this@GsonJsonWriterDecorator.inputSourceName
 
-        override fun toString(): String = "at $pointer"
+        override fun toString(): String =
+            inputSourceName?.let { "at $pointer in $inputSourceName" } ?: "at $pointer"
     }
 
     private fun consume(token: JsonTokenData) {

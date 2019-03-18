@@ -8,11 +8,11 @@ import com.worldturner.medeia.parser.JsonParserAdapter
 import com.worldturner.medeia.parser.JsonTokenDataAndLocationConsumer
 import com.worldturner.medeia.parser.JsonTokenDataConsumer
 import com.worldturner.medeia.parser.MultipleConsumer
-import com.worldturner.medeia.parser.TreeNode
 import com.worldturner.medeia.parser.ObjectNode
+import com.worldturner.medeia.parser.SimpleNode
 import com.worldturner.medeia.parser.SimpleObjectMapper
 import com.worldturner.medeia.parser.SimpleTreeBuilder
-import com.worldturner.medeia.parser.SimpleNode
+import com.worldturner.medeia.parser.TreeNode
 import com.worldturner.medeia.parser.tree.JsonParserFromSimpleTree
 import com.worldturner.medeia.pointer.JsonPointer
 import com.worldturner.medeia.schema.model.JsonSchema
@@ -141,7 +141,7 @@ abstract class MedeiaApiBase {
             unknownRefs.forEach { absoluteRef ->
                 val node = findNode(schemaIds, absoluteRef)
                 node?.let {
-                    val validator = parseSchemaFromNode(
+                    val validator = parseSchemaFromTree(
                         node,
                         context.withBaseUri(absoluteRef, root = true)
                     )
@@ -203,7 +203,7 @@ abstract class MedeiaApiBase {
             } else {
                 schemaBuilder
             }
-        JsonParserFromSimpleTree(tree.tree, consumer).use { it.parseAll() }
+        JsonParserFromSimpleTree(tree.tree, consumer, tree.inputSourceName).use { it.parseAll() }
     }
 
     private fun parseIntoTree(source: SchemaSource): VersionedTree {
@@ -220,17 +220,17 @@ abstract class MedeiaApiBase {
                         ?: "Version not specified in schema $source") +
                         ", modify schema or pass version in SchemaSource.version"
                 )
-            return VersionedTree(tree, version)
+            return VersionedTree(tree, version, source.input.name)
         } catch (e: IOException) {
             throw Exception("In file with baseUri ${source.baseUri}", e)
         }
     }
 }
 
-private fun parseSchemaFromNode(node: VersionedTree, context: ValidationBuilderContext): SchemaValidator {
-    val mapperType = node.version.mapperType
+private fun parseSchemaFromTree(tree: VersionedTree, context: ValidationBuilderContext): SchemaValidator {
+    val mapperType = tree.version.mapperType
     val consumer = SimpleObjectMapper(mapperType, 0)
-    val parser: JsonParserAdapter = JsonParserFromSimpleTree(node.tree, consumer)
+    val parser: JsonParserAdapter = JsonParserFromSimpleTree(tree.tree, consumer, tree.inputSourceName)
     parser.parseAll()
     val schema = consumer.takeResult() as JsonSchema
     return schema.buildValidator(context)
@@ -242,9 +242,9 @@ private fun findNode(nodeMap: MutableMap<URI, VersionedTree>, ref: URI): Version
     return if (ref.hasFragment()) {
         // Next step - look up json pointer relative to id
         val pointer = JsonPointer(ref.fragment)
-        val baseNode = nodeMap[ref.withEmptyFragment()] ?: nodeMap[ref.withoutFragment()]
-        val targetNode = baseNode?.let {
-            it.tree.resolve(pointer)?.let { VersionedTree(it, baseNode.version) }
+        val baseTree = nodeMap[ref.withEmptyFragment()] ?: nodeMap[ref.withoutFragment()]
+        val targetNode = baseTree?.let {
+            it.tree.resolve(pointer)?.let { VersionedTree(it, baseTree.version, baseTree.inputSourceName) }
         }
         targetNode
     } else {
@@ -253,24 +253,24 @@ private fun findNode(nodeMap: MutableMap<URI, VersionedTree>, ref: URI): Version
 }
 
 private fun VersionedTree.collectIds(baseUri: URI?, ids: MutableMap<URI, VersionedTree>) {
-    val newBaseUri = (tree.registerAndGetJsonSchemaId(baseUri, ids, version) ?: EMPTY_URI).also {
-        // Force register the root even if it isn't an object node with an $id
-        ids[it] = this
-    }
-    tree.collectIdsNonRoot(newBaseUri, ids, version)
+    val newBaseUri = (tree.registerAndGetJsonSchemaId(baseUri, ids, version, inputSourceName) ?: EMPTY_URI)
+    // Force register the root even if it isn't an object node with an $id
+    ids[newBaseUri] = this
+    tree.collectIdsNonRoot(newBaseUri, ids, version, inputSourceName)
 }
 
 private fun TreeNode.collectIdsNonRoot(
     baseUri: URI?,
     ids: MutableMap<URI, VersionedTree>,
-    version: JsonSchemaVersion
+    version: JsonSchemaVersion,
+    inputSourceName: String?
 ) {
     when (this) {
         is ObjectNode -> {
-            val newBaseUri = registerAndGetJsonSchemaId(baseUri, ids, version) ?: baseUri
-            nodes.values.forEach { it.collectIdsNonRoot(newBaseUri, ids, version) }
+            val newBaseUri = registerAndGetJsonSchemaId(baseUri, ids, version, inputSourceName) ?: baseUri
+            nodes.values.forEach { it.collectIdsNonRoot(newBaseUri, ids, version, inputSourceName) }
         }
-        is ArrayNode -> nodes.forEach { it.collectIdsNonRoot(baseUri, ids, version) }
+        is ArrayNode -> nodes.forEach { it.collectIdsNonRoot(baseUri, ids, version, inputSourceName) }
         else -> {
         }
     }
@@ -279,13 +279,14 @@ private fun TreeNode.collectIdsNonRoot(
 private fun TreeNode.registerAndGetJsonSchemaId(
     baseUri: URI?,
     ids: MutableMap<URI, VersionedTree>,
-    version: JsonSchemaVersion
+    version: JsonSchemaVersion,
+    inputSourceName: String?
 ): URI? =
     textProperty(version.idProperty)?.let {
         try {
             val relativeUri = URI(it.toString())
             val absoluteUri = baseUri?.let { baseUri.resolve(relativeUri) } ?: relativeUri
-            absoluteUri.also { ids[absoluteUri] = VersionedTree(this, version) }
+            absoluteUri.also { ids[absoluteUri] = VersionedTree(this, version, inputSourceName) }
         } catch (e: URISyntaxException) {
             // TODO: maybe worth a debug log
             baseUri
@@ -308,4 +309,8 @@ fun TreeNode.resolve(pointer: JsonPointer): TreeNode? {
     return if (tail != null) selected?.resolve(tail) else selected
 }
 
-internal data class VersionedTree(val tree: TreeNode, val version: JsonSchemaVersion)
+internal data class VersionedTree(
+    val tree: TreeNode,
+    val version: JsonSchemaVersion,
+    val inputSourceName: String?
+)
