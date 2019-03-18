@@ -58,7 +58,7 @@ open class ObjectType(
         val additionalProperties = arguments
             .filter { (k, _) -> k !in propertyTypeMap }
         val kotlinArguments = arguments
-            .filterKeys { it in propertyTypeMap }
+            .filterKeys { it in propertyTypeMap }.asSequence()
             .map { entry -> propertyTypeMap[entry.key]?.kotlinPropertyName?.let { it to entry.value } }
             .plus(kotlinAdditionalPropertiesProperty?.let {
                 kotlinAdditionalPropertiesProperty to additionalProperties

@@ -12,7 +12,7 @@ class TextOutputBuilderTest {
     @Test
     fun test() {
         val builder = TextOutputBuilder()
-        val parser = JacksonTokenDataJsonParser(builder, jsonFactory.createParser(input))
+        val parser = JacksonTokenDataJsonParser(jsonFactory.createParser(input), builder, inputSourceName = null)
         parser.parseAll()
         assertEquals(input, builder.takeResult())
     }

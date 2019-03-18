@@ -1,9 +1,9 @@
 package com.worldturner.medeia.testing.support
 
 import com.worldturner.medeia.parser.JsonParserAdapter
-import com.worldturner.medeia.parser.TreeNode
 import com.worldturner.medeia.parser.SimpleObjectMapper
 import com.worldturner.medeia.parser.SimpleTreeBuilder
+import com.worldturner.medeia.parser.TreeNode
 import com.worldturner.medeia.parser.gson.GsonJsonReaderDecorator
 import com.worldturner.medeia.parser.jackson.JacksonTokenDataJsonParser
 import com.worldturner.medeia.parser.jackson.jsonFactory
@@ -24,10 +24,10 @@ fun parse(type: MapperType, input: Reader, library: JsonParserLibrary): Any? {
     val consumer = SimpleObjectMapper(type, 0)
     val parser: JsonParserAdapter = when (library) {
         JsonParserLibrary.JACKSON -> JacksonTokenDataJsonParser(
-            consumer = consumer, jsonParser = jsonFactory.createParser(input)
+            jsonParser = jsonFactory.createParser(input), consumer = consumer, inputSourceName = null
         )
         JsonParserLibrary.GSON -> GsonJsonReaderDecorator(
-            consumer = consumer, input = input
+            input = input, consumer = consumer, inputSourceName = null
         )
     }
     parser.parseAll()
@@ -38,10 +38,10 @@ fun parseTree(input: Reader, library: JsonParserLibrary): TreeNode {
     val consumer = SimpleTreeBuilder(0)
     val parser: JsonParserAdapter = when (library) {
         JsonParserLibrary.JACKSON -> JacksonTokenDataJsonParser(
-            consumer = consumer, jsonParser = jsonFactory.createParser(input)
+            jsonParser = jsonFactory.createParser(input), consumer = consumer, inputSourceName = null
         )
         JsonParserLibrary.GSON -> GsonJsonReaderDecorator(
-            consumer = consumer, input = input
+            input = input, consumer = consumer, inputSourceName = null
         )
     }
     parser.parseAll()

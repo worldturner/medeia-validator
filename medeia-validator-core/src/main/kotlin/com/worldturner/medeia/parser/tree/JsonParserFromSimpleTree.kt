@@ -15,10 +15,14 @@ import com.worldturner.medeia.parser.TOKEN_START_OBJECT
 import com.worldturner.medeia.parser.TreeNode
 import com.worldturner.medeia.pointer.JsonPointer
 import com.worldturner.medeia.pointer.JsonPointerBuilder
+import com.worldturner.util.withValue
 import java.util.ArrayDeque
-import kotlin.reflect.KMutableProperty0
 
-class JsonParserFromSimpleTree(val tree: TreeNode, val consumer: JsonTokenDataAndLocationConsumer) : JsonParserAdapter {
+class JsonParserFromSimpleTree(
+    private val tree: TreeNode,
+    private val consumer: JsonTokenDataAndLocationConsumer,
+    private val inputSourceName: String?
+) : JsonParserAdapter {
     private val propertyNamesStack = ArrayDeque<MutableSet<String>>()
 
     inner class DynamicTokenLocation : JsonTokenLocation {
@@ -32,16 +36,21 @@ class JsonParserFromSimpleTree(val tree: TreeNode, val consumer: JsonTokenDataAn
             get() = currentNode?.column ?: -1
         override val line: Int
             get() = currentNode?.line ?: -1
+        override val inputSourceName: String?
+            get() = this@JsonParserFromSimpleTree.inputSourceName
 
         override fun toString(): String {
-            return if (line != -1) {
+            val b = StringBuilder("at ")
+            if (line != -1) {
+                b.append(line)
                 if (column != -1)
-                    "at $line:$column ($pointer)"
-                else
-                    "at $line ($pointer)"
+                    b.append(':').append(column)
+                b.append(" (").append(pointer).append(')')
             } else {
-                "at $pointer"
+                b.append(pointer)
             }
+            inputSourceName?.let { b.append(" in ").append(it) }
+            return b.toString()
         }
     }
 
@@ -95,18 +104,5 @@ class JsonParserFromSimpleTree(val tree: TreeNode, val consumer: JsonTokenDataAn
     }
 
     override fun close() {
-    }
-}
-
-private inline fun <T> KMutableProperty0<T>.withValue(
-    assignValue: T,
-    action: () -> Unit
-) {
-    val savedValue = this.get()
-    this.set(assignValue)
-    try {
-        action()
-    } finally {
-        this.set(savedValue)
     }
 }

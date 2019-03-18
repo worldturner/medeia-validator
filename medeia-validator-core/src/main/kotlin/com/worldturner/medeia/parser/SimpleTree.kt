@@ -1,6 +1,7 @@
 package com.worldturner.medeia.parser
 
 import com.worldturner.medeia.parser.type.SimpleTreeType
+import com.worldturner.util.getAndClear
 import java.util.ArrayDeque
 import java.util.Deque
 
@@ -42,11 +43,7 @@ class SimpleTreeBuilder(val startLevel: Int) : JsonTokenDataAndLocationBuilder {
         }
     }
 
-    override fun takeResult(): TreeNode? {
-        val r = result
-        result = null
-        return r
-    }
+    override fun takeResult(): TreeNode? = ::result.getAndClear()
 }
 
 sealed class TreeNode(

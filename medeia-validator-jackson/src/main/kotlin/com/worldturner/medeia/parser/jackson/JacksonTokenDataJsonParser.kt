@@ -22,8 +22,9 @@ import com.worldturner.medeia.pointer.JsonPointer
 import java.util.ArrayDeque
 
 class JacksonTokenDataJsonParser(
-    val consumer: JsonTokenDataAndLocationConsumer,
-    jsonParser: JsonParser
+    jsonParser: JsonParser,
+    private val consumer: JsonTokenDataAndLocationConsumer,
+    private val inputSourceName: String?
 ) : JsonParserDelegate(jsonParser), JsonParserAdapter {
 
     private var level: Int = 0
@@ -98,7 +99,11 @@ class JacksonTokenDataJsonParser(
         override val propertyNames: Set<String>
             get() = propertyNamesStack.peek() ?: emptySet()
 
-        override fun toString(): String = "at $line:$column"
+        override val inputSourceName: String?
+            get() = this@JacksonTokenDataJsonParser.inputSourceName
+
+        override fun toString(): String =
+            inputSourceName?.let { "at $line:$column in $inputSourceName" } ?: "at $line:$column"
     }
 
     override fun parseAll() {

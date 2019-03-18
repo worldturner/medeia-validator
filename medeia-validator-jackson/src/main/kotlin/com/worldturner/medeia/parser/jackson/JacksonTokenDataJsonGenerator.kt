@@ -29,8 +29,9 @@ import java.math.BigInteger
 import java.util.ArrayDeque
 
 class JacksonTokenDataJsonGenerator(
-    val consumer: JsonTokenDataAndLocationConsumer,
-    val delegate: JsonGenerator
+    private val delegate: JsonGenerator,
+    private val consumer: JsonTokenDataAndLocationConsumer,
+    private val inputSourceName: String?
 ) : JsonGenerator() {
     var level: Int = 0
         private set
@@ -48,8 +49,11 @@ class JacksonTokenDataJsonGenerator(
             get() = jsonPointerBuilder.toJsonPointer()
         override val propertyNames: Set<String>
             get() = propertyNamesStack.peek() ?: emptySet()
+        override val inputSourceName: String?
+            get() = this@JacksonTokenDataJsonGenerator.inputSourceName
 
-        override fun toString(): String = "at $pointer"
+        override fun toString(): String =
+            inputSourceName?.let { "at $pointer in $inputSourceName" } ?: "at $pointer"
     }
 
     override fun getOutputContext(): JsonStreamContext {

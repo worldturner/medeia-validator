@@ -26,7 +26,8 @@ import java.util.ArrayDeque
 
 class GsonJsonReaderDecorator(
     input: Reader,
-    val consumer: JsonTokenDataAndLocationConsumer
+    private val consumer: JsonTokenDataAndLocationConsumer,
+    private val inputSourceName: String?
 ) : JsonReader(input), JsonParserAdapter {
 
     private val jsonPointerBuilder = JsonPointerBuilder()
@@ -147,7 +148,11 @@ class GsonJsonReaderDecorator(
         override val propertyNames: Set<String>
             get() = propertyNamesStack.peek() ?: emptySet()
 
-        override fun toString(): String = "at $pointer"
+        override val inputSourceName: String?
+            get() = this@GsonJsonReaderDecorator.inputSourceName
+
+        override fun toString(): String =
+            inputSourceName?.let { "at $pointer in $inputSourceName" } ?: "at $pointer"
     }
 
     override fun parseAll() {

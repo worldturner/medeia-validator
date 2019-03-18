@@ -5,13 +5,13 @@ import com.fasterxml.jackson.core.JsonParseException
 import com.fasterxml.jackson.databind.JsonMappingException
 import com.google.gson.Gson
 import com.worldturner.medeia.api.FailedValidationResult
-import com.worldturner.medeia.api.ValidationOptions
 import com.worldturner.medeia.api.JsonSchemaVersion
 import com.worldturner.medeia.api.MedeiaApiBase
 import com.worldturner.medeia.api.OkValidationResult
 import com.worldturner.medeia.api.SchemaSource
 import com.worldturner.medeia.api.StringSchemaSource
 import com.worldturner.medeia.api.ValidationFailedException
+import com.worldturner.medeia.api.ValidationOptions
 import com.worldturner.medeia.api.ValidationResult
 import com.worldturner.medeia.gson.toJsonElement
 import com.worldturner.medeia.jackson.toTreeNode
@@ -83,8 +83,9 @@ data class SchemaTestCase(
         when (library) {
             JsonParserLibrary.JACKSON -> {
                 val generator = JacksonTokenDataJsonGenerator(
+                    jacksonFactory.createGenerator(writer),
                     SchemaValidatingConsumer(validator),
-                    jacksonFactory.createGenerator(writer)
+                    null
                 )
                 try {
                     mapper.writeTree(generator, dataAsJacksonTree)
@@ -102,7 +103,8 @@ data class SchemaTestCase(
             JsonParserLibrary.GSON -> {
                 val gsonWriter = GsonJsonWriterDecorator(
                     writer,
-                    SchemaValidatingConsumer(validator)
+                    SchemaValidatingConsumer(validator),
+                    inputSourceName = null
                 )
                 try {
                     Gson().toJson(dataAsGsonTree, gsonWriter)
@@ -139,8 +141,16 @@ data class SchemaTestCase(
         library: JsonParserLibrary
     ): JsonParserAdapter =
         when (library) {
-            JsonParserLibrary.JACKSON -> JacksonTokenDataJsonParser(consumer, jsonFactory.createParser(input))
-            JsonParserLibrary.GSON -> GsonJsonReaderDecorator(StringReader(input), consumer)
+            JsonParserLibrary.JACKSON -> JacksonTokenDataJsonParser(
+                jsonFactory.createParser(input),
+                consumer,
+                inputSourceName = description
+            )
+            JsonParserLibrary.GSON -> GsonJsonReaderDecorator(
+                StringReader(input),
+                consumer,
+                inputSourceName = description
+            )
         }
 }
 

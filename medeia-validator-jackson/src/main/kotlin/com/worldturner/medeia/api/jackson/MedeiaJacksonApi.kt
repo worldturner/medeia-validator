@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonFactory
 import com.fasterxml.jackson.core.JsonGenerator
 import com.fasterxml.jackson.core.JsonParser
 import com.worldturner.medeia.api.InputPreference
+import com.worldturner.medeia.api.InputSource
 import com.worldturner.medeia.api.MedeiaApiBase
 import com.worldturner.medeia.api.SchemaSource
 import com.worldturner.medeia.parser.JsonParserAdapter
@@ -24,26 +25,33 @@ class MedeiaJacksonApi @JvmOverloads constructor(
     private val addBuffer: Boolean = true
 ) : MedeiaApiBase() {
 
+    fun createJsonParser(validator: SchemaValidator, source: InputSource): JsonParser {
+        val jsonParser = createJsonParser(source)
+        val consumer = SchemaValidatingConsumer(validator)
+        return JacksonTokenDataJsonParser(consumer = consumer, jsonParser = jsonParser, inputSourceName = source.name)
+    }
+
     fun decorateJsonParser(validator: SchemaValidator, jsonParser: JsonParser): JsonParser {
         val consumer = SchemaValidatingConsumer(validator)
-        return JacksonTokenDataJsonParser(consumer = consumer, jsonParser = jsonParser)
+        val sourceName = jsonParser.tokenLocation.sourceRef?.toString()
+        return JacksonTokenDataJsonParser(consumer = consumer, jsonParser = jsonParser, inputSourceName = sourceName)
     }
 
     fun decorateJsonGenerator(validator: SchemaValidator, jsonGenerator: JsonGenerator): JsonGenerator {
         val consumer = SchemaValidatingConsumer(validator)
-        return JacksonTokenDataJsonGenerator(consumer = consumer, delegate = jsonGenerator)
+        return JacksonTokenDataJsonGenerator(consumer = consumer, delegate = jsonGenerator, inputSourceName = null)
     }
 
     override fun createSchemaParser(
         source: SchemaSource,
         consumer: JsonTokenDataAndLocationConsumer
     ): JsonParserAdapter {
-        val jsonParser =
-            when (source.input.preference) {
-                InputPreference.STREAM -> streamParser(source)
-                InputPreference.READER -> readerParser(source)
-            }
-        return JacksonTokenDataJsonParser(consumer = consumer, jsonParser = jsonParser)
+        val jsonParser = createJsonParser(source.input)
+        return JacksonTokenDataJsonParser(
+            consumer = consumer,
+            jsonParser = jsonParser,
+            inputSourceName = source.input.name
+        )
     }
 
     fun parseAll(parser: JsonParser) {
@@ -54,9 +62,15 @@ class MedeiaJacksonApi @JvmOverloads constructor(
     override fun createTokenDataConsumerWriter(destination: Writer): JsonTokenDataConsumer =
         JacksonTokenDataWriter(jsonFactory.createGenerator(destination))
 
-    private fun readerParser(source: SchemaSource): JsonParser =
-        source.input.reader.let { if (addBuffer) BufferedReader(it) else it }.let { jsonFactory.createParser(it) }
+    private fun createJsonParser(source: InputSource): JsonParser =
+        when (source.preference) {
+            InputPreference.STREAM -> streamParser(source)
+            InputPreference.READER -> readerParser(source)
+        }
 
-    private fun streamParser(source: SchemaSource): JsonParser =
-        source.input.stream.let { if (addBuffer) BufferedInputStream(it) else it }.let { jsonFactory.createParser(it) }
+    private fun readerParser(source: InputSource): JsonParser =
+        source.reader.let { if (addBuffer) BufferedReader(it) else it }.let { jsonFactory.createParser(it) }
+
+    private fun streamParser(source: InputSource): JsonParser =
+        source.stream.let { if (addBuffer) BufferedInputStream(it) else it }.let { jsonFactory.createParser(it) }
 }

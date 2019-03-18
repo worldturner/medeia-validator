@@ -20,6 +20,7 @@ interface InputSource {
     val preference: InputPreference
     val stream: InputStream get() = throw UnsupportedOperationException()
     val reader: Reader get() = InputStreamReader(stream, Charsets.UTF_8)
+    /** Optional name for the resource, used in error reporting. */
     val name: String?
 }
 

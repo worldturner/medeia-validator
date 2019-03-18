@@ -14,6 +14,7 @@ import com.worldturner.medeia.schema.validation.NodeHasher.Companion.TYPE_ARRAY_
 import com.worldturner.medeia.schema.validation.NodeHasher.Companion.TYPE_OBJECT_END
 import com.worldturner.medeia.schema.validation.NodeHasher.Companion.TYPE_OBJECT_START
 import com.worldturner.medeia.schema.validation.stream.SchemaValidatorInstance
+import com.worldturner.util.getAndClear
 import com.worldturner.util.updateValue
 import java.net.URI
 import java.security.MessageDigest
@@ -216,11 +217,7 @@ class DigestBuilder(
         throw IllegalStateException("Received field name outside of Object context")
     }
 
-    override fun takeResult(): HashResult? {
-        val r = result
-        result = null
-        return r
-    }
+    override fun takeResult(): HashResult? = ::result.getAndClear()
 }
 
 /**
