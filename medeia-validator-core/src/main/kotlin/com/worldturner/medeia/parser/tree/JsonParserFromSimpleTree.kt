@@ -15,8 +15,8 @@ import com.worldturner.medeia.parser.TOKEN_START_OBJECT
 import com.worldturner.medeia.parser.TreeNode
 import com.worldturner.medeia.pointer.JsonPointer
 import com.worldturner.medeia.pointer.JsonPointerBuilder
+import com.worldturner.util.withValue
 import java.util.ArrayDeque
-import kotlin.reflect.KMutableProperty0
 
 class JsonParserFromSimpleTree(
     private val tree: TreeNode,
@@ -104,18 +104,5 @@ class JsonParserFromSimpleTree(
     }
 
     override fun close() {
-    }
-}
-
-private inline fun <T> KMutableProperty0<T>.withValue(
-    assignValue: T,
-    action: () -> Unit
-) {
-    val savedValue = this.get()
-    this.set(assignValue)
-    try {
-        action()
-    } finally {
-        this.set(savedValue)
     }
 }
