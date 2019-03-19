@@ -62,6 +62,8 @@ abstract class MedeiaApiBase {
 
     /**
      * Simple API for stream validation - copies input to output while validating.
+     * @param source source for copying. Opened and closed by this method.
+     * @param target target for copying. Not closed by this method.
      * @throws IOException io problems
      * @throws ValidationFailedException validation failures
      */
