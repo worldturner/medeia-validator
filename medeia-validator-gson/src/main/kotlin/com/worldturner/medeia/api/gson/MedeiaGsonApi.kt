@@ -26,7 +26,7 @@ import java.io.Writer
 class MedeiaGsonApi(private val addBuffer: Boolean = true) : MedeiaApiBase() {
 
     override fun copyStream(source: InputSource, target: OutputStream, validator: SchemaValidator) {
-        val copier = GsonValidatingStreamCopier(source, target, validator)
+        val copier = GsonValidatingStreamCopier(source.stream, target, validator, source.name)
         copier.copy()
     }
 

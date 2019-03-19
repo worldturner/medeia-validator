@@ -28,7 +28,7 @@ class MedeiaJacksonApi @JvmOverloads constructor(
 ) : MedeiaApiBase() {
 
     override fun copyStream(source: InputSource, target: OutputStream, validator: SchemaValidator) {
-        val copier = JacksonValidatingStreamCopier(source, target, validator, jsonFactory)
+        val copier = JacksonValidatingStreamCopier(source.stream, target, validator, source.name, jsonFactory)
         copier.copy()
     }
 
