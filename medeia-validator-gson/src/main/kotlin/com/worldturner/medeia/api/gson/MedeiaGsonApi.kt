@@ -1,7 +1,6 @@
 package com.worldturner.medeia.api.gson
 
 import com.google.gson.stream.JsonReader
-import com.google.gson.stream.JsonToken
 import com.google.gson.stream.JsonWriter
 import com.worldturner.medeia.api.InputPreference
 import com.worldturner.medeia.api.InputSource
@@ -13,15 +12,23 @@ import com.worldturner.medeia.parser.JsonTokenDataConsumer
 import com.worldturner.medeia.parser.gson.GsonJsonReaderDecorator
 import com.worldturner.medeia.parser.gson.GsonJsonWriterDecorator
 import com.worldturner.medeia.parser.gson.GsonTokenDataWriter
+import com.worldturner.medeia.parser.gson.GsonValidatingStreamCopier
+import com.worldturner.medeia.parser.gson.gsonParseAll
 import com.worldturner.medeia.schema.validation.SchemaValidator
 import com.worldturner.medeia.schema.validation.stream.SchemaValidatingConsumer
 import java.io.BufferedInputStream
 import java.io.BufferedReader
 import java.io.InputStreamReader
+import java.io.OutputStream
 import java.io.Reader
 import java.io.Writer
 
 class MedeiaGsonApi(private val addBuffer: Boolean = true) : MedeiaApiBase() {
+
+    override fun copyStream(source: InputSource, target: OutputStream, validator: SchemaValidator) {
+        val copier = GsonValidatingStreamCopier(source, target, validator)
+        copier.copy()
+    }
 
     fun createJsonReader(validator: SchemaValidator, source: InputSource): JsonReader {
         val consumer = SchemaValidatingConsumer(validator)
@@ -50,21 +57,7 @@ class MedeiaGsonApi(private val addBuffer: Boolean = true) : MedeiaApiBase() {
         GsonTokenDataWriter(JsonWriter(destination))
 
     fun parseAll(reader: JsonReader) {
-        loop@ do {
-            var token = reader.peek()!!
-            when (token) {
-                JsonToken.NUMBER -> reader.nextString()
-                JsonToken.STRING -> reader.nextString()
-                JsonToken.NAME -> reader.nextName()
-                JsonToken.BOOLEAN -> reader.nextBoolean()
-                JsonToken.NULL -> reader.nextNull()
-                JsonToken.BEGIN_ARRAY -> reader.beginArray()
-                JsonToken.END_ARRAY -> reader.endArray()
-                JsonToken.BEGIN_OBJECT -> reader.beginObject()
-                JsonToken.END_OBJECT -> reader.endObject()
-                JsonToken.END_DOCUMENT -> break@loop
-            }
-        } while (true)
+        gsonParseAll(reader)
     }
 
     private fun createReader(source: InputSource): Reader =

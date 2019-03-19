@@ -1,13 +1,24 @@
 package com.worldturner.medeia.parser.jackson
 
+import com.fasterxml.jackson.core.JsonFactory
 import com.fasterxml.jackson.core.JsonParser
+import com.worldturner.medeia.schema.validation.SchemaValidator
+import com.worldturner.medeia.schema.validation.stream.SchemaValidatingConsumer
 import java.io.InputStream
 import kotlin.math.min
 
 class JacksonValidatingInputStream(
     private val source: InputStream,
-    private val parser: JsonParser
+    private val validator: SchemaValidator,
+    private val jsonFactory: JsonFactory
 ) : ByteBufferInputStream() {
+    private val parser = createParser()
+
+    private fun createParser(): JsonParser {
+        val jsonParser = jsonFactory.createParser(ValidatorInputStream())
+        val consumer = SchemaValidatingConsumer(validator)
+        return JacksonTokenDataJsonParser(consumer = consumer, jsonParser = jsonParser, inputSourceName = null)
+    }
 
     private inner class ValidatorInputStream : InputStream() {
         override fun read(): Int {
@@ -47,6 +58,7 @@ open class ByteBufferInputStream(initialSize: Int = 8192) : InputStream() {
             ensureBuffer(len)
         }
         b.copyInto(buffer, destinationOffset = writeOffset, startIndex = off, endIndex = off + len)
+        writeOffset += len
     }
 
     // Compact and/or grow buffer
