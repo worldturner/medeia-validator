@@ -16,7 +16,7 @@ private val TEST_SCHEMA = """
 }
 """.trimIndent()
 
-class SchemaLoadingErrorReporting {
+class SchemaLoadingErrorReportingTest {
     val medeia = MedeiaJacksonApi()
 
     @Test(expected = ValidationFailedException::class)

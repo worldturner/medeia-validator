@@ -19,7 +19,7 @@ private val TEST_SCHEMA = """
 }
 """.trimIndent()
 
-class SchemaLoadingBaseUri {
+class SchemaLoadingBaseUriTest {
     val medeia = MedeiaJacksonApi()
 
     @Test
