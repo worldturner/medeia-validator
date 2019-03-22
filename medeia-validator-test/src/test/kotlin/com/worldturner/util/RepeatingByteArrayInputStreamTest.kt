@@ -1,7 +1,7 @@
-package com.worldturner.medeia.testing.support
+package com.worldturner.util
 
-import org.junit.Assert
-import org.junit.Test
+import org.junit.Assert.assertArrayEquals
+import kotlin.test.Test
 
 class RepeatingByteArrayInputStreamTest {
     val stringData = "abcdefg"
@@ -12,6 +12,6 @@ class RepeatingByteArrayInputStreamTest {
     @Test
     fun `Correct repeated data`() {
         val streamBytes = stream.readBytes()
-        Assert.assertArrayEquals(stringData.repeat(repeats).toByteArray(Charsets.UTF_8), streamBytes)
+        assertArrayEquals(stringData.repeat(repeats).toByteArray(Charsets.UTF_8), streamBytes)
     }
 }

@@ -18,3 +18,19 @@ inline fun <T> MutableCollection<T>.iterate(action: (element: T, iterator: Mutab
         action(element, iterator)
     }
 }
+
+fun <T> List<T>.repeat(times: Int): List<T> =
+    when (times) {
+        0 -> emptyList<T>()
+        1 -> this
+        else -> when (size) {
+            0 -> emptyList<T>()
+            else -> {
+                val result = ArrayList<T>(size * times)
+                for (i in 1..times) {
+                    result.addAll(this)
+                }
+                result
+            }
+        }
+    }
