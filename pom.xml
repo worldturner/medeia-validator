@@ -5,7 +5,7 @@
 
     <groupId>com.worldturner.medeia</groupId>
     <artifactId>medeia-validator-parent</artifactId>
-    <version>1.0.1-SNAPSHOT</version>
+    <version>1.1.0</version>
     <packaging>pom</packaging>
     <name>Medeia Validator</name>
     <description>Medeia streaming JSON-schema validator for the JVM platform, parent pom</description>
@@ -27,7 +27,7 @@
         <connection>scm:git:git://git@github.com/worldturner/medeia-validator.git</connection>
         <developerConnection>scm:git:ssh://git@github.com/worldturner/medeia-validator.git</developerConnection>
         <url>https://github.com/worldturner/medeia-validator.git</url>
-        <tag>HEAD</tag>
+        <tag>medeia-validator-parent-1.1.0</tag>
     </scm>
     <distributionManagement>
         <snapshotRepository>
@@ -37,7 +37,7 @@
     </distributionManagement>
 
     <properties>
-        <medeia-validator.version>1.0.1-SNAPSHOT</medeia-validator.version>
+        <medeia-validator.version>1.1.0</medeia-validator.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <kotlin.version>1.3.20</kotlin.version>
         <kotlin.compiler.jvmTarget>1.8</kotlin.compiler.jvmTarget>
