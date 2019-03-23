@@ -18,3 +18,7 @@ Improvements:
   validating without Jackson or Gson API calls.
 * Added `TokenLocationException` to the public API; this exception can
   be caught and queried for the location of the error.
+* When a `baseUri` is specified in the `SchemaSource`, the schema is
+  always registered under this URI too, regardless of any `$id` on 
+  the root of the schema. This is useful for providing a known URI
+  to reference a schema without looking inside the schema. 
