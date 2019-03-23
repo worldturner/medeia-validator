@@ -5,7 +5,7 @@
     <parent>
         <groupId>com.worldturner.medeia</groupId>
         <artifactId>medeia-validator-parent</artifactId>
-        <version>1.1.0</version>
+        <version>1.1.1-SNAPSHOT</version>
     </parent>
 
     <groupId>com.worldturner.medeia</groupId>
@@ -21,7 +21,7 @@
         <connection>scm:git:git://github.comworldturner/medeia-validator.git</connection>
         <developerConnection>scm:git:ssh://github.com:worldturner/medeia-validator.git</developerConnection>
         <url>https://github.com/worldturner/medeia-validator.git</url>
-      <tag>medeia-validator-parent-1.1.0</tag>
+      <tag>HEAD</tag>
   </scm>
 
     <dependencies>
