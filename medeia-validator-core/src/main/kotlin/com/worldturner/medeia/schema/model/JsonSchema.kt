@@ -97,6 +97,12 @@ data class JsonSchema constructor(
                 context.put(it, this, validator)
                 if (!it.hasFragment()) context.put(it.withEmptyFragment(), this, validator)
             }
+            // Also make context accessible by baseUri if the baseUri is different
+            // To allow a stable external URI that is known without looking into the
+            // schema.
+            if (context.root && context.baseUri != resolvedId) {
+                context.put(context.baseUri, this, validator)
+            }
         }
         context.parents.forEachIndexed { index, parent ->
             parent.resolvedId?.let {

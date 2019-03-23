@@ -1,5 +1,6 @@
 package com.worldturner.medeia.parser
 
+import com.worldturner.medeia.api.TokenLocationException
 import com.worldturner.medeia.parser.builder.ValueBuilder
 import com.worldturner.medeia.parser.type.AcceptKind
 import com.worldturner.medeia.parser.type.MapperType
@@ -88,12 +89,5 @@ class SimpleObjectMapper(val rootType: MapperType, val startLevel: Int) : JsonTo
         override fun completed(token: JsonTokenData): Boolean = false
     }
 }
-
-open class TokenLocationException(
-    message: String?,
-    val location: String,
-    cause: Throwable? = null
-) :
-    RuntimeException("$message $location", cause)
 
 class TypeMismatchException(message: String, location: String) : TokenLocationException(message, location)

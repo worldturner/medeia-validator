@@ -105,10 +105,19 @@ class GsonJsonReaderDecorator(
             consume(JsonTokenData(FIELD_NAME, text = it))
         }
 
-    override fun nextString(): String =
-        super.nextString().also {
-            consume(JsonTokenData.createText(it))
+    override fun nextString(): String {
+        val token = peek()
+        return super.nextString().also {
+            if (token == JsonToken.NUMBER) {
+                if (it.contains('.'))
+                    BigDecimal(it).let { JsonTokenData(VALUE_NUMBER, decimal = it) }
+                else
+                    BigInteger(it).let { JsonTokenData(VALUE_NUMBER, integer = it) }
+            } else {
+                JsonTokenData.createText(it)
+            }.also { consume(it) }
         }
+    }
 
     override fun nextNull() =
         super.nextNull().also {

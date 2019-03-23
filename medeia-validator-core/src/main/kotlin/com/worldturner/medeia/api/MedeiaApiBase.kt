@@ -27,6 +27,7 @@ import com.worldturner.util.hasFragment
 import com.worldturner.util.withEmptyFragment
 import com.worldturner.util.withoutFragment
 import java.io.IOException
+import java.io.OutputStream
 import java.io.Writer
 import java.net.URI
 import java.net.URISyntaxException
@@ -58,6 +59,16 @@ private const val MAX_REF_RESOLVE_ITERATIONS = 100
 
 abstract class MedeiaApiBase {
     private val metaSchemaValidators: MutableMap<JsonSchemaVersion, SchemaValidator> = ConcurrentHashMap()
+
+    /**
+     * Simple API for stream validation - copies input to output while validating.
+     * @param source source for copying. Opened and closed by this method.
+     * @param target target for copying. Not closed by this method.
+     * @throws IOException io problems
+     * @throws ValidationFailedException validation failures
+     */
+    @Throws(IOException::class)
+    abstract fun copyStream(source: InputSource, target: OutputStream, validator: SchemaValidator)
 
     fun loadSchemas(sources: List<SchemaSource>, options: ValidationOptions) =
         loadSchemas(sources, validatorMap = null, options = options)

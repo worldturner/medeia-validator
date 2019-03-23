@@ -18,7 +18,7 @@ For the Jackson support
     <dependency>
         <groupId>com.worldturner.medeia</groupId>
         <artifactId>medeia-validator-jackson</artifactId>
-        <version>1.0.0</version>
+        <version>1.1.0</version>
     </dependency>
     
 For the Gson support
@@ -26,7 +26,7 @@ For the Gson support
     <dependency>
         <groupId>com.worldturner.medeia</groupId>
         <artifactId>medeia-validator-gson</artifactId>
-        <version>1.0.0</version>
+        <version>1.1.0</version>
     </dependency>
     
 Json Schema version support

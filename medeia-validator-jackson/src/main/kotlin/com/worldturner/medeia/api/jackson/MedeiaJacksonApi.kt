@@ -13,10 +13,12 @@ import com.worldturner.medeia.parser.JsonTokenDataConsumer
 import com.worldturner.medeia.parser.jackson.JacksonTokenDataJsonGenerator
 import com.worldturner.medeia.parser.jackson.JacksonTokenDataJsonParser
 import com.worldturner.medeia.parser.jackson.JacksonTokenDataWriter
+import com.worldturner.medeia.parser.jackson.JacksonValidatingStreamCopier
 import com.worldturner.medeia.schema.validation.SchemaValidator
 import com.worldturner.medeia.schema.validation.stream.SchemaValidatingConsumer
 import java.io.BufferedInputStream
 import java.io.BufferedReader
+import java.io.OutputStream
 import java.io.Writer
 
 class MedeiaJacksonApi @JvmOverloads constructor(
@@ -24,6 +26,11 @@ class MedeiaJacksonApi @JvmOverloads constructor(
         JsonFactory().apply { enable(JsonParser.Feature.STRICT_DUPLICATE_DETECTION) },
     private val addBuffer: Boolean = true
 ) : MedeiaApiBase() {
+
+    override fun copyStream(source: InputSource, target: OutputStream, validator: SchemaValidator) {
+        val copier = JacksonValidatingStreamCopier(source.stream, target, validator, source.name, jsonFactory)
+        copier.copy()
+    }
 
     fun createJsonParser(validator: SchemaValidator, source: InputSource): JsonParser {
         val jsonParser = createJsonParser(source)
