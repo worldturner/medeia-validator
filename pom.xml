@@ -11,9 +11,28 @@
     <name>Medeia Validator Performance Tests</name>
     <description>
         Medeia streaming JSON-schema validator for the JVM platform,
-        test suite.
+        performance test suite.
     </description>
-    <url>https://github.com/worldturner/medeia-validator</url>
+    <url>https://github.com/worldturner/medeia-validator-performance</url>
+    <licenses>
+        <license>
+            <name>The Apache License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+        </license>
+    </licenses>
+    <developers>
+        <developer>
+            <name>Erwin Bolwidt</name>
+            <email>ebolwidt-pom@worldturner.com</email>
+            <url>http://www.github.com/ebolwidt</url>
+        </developer>
+    </developers>
+    <scm>
+        <connection>scm:git:git://git@github.com/worldturner/medeia-validator.git</connection>
+        <developerConnection>scm:git:ssh://git@github.com/worldturner/medeia-validator.git</developerConnection>
+        <url>https://github.com/worldturner/medeia-validator.git</url>
+        <tag>HEAD</tag>
+    </scm>
 
     <properties>
         <maven.deploy.skip>true</maven.deploy.skip>
