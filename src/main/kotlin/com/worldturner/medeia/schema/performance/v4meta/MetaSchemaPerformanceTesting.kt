@@ -20,7 +20,7 @@ fun supportsVersion(
     version: JsonSchemaVersion
 ): Boolean {
     val supportsValue =
-        test.companionObject?.java?.getMethod("getSupports")?.invoke(test.companionObjectInstance) as Set<JsonSchemaVersion>?
+        test.companionObject?.java?.getMethod("getSupports")?.invoke(test.companionObjectInstance) as Set<*>?
     return supportsValue?.let { version in it } ?: false
 }
 

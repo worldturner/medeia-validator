@@ -11,8 +11,6 @@ import com.worldturner.medeia.api.SchemaSource
 import com.worldturner.medeia.api.ValidationFailedException
 import com.worldturner.medeia.api.gson.MedeiaGsonApi
 import com.worldturner.medeia.api.jackson.MedeiaJacksonApi
-import com.worldturner.medeia.parser.gson.GsonJsonReaderDecorator
-import com.worldturner.medeia.schema.validation.stream.SchemaValidatingConsumer
 import org.everit.json.schema.ValidationException
 import org.everit.json.schema.loader.SchemaLoader
 import org.json.JSONObject
@@ -92,10 +90,9 @@ class MedeiaGsonPerformanceTest(
     val data = String(dataSource.stream.use { it.readBytes() }, Charsets.UTF_8)
 
     override fun run(): Boolean {
-        val consumer = SchemaValidatingConsumer(validator)
-        val parser = GsonJsonReaderDecorator(StringReader(data), consumer)
+        val parser = api.createJsonReader(validator, StringReader(data))
         return try {
-            parser.parseAll()
+            api.parseAll(parser)
             true
         } catch (e: ValidationFailedException) {
             println("Exception: $e")
