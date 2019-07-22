@@ -124,7 +124,7 @@ class JsonTokenData(
         val minLongValue = -127
         val maxLongValue = 127
 
-        val array: Array<JsonTokenData> = Array(maxLongValue - minLongValue, init = {
+        val array: Array<JsonTokenData> = Array(maxLongValue - minLongValue + 1, init = {
             JsonTokenData(JsonTokenType.VALUE_NUMBER, longValue = minLongValue + it.toLong())
         })
 
@@ -135,7 +135,7 @@ class JsonTokenData(
                 JsonTokenData(JsonTokenType.VALUE_TEXT, text = text)
 
         fun createNumber(longValue: Long): JsonTokenData =
-            if (longValue >= minLongValue && longValue <= maxLongValue) {
+            if (longValue in minLongValue..maxLongValue) {
                 array[longValue.toInt() - minLongValue]
             } else if (longValue == Long.MIN_VALUE) {
                 JsonTokenData(JsonTokenType.VALUE_NUMBER, integer = BigInteger.valueOf(longValue))

@@ -1,0 +1,16 @@
+[
+    {
+        "description": "Numeric bounds and corner cases",
+        "schema": {
+            "type": "integer",
+            "minimum": 0
+        },
+        "tests": [
+            {
+                "description": "127",
+                "data": 127,
+                "valid": true
+            }
+        ]
+    }
+]
