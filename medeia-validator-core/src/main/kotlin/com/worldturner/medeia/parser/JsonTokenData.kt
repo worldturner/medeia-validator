@@ -135,7 +135,7 @@ class JsonTokenData(
                 JsonTokenData(JsonTokenType.VALUE_TEXT, text = text)
 
         fun createNumber(longValue: Long): JsonTokenData =
-            if (longValue in minLongValue..maxLongValue) {
+            if (longValue in minLongValue until maxLongValue) {
                 array[longValue.toInt() - minLongValue]
             } else if (longValue == Long.MIN_VALUE) {
                 JsonTokenData(JsonTokenType.VALUE_NUMBER, integer = BigInteger.valueOf(longValue))
