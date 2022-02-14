@@ -1,3 +1,5 @@
+package com.worldturner.util
+
 import java.net.URLEncoder
 import java.nio.charset.Charset
 

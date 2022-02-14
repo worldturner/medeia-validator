@@ -1,6 +1,5 @@
 package com.worldturner.util
 
-import replaceFromLast
 import java.net.URI
 
 fun URI.hasAnyOtherThanFragment() =
